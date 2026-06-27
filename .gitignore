@@ -1,1 +1,21 @@
+# IDE
 /hitz.iml
+/.idea
+
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+.output
+.vinxi
+
+# Env files
+.env
+.env.local
+
+# Turbo
+.turbo
+
+# OS
+.DS_Store
