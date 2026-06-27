@@ -1,5 +1,5 @@
 {
-  "name": "@hitz/web",
+  "name": "@haiz/web",
   "private": true,
   "type": "module",
   "imports": {
@@ -31,7 +31,7 @@
     "react-konva": "^19.2.5",
     "konva": "^9.3.20",
     "zod": "^4.4.3",
-    "@hitz/shared": "workspace:*"
+    "@haiz/shared": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",
