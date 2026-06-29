@@ -1,8 +1,68 @@
-
+@import url("https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap");
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
+
+@theme {
+  /* --- Colors --- */
+  --color-primary: #0ea5a4;
+  --color-primary-hover: #0c8e8d;
+  --color-primary-soft: #dcf2f0;
+  --color-primary-soft-bd: #b6e3df;
+  --color-app-bg: #f4f7fb;
+  --color-surface: #ffffff;
+  --color-charcoal: #494949;
+
+  /* text */
+  --color-ink: #1d2a3a;
+  --color-muted: #6b7a8d;
+  --color-faint: #9aabc1;
+
+  /* borders / surfaces */
+  --color-border: #e2e9f3;
+  --color-hairline: #eef2f8;
+  --color-table-head: #f7f9fc;
+  --color-slot-border: #d4deec;
+  --color-dash: #cdd7e4;
+  --color-zone: #c9d6e8;
+  --color-empty-bg: #fafcff;
+
+  /* semantic */
+  --color-success: #16a34a;
+  --color-success-soft: #e3f5e9;
+  --color-warning: #e07b1a;
+  --color-warning-soft: #fbecd8;
+  --color-danger: #e5484d;
+  --color-danger-soft: #fce8e9;
+  --color-danger-line: #f3c9cb;
+  --color-info: #2f6df0;
+  --color-disabled: #cfe1e0;
+
+  /* avatar palette */
+  --color-avatar-1: #2f8fd6;
+  --color-avatar-2: #3d9970;
+  --color-avatar-3: #f0883e;
+  --color-avatar-4: #8b5cf6;
+  --color-avatar-5: #26a69a;
+  --color-avatar-6: #e85d75;
+  --color-avatar-7: #d4a017;
+  --color-avatar-8: #ef6c5a;
+
+  /* --- Fonts --- */
+  --font-sans: "Zen Kaku Gothic New", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* --- Border radius --- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-section: 16px;
+  --radius-pill: 999px;
+
+  /* --- Shadows --- */
+  --shadow-card: 0 1px 2px rgba(16, 42, 67, 0.05);
+  --shadow-card-strong: 0 1px 2px rgba(16, 42, 67, 0.06);
+  --shadow-float: 0 1px 2px rgba(16, 42, 67, 0.06), 0 12px 30px rgba(16, 42, 67, 0.1);
+  --shadow-ring-surface: 0 0 0 2px #ffffff;
 }
 
 html,
@@ -13,5 +73,8 @@ body,
 
 body {
   margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-app-bg);
+  -webkit-font-smoothing: antialiased;
 }
-
