@@ -35,6 +35,7 @@ export const LayoutSpecVersionSchema = z.object({
   status: LayoutSpecStatusSchema,
   planImageUrl: z.string().url().nullable(),
   planImageName: z.string().nullable(),
+  planAspectRatio: z.number().positive().optional(), // 幅/高さ比（例: 4/3 → 1.333）。画像アップロード時に保存
   spots: z.array(SpotSchema).max(100),
   publishedAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),

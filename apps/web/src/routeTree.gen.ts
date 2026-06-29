@@ -10,11 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as CatalogRouteImport } from './routes/catalog'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppViewerRouteImport } from './routes/_app.viewer'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppMembersRouteImport } from './routes/_app.members'
+import { Route as AppHomeRouteImport } from './routes/_app.home'
+import { Route as AppHistoryRouteImport } from './routes/_app.history'
+import { Route as AppEmployeesRouteImport } from './routes/_app.employees'
+import { Route as AppEditorRouteImport } from './routes/_app.editor'
+import { Route as AppAssignmentRouteImport } from './routes/_app.assignment'
+import { Route as AppEditorIndexRouteImport } from './routes/_app.editor.index'
+import { Route as AppEditorAreaIdRouteImport } from './routes/_app.editor.$areaId'
 
 const CatalogRoute = CatalogRouteImport.update({
   id: '/catalog',
   path: '/catalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,30 +37,148 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppViewerRoute = AppViewerRouteImport.update({
+  id: '/viewer',
+  path: '/viewer',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMembersRoute = AppMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHomeRoute = AppHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHistoryRoute = AppHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEmployeesRoute = AppEmployeesRouteImport.update({
+  id: '/employees',
+  path: '/employees',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEditorRoute = AppEditorRouteImport.update({
+  id: '/editor',
+  path: '/editor',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAssignmentRoute = AppAssignmentRouteImport.update({
+  id: '/assignment',
+  path: '/assignment',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEditorIndexRoute = AppEditorIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppEditorRoute,
+} as any)
+const AppEditorAreaIdRoute = AppEditorAreaIdRouteImport.update({
+  id: '/$areaId',
+  path: '/$areaId',
+  getParentRoute: () => AppEditorRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/assignment': typeof AppAssignmentRoute
+  '/editor': typeof AppEditorRouteWithChildren
+  '/employees': typeof AppEmployeesRoute
+  '/history': typeof AppHistoryRoute
+  '/home': typeof AppHomeRoute
+  '/members': typeof AppMembersRoute
+  '/settings': typeof AppSettingsRoute
+  '/viewer': typeof AppViewerRoute
+  '/editor/$areaId': typeof AppEditorAreaIdRoute
+  '/editor/': typeof AppEditorIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/assignment': typeof AppAssignmentRoute
+  '/employees': typeof AppEmployeesRoute
+  '/history': typeof AppHistoryRoute
+  '/home': typeof AppHomeRoute
+  '/members': typeof AppMembersRoute
+  '/settings': typeof AppSettingsRoute
+  '/viewer': typeof AppViewerRoute
+  '/editor/$areaId': typeof AppEditorAreaIdRoute
+  '/editor': typeof AppEditorIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
   '/catalog': typeof CatalogRoute
+  '/_app/assignment': typeof AppAssignmentRoute
+  '/_app/editor': typeof AppEditorRouteWithChildren
+  '/_app/employees': typeof AppEmployeesRoute
+  '/_app/history': typeof AppHistoryRoute
+  '/_app/home': typeof AppHomeRoute
+  '/_app/members': typeof AppMembersRoute
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/viewer': typeof AppViewerRoute
+  '/_app/editor/$areaId': typeof AppEditorAreaIdRoute
+  '/_app/editor/': typeof AppEditorIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/catalog'
+  fullPaths:
+    | '/'
+    | '/catalog'
+    | '/assignment'
+    | '/editor'
+    | '/employees'
+    | '/history'
+    | '/home'
+    | '/members'
+    | '/settings'
+    | '/viewer'
+    | '/editor/$areaId'
+    | '/editor/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/catalog'
-  id: '__root__' | '/' | '/catalog'
+  to:
+    | '/'
+    | '/catalog'
+    | '/assignment'
+    | '/employees'
+    | '/history'
+    | '/home'
+    | '/members'
+    | '/settings'
+    | '/viewer'
+    | '/editor/$areaId'
+    | '/editor'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/catalog'
+    | '/_app/assignment'
+    | '/_app/editor'
+    | '/_app/employees'
+    | '/_app/history'
+    | '/_app/home'
+    | '/_app/members'
+    | '/_app/settings'
+    | '/_app/viewer'
+    | '/_app/editor/$areaId'
+    | '/_app/editor/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
   CatalogRoute: typeof CatalogRoute
 }
 
@@ -58,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CatalogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -65,11 +205,120 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/viewer': {
+      id: '/_app/viewer'
+      path: '/viewer'
+      fullPath: '/viewer'
+      preLoaderRoute: typeof AppViewerRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/members': {
+      id: '/_app/members'
+      path: '/members'
+      fullPath: '/members'
+      preLoaderRoute: typeof AppMembersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/home': {
+      id: '/_app/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AppHomeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/history': {
+      id: '/_app/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof AppHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/employees': {
+      id: '/_app/employees'
+      path: '/employees'
+      fullPath: '/employees'
+      preLoaderRoute: typeof AppEmployeesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/editor': {
+      id: '/_app/editor'
+      path: '/editor'
+      fullPath: '/editor'
+      preLoaderRoute: typeof AppEditorRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/assignment': {
+      id: '/_app/assignment'
+      path: '/assignment'
+      fullPath: '/assignment'
+      preLoaderRoute: typeof AppAssignmentRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/editor/': {
+      id: '/_app/editor/'
+      path: '/'
+      fullPath: '/editor/'
+      preLoaderRoute: typeof AppEditorIndexRouteImport
+      parentRoute: typeof AppEditorRoute
+    }
+    '/_app/editor/$areaId': {
+      id: '/_app/editor/$areaId'
+      path: '/$areaId'
+      fullPath: '/editor/$areaId'
+      preLoaderRoute: typeof AppEditorAreaIdRouteImport
+      parentRoute: typeof AppEditorRoute
+    }
   }
 }
 
+interface AppEditorRouteChildren {
+  AppEditorAreaIdRoute: typeof AppEditorAreaIdRoute
+  AppEditorIndexRoute: typeof AppEditorIndexRoute
+}
+
+const AppEditorRouteChildren: AppEditorRouteChildren = {
+  AppEditorAreaIdRoute: AppEditorAreaIdRoute,
+  AppEditorIndexRoute: AppEditorIndexRoute,
+}
+
+const AppEditorRouteWithChildren = AppEditorRoute._addFileChildren(
+  AppEditorRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppAssignmentRoute: typeof AppAssignmentRoute
+  AppEditorRoute: typeof AppEditorRouteWithChildren
+  AppEmployeesRoute: typeof AppEmployeesRoute
+  AppHistoryRoute: typeof AppHistoryRoute
+  AppHomeRoute: typeof AppHomeRoute
+  AppMembersRoute: typeof AppMembersRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppViewerRoute: typeof AppViewerRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAssignmentRoute: AppAssignmentRoute,
+  AppEditorRoute: AppEditorRouteWithChildren,
+  AppEmployeesRoute: AppEmployeesRoute,
+  AppHistoryRoute: AppHistoryRoute,
+  AppHomeRoute: AppHomeRoute,
+  AppMembersRoute: AppMembersRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppViewerRoute: AppViewerRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
   CatalogRoute: CatalogRoute,
 }
 export const routeTree = rootRouteImport
