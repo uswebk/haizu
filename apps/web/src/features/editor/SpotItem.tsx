@@ -1,10 +1,14 @@
+import type * as React from "react";
 import type { SpotState } from "./types";
 
 type Props = {
 	spot: SpotState;
 	isSelected: boolean;
 	zoom: number;
-	onPointerDown: (e: React.PointerEvent<HTMLDivElement>, spotId: string) => void;
+	onPointerDown: (
+		e: React.PointerEvent<HTMLDivElement>,
+		spotId: string,
+	) => void;
 	onResizePointerDown: (
 		e: React.PointerEvent<HTMLDivElement>,
 		spotId: string,

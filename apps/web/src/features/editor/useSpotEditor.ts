@@ -1,8 +1,19 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { SpotState } from "./types";
 
-export function useSpotEditor(initialSpots: SpotState[], zoom: number) {
-	const [spots, setSpots] = useState<SpotState[]>(initialSpots);
+export function useSpotEditor(
+	initialSpots: SpotState[] | undefined,
+	versionId: string | undefined,
+	zoom: number,
+) {
+	const [spots, setSpots] = useState<SpotState[]>(initialSpots ?? []);
+
+	// versionId が変わったとき（バージョン切り替え）、またはデータが届いたときに同期する
+	useEffect(() => {
+		if (initialSpots !== undefined) {
+			setSpots(initialSpots);
+		}
+	}, [versionId, initialSpots]);
 	const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null);
 
 	const selectedSpot = spots.find((s) => s.id === selectedSpotId) ?? null;
@@ -56,7 +67,9 @@ export function useSpotEditor(initialSpots: SpotState[], zoom: number) {
 		e.currentTarget.setPointerCapture(e.pointerId);
 	};
 
-	const handleContainerPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+	const handleContainerPointerMove = (
+		e: React.PointerEvent<HTMLDivElement>,
+	) => {
 		const container = containerRef.current;
 		if (!container) return;
 		const rect = container.getBoundingClientRect();

@@ -28,7 +28,10 @@ export function VersionSelector({ versions, currentVersion, onSelect }: Props) {
 			</button>
 			{open && (
 				<>
-					<div className="fixed inset-0 z-[29]" onClick={() => setOpen(false)} />
+					<div
+						className="fixed inset-0 z-[29]"
+						onClick={() => setOpen(false)}
+					/>
 					<div className="absolute top-[40px] right-0 w-[200px] bg-surface border border-border rounded-[11px] shadow-float p-[6px] z-30">
 						<div className="text-[10px] font-bold tracking-[.08em] text-faint px-[9px] py-[5px]">
 							バージョン
@@ -44,7 +47,11 @@ export function VersionSelector({ versions, currentVersion, onSelect }: Props) {
 								className="w-full flex items-center justify-between gap-2 px-[10px] py-[8px] rounded-[8px] text-[12.5px] font-semibold text-ink hover:bg-hairline cursor-pointer border-none bg-transparent"
 							>
 								<span>{v.label}</span>
-								{v.isActive && <Badge tone="success">使用中</Badge>}
+								{v.isCurrent ? (
+									<Badge tone="success">使用中</Badge>
+								) : v.status === "published" ? (
+									<Badge tone="primary">公開済み</Badge>
+								) : null}
 							</button>
 						))}
 						<div className="h-px bg-hairline mx-1 my-[5px]" />

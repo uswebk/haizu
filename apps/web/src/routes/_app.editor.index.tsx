@@ -1,46 +1,37 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
+import { areaKeys, createArea, fetchAreas } from "#/lib/api/areas";
 
 export const Route = createFileRoute("/_app/editor/")({
 	component: EditorList,
 });
 
-const MOCK_AREAS = [
-	{
-		id: "1",
-		name: "ライン1",
-		hasFloorPlan: true,
-		floorPlanName: "1F フロア図.png",
-		spotCount: 6,
-	},
-	{
-		id: "2",
-		name: "ライン2",
-		hasFloorPlan: true,
-		floorPlanName: "1F フロア図.png",
-		spotCount: 4,
-	},
-	{
-		id: "3",
-		name: "検収室",
-		hasFloorPlan: false,
-		floorPlanName: null,
-		spotCount: 0,
-	},
-	{
-		id: "4",
-		name: "仕分室",
-		hasFloorPlan: false,
-		floorPlanName: null,
-		spotCount: 0,
-	},
-];
-
 function EditorList() {
+	const queryClient = useQueryClient();
 	const [addOpen, setAddOpen] = useState(false);
 	const [newAreaName, setNewAreaName] = useState("");
+
+	const { data: areas = [] } = useQuery({
+		queryKey: areaKeys.all,
+		queryFn: fetchAreas,
+	});
+
+	const addMutation = useMutation({
+		mutationFn: createArea,
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: areaKeys.all });
+			setAddOpen(false);
+			setNewAreaName("");
+		},
+	});
+
+	const handleAddArea = () => {
+		if (!newAreaName.trim()) return;
+		addMutation.mutate(newAreaName.trim());
+	};
 
 	return (
 		<div className="p-7 overflow-auto h-full">
@@ -57,9 +48,11 @@ function EditorList() {
 
 				<div
 					className="grid gap-4"
-					style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}
+					style={{
+						gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+					}}
 				>
-					{MOCK_AREAS.map((area) => (
+					{areas.map((area) => (
 						<Link
 							key={area.id}
 							to="/editor/$areaId"
@@ -71,7 +64,7 @@ function EditorList() {
 									<div className="text-[16px] font-bold min-w-0 truncate">
 										{area.name}
 									</div>
-									{area.hasFloorPlan ? (
+									{area.floorPlanName ? (
 										<Badge tone="success">図面あり</Badge>
 									) : (
 										<Badge tone="warning">図面なし</Badge>
@@ -86,8 +79,17 @@ function EditorList() {
 										スポット{" "}
 										<b className="text-ink font-bold">{area.spotCount}</b> 箇所
 									</div>
-									<div className="text-[12.5px] font-bold text-primary">
-										設定する →
+									<div className="flex items-center gap-[6px]">
+										{area.currentVersion && (
+											<span className="text-[11.5px] font-bold text-faint">
+												{area.currentVersion}
+											</span>
+										)}
+										{area.currentStatus === "published" ? (
+											<Badge tone="success">公開中</Badge>
+										) : area.currentStatus === "draft" ? (
+											<Badge tone="draft">下書き</Badge>
+										) : null}
 									</div>
 								</div>
 							</div>
@@ -122,6 +124,7 @@ function EditorList() {
 							<input
 								value={newAreaName}
 								onChange={(e) => setNewAreaName(e.target.value)}
+								onKeyDown={(e) => e.key === "Enter" && handleAddArea()}
 								placeholder="ライン3"
 								className="w-full font-sans text-[14px] px-3 py-[10px] rounded-[9px] border border-border bg-surface text-ink outline-none focus:border-primary"
 							/>
@@ -136,12 +139,10 @@ function EditorList() {
 									キャンセル
 								</Button>
 								<Button
-									onClick={() => {
-										setAddOpen(false);
-										setNewAreaName("");
-									}}
+									onClick={handleAddArea}
+									disabled={addMutation.isPending}
 								>
-									追加する
+									{addMutation.isPending ? "追加中…" : "追加する"}
 								</Button>
 							</div>
 						</div>

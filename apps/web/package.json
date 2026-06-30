@@ -16,22 +16,23 @@
     "check": "biome check"
   },
   "dependencies": {
+    "@haiz/shared": "workspace:*",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
+    "@tanstack/react-query": "^5.101.2",
     "@tanstack/react-router": "latest",
     "@tanstack/react-router-devtools": "latest",
     "@tanstack/react-router-ssr-query": "latest",
     "@tanstack/react-start": "latest",
     "@tanstack/router-plugin": "^1.132.0",
+    "hono": "^4.12.27",
+    "konva": "^9.3.20",
     "lucide-react": "^0.545.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "tailwindcss": "^4.1.18",
-    "hono": "^4.12.27",
     "react-konva": "^19.2.5",
-    "konva": "^9.3.20",
-    "zod": "^4.4.3",
-    "@haiz/shared": "workspace:*"
+    "tailwindcss": "^4.1.18",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",

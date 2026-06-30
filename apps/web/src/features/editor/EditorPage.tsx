@@ -1,12 +1,21 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "#/components/ui/Button";
+import {
+	areaKeys,
+	fetchArea,
+	fetchVersionSpots,
+	publishVersion,
+	saveAreaDraft,
+	unpublishVersion,
+} from "#/lib/api/areas";
 import { EditorSidebar } from "./EditorSidebar";
 import { FloorPlanCanvas } from "./FloorPlanCanvas";
-import { VersionSelector } from "./VersionSelector";
-import { MOCK_AREAS } from "./mock";
+import { SaveDraftDialog } from "./SaveDraftDialog";
 import type { VersionState } from "./types";
 import { useSpotEditor } from "./useSpotEditor";
+import { VersionSelector } from "./VersionSelector";
 
 const BASE_WIDTH = 760;
 const ZOOM_MIN = 0.5;
@@ -16,24 +25,78 @@ type Props = { areaId: string };
 
 export function EditorPage({ areaId }: Props) {
 	const navigate = useNavigate();
-	const areaData = MOCK_AREAS[areaId] ?? MOCK_AREAS["1"];
+	const queryClient = useQueryClient();
 
-	const [areaName, setAreaName] = useState(areaData.name);
-	const [currentVersion, setCurrentVersion] = useState<VersionState>(
-		areaData.versions.find((v) => v.isActive) ?? areaData.versions[0],
+	const { data: areaData } = useQuery({
+		queryKey: areaKeys.detail(areaId),
+		queryFn: () => fetchArea(areaId),
+	});
+
+	const [areaName, setAreaName] = useState<string | null>(null);
+	const [currentVersion, setCurrentVersion] = useState<VersionState | null>(
+		null,
 	);
 	const [zoom, setZoom] = useState(1);
+	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
-	const aspectRatio = areaData.planAspectRatio ?? 4 / 3;
+	const resolvedName = areaName ?? areaData?.name ?? "";
+	const resolvedVersion =
+		currentVersion ??
+		areaData?.versions.find((v) => v.isActive) ??
+		areaData?.versions[0] ??
+		null;
+
+	const { data: spotsData } = useQuery({
+		queryKey: areaKeys.versionSpots(areaId, resolvedVersion?.id ?? ""),
+		queryFn: () => fetchVersionSpots(areaId, resolvedVersion?.id ?? ""),
+		enabled: !!resolvedVersion,
+	});
+
+	const aspectRatio = areaData?.planAspectRatio ?? 4 / 3;
 	const canvasWidth = Math.round(BASE_WIDTH * zoom);
 	const canvasHeight = Math.round(canvasWidth / aspectRatio);
 
 	const changeZoom = (delta: number) =>
 		setZoom((z) =>
-			Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round((z + delta) * 100) / 100)),
+			Math.min(
+				ZOOM_MAX,
+				Math.max(ZOOM_MIN, Math.round((z + delta) * 100) / 100),
+			),
 		);
 
-	const editor = useSpotEditor(areaData.initialSpots, zoom);
+	const editor = useSpotEditor(spotsData, resolvedVersion?.id, zoom);
+
+	const saveMutation = useMutation({
+		mutationFn: saveAreaDraft,
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: areaKeys.versionSpots(areaId, resolvedVersion?.id ?? ""),
+			});
+			setSaveDialogOpen(false);
+		},
+	});
+
+	const publishMutation = useMutation({
+		mutationFn: publishVersion,
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
+		},
+	});
+
+	const unpublishMutation = useMutation({
+		mutationFn: unpublishVersion,
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
+		},
+	});
+
+	if (!areaData || !resolvedVersion) {
+		return (
+			<div className="p-7 h-full flex items-center justify-center text-faint text-[14px]">
+				読み込み中…
+			</div>
+		);
+	}
 
 	return (
 		<div className="p-7 h-full flex flex-col">
@@ -49,7 +112,7 @@ export function EditorPage({ areaId }: Props) {
 							← エリア一覧
 						</button>
 						<div className="w-px h-[18px] bg-border shrink-0" />
-						<div className="text-[14px] font-bold truncate">{areaName}</div>
+						<div className="text-[14px] font-bold truncate">{resolvedName}</div>
 						<button
 							type="button"
 							onClick={editor.addSpot}
@@ -61,13 +124,58 @@ export function EditorPage({ areaId }: Props) {
 					<div className="flex items-center gap-[10px] shrink-0">
 						<VersionSelector
 							versions={areaData.versions}
-							currentVersion={currentVersion}
+							currentVersion={resolvedVersion}
 							onSelect={setCurrentVersion}
 						/>
-						<Button variant="secondary" size="sm">
-							下書き保存
-						</Button>
-						<Button size="sm">この規格を公開</Button>
+						{resolvedVersion.status === "draft" ? (
+							<>
+								<Button
+									variant="secondary"
+									size="sm"
+									onClick={() => setSaveDialogOpen(true)}
+								>
+									下書き保存
+								</Button>
+								<Button
+									size="sm"
+									onClick={() =>
+										publishMutation.mutate({
+											areaId: areaData.id,
+											versionId: resolvedVersion.id,
+										})
+									}
+									disabled={publishMutation.isPending}
+								>
+									{publishMutation.isPending ? "公開中…" : "この規格を公開"}
+								</Button>
+							</>
+						) : (
+							<>
+								<Button
+									variant="secondary"
+									size="sm"
+									onClick={() => setSaveDialogOpen(true)}
+								>
+									保存
+								</Button>
+								<span className="text-[12px] font-semibold text-success px-[10px] py-[6px] bg-success/10 rounded-[8px]">
+									公開済み
+								</span>
+								<Button
+									variant="secondary"
+									size="sm"
+									onClick={() =>
+										unpublishMutation.mutate({
+											areaId: areaData.id,
+											versionId: resolvedVersion.id,
+										})
+									}
+									disabled={unpublishMutation.isPending}
+								>
+									{unpublishMutation.isPending ? "取り消し中…" : "公開を取り消す"}
+								</Button>
+							</>
+						)}
 					</div>
 				</div>
 
@@ -90,12 +198,12 @@ export function EditorPage({ areaId }: Props) {
 						onSpotPointerDown={editor.handleSpotPointerDown}
 						onResizePointerDown={editor.handleResizePointerDown}
 						onZoomChange={changeZoom}
-						areaName={areaName}
+						areaName={resolvedName}
 						spotCount={editor.spots.length}
 					/>
 					<EditorSidebar
 						selectedSpot={editor.selectedSpot}
-						areaName={areaName}
+						areaName={resolvedName}
 						hasFloorPlan={areaData.hasFloorPlan}
 						floorPlanName={areaData.floorPlanName}
 						spotCount={editor.spots.length}
@@ -106,6 +214,20 @@ export function EditorPage({ areaId }: Props) {
 					/>
 				</div>
 			</div>
+
+			<SaveDraftDialog
+				open={saveDialogOpen}
+				isPending={saveMutation.isPending}
+				status={resolvedVersion.status}
+				onConfirm={() =>
+					saveMutation.mutate({
+						areaId: areaData.id,
+						versionId: resolvedVersion.id,
+						spots: editor.spots,
+					})
+				}
+				onCancel={() => setSaveDialogOpen(false)}
+			/>
 		</div>
 	);
 }
