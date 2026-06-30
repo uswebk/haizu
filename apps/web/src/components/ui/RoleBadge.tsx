@@ -36,7 +36,7 @@ export function RoleBadge({
 	const r = ROLE_META[role] || ROLE_META.general;
 	return (
 		<span
-			className={`inline-block text-[12px] px-3 py-[6px] rounded-[7px] leading-none ${r.classes}${className ? ` ${className}` : ""}`}
+			className={`inline-block text-xs px-3 py-1.5 rounded-[7px] leading-none ${r.classes}${className ? ` ${className}` : ""}`}
 			style={style}
 			{...rest}
 		>

@@ -24,7 +24,7 @@ export function Badge({
 }: BadgeProps) {
 	return (
 		<span
-			className={`inline-block text-[11.5px] font-bold px-[11px] py-[5px] rounded-pill leading-none ${TONE_CLASSES[tone]}${className ? ` ${className}` : ""}`}
+			className={`inline-block text-[11.5px] font-bold px-2.75 py-1.25 rounded-pill leading-none ${TONE_CLASSES[tone]}${className ? ` ${className}` : ""}`}
 			style={style}
 			{...rest}
 		>

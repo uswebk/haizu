@@ -21,7 +21,7 @@ export function Slot({
 	if (!assigned) {
 		return (
 			<div
-				className={`border-[1.6px] border-dashed border-dash rounded-[10px] flex items-center justify-center text-faint text-[12.5px] font-semibold h-[74px]${className ? ` ${className}` : ""}`}
+				className={`border-[1.6px] border-dashed border-dash rounded-[10px] flex items-center justify-center text-faint text-[12.5px] font-semibold h-18.5${className ? ` ${className}` : ""}`}
 				style={{ width, ...style }}
 				{...rest}
 			>

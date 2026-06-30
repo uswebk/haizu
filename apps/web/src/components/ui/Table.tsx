@@ -28,7 +28,7 @@ export function Table<Row>({
 			{...rest}
 		>
 			<div
-				className="grid bg-table-head px-[18px] py-[11px] text-[11.5px] font-bold text-faint tracking-[.04em] gap-3"
+				className="grid bg-table-head px-4.5 py-2.75 text-[11.5px] font-bold text-faint tracking-[.04em] gap-3"
 				style={{ gridTemplateColumns: template }}
 			>
 				{columns.map((c) => (
@@ -39,7 +39,7 @@ export function Table<Row>({
 				<div
 					// biome-ignore lint/suspicious/noArrayIndexKey: rows are positional sample data
 					key={ri}
-					className="grid items-center px-[18px] py-[13px] border-t border-hairline text-[13.5px] gap-3"
+					className="grid items-center px-4.5 py-3.25 border-t border-hairline text-[13.5px] gap-3"
 					style={{ gridTemplateColumns: template }}
 				>
 					{columns.map((c) => (

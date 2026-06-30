@@ -25,10 +25,10 @@ export function EditorSidebar({
 	onDeleteSpot,
 }: Props) {
 	return (
-		<div className="w-[240px] shrink-0 border-l border-border p-[16px] overflow-auto">
+		<div className="w-60 shrink-0 border-l border-border p-4 overflow-auto">
 			{selectedSpot ? (
 				<>
-					<div className="text-[10.5px] font-bold tracking-[.1em] text-faint mb-[10px]">
+					<div className="text-[10.5px] font-bold tracking-[.1em] text-faint mb-2.5">
 						配置スポットの設定
 					</div>
 					<Input
@@ -37,51 +37,51 @@ export function EditorSidebar({
 						onChange={(e) => onUpdateSpotLabel(selectedSpot.id, e.target.value)}
 					/>
 					<div className="mt-4">
-						<label className="block text-[12px] font-semibold text-muted mb-[6px]">
+						<div className="block text-xs font-semibold text-muted mb-1.5">
 							大きさ
-						</label>
+						</div>
 						<div className="flex items-center gap-3">
 							<button
 								type="button"
 								onClick={() => onUpdateSpotSize(selectedSpot.id, -8)}
-								className="w-[34px] h-[34px] rounded-[8px] border border-border flex items-center justify-center text-[18px] font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface"
+								className="w-8.5 h-8.5 rounded-sm border border-border flex items-center justify-center text-lg font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface"
 							>
 								−
 							</button>
-							<div className="text-[15px] font-bold min-w-[54px] text-center">
+							<div className="text-[15px] font-bold min-w-13.5 text-center">
 								{Math.round(selectedSpot.size)} px
 							</div>
 							<button
 								type="button"
 								onClick={() => onUpdateSpotSize(selectedSpot.id, 8)}
-								className="w-[34px] h-[34px] rounded-[8px] border border-border flex items-center justify-center text-[18px] font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface"
+								className="w-8.5 h-8.5 rounded-sm border border-border flex items-center justify-center text-lg font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface"
 							>
 								＋
 							</button>
 						</div>
-						<div className="text-[11px] text-faint mt-[7px] leading-relaxed">
+						<div className="text-[11px] text-faint mt-1.75 leading-relaxed">
 							スポット右下のハンドルをドラッグでも変更できます
 						</div>
 					</div>
 					<div className="mt-4">
-						<label className="block text-[12px] font-semibold text-muted mb-[6px]">
+						<div className="block text-xs font-semibold text-muted mb-1.5">
 							所属エリア
-						</label>
-						<div className="text-[13px] font-semibold text-ink border border-border rounded-[8px] px-[11px] py-[9px] bg-table-head">
+						</div>
+						<div className="text-[13px] font-semibold text-ink border border-border rounded-sm px-2.75 py-2.25 bg-table-head">
 							{areaName}
 						</div>
 					</div>
 					<button
 						type="button"
 						onClick={() => onDeleteSpot(selectedSpot.id)}
-						className="w-full mt-5 font-sans text-[12.5px] font-semibold px-[9px] py-[9px] rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft"
+						className="w-full mt-5 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft"
 					>
 						スポットを削除
 					</button>
 				</>
 			) : (
 				<>
-					<div className="text-[10.5px] font-bold tracking-[.1em] text-faint mb-[10px]">
+					<div className="text-[10.5px] font-bold tracking-[.1em] text-faint mb-2.5">
 						エリアの設定
 					</div>
 					<Input
@@ -90,32 +90,32 @@ export function EditorSidebar({
 						onChange={(e) => onAreaNameChange(e.target.value)}
 					/>
 					<div className="mt-4">
-						<label className="block text-[12px] font-semibold text-muted mb-[6px]">
+						<div className="block text-xs font-semibold text-muted mb-1.5">
 							図面
-						</label>
+						</div>
 						{hasFloorPlan ? (
-							<div className="flex items-center gap-[9px] border border-border rounded-[9px] px-[11px] py-[9px]">
-								<div className="w-[26px] h-[26px] rounded-[6px] bg-primary-soft shrink-0" />
+							<div className="flex items-center gap-2.25 border border-border rounded-[9px] px-2.75 py-2.25">
+								<div className="w-6.5 h-6.5 rounded-[6px] bg-primary-soft shrink-0" />
 								<div className="text-[11.5px] font-semibold text-ink min-w-0 truncate">
 									{floorPlanName}
 								</div>
 							</div>
 						) : (
-							<div className="text-[12px] text-faint border-[1.4px] border-dashed border-slot-border rounded-[9px] px-[11px] py-[11px] text-center bg-empty-bg">
+							<div className="text-xs text-faint border-[1.4px] border-dashed border-slot-border rounded-[9px] px-2.75 py-2.75 text-center bg-empty-bg">
 								図面が未アップロードです
 							</div>
 						)}
 					</div>
-					<div className="mt-[14px] p-[11px] border border-border rounded-[9px] bg-table-head">
+					<div className="mt-3.5 p-2.75 border border-border rounded-[9px] bg-table-head">
 						<div className="text-[11px] text-faint">配置スポット</div>
-						<div className="text-[20px] font-bold text-ink mt-[2px]">
+						<div className="text-xl font-bold text-ink mt-0.5">
 							{spotCount}{" "}
-							<span className="text-[12px] text-faint font-semibold">箇所</span>
+							<span className="text-xs text-faint font-semibold">箇所</span>
 						</div>
 					</div>
 					<button
 						type="button"
-						className="w-full mt-5 font-sans text-[12.5px] font-semibold px-[9px] py-[9px] rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft"
+						className="w-full mt-5 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft"
 					>
 						エリアを削除
 					</button>

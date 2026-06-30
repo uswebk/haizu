@@ -35,11 +35,11 @@ function EditorList() {
 
 	return (
 		<div className="p-7 overflow-auto h-full">
-			<div className="max-w-[980px]">
-				<div className="flex items-end justify-between gap-5 mb-[22px] flex-wrap">
+			<div className="max-w-245">
+				<div className="flex items-end justify-between gap-5 mb-5.5 flex-wrap">
 					<div>
 						<div className="text-[22px] font-bold">配置エリア一覧</div>
-						<div className="text-[13.5px] text-muted mt-[5px]">
+						<div className="text-[13.5px] text-muted mt-1.25">
 							エリアを選んで、図面と配置スポットを設定します。
 						</div>
 					</div>
@@ -59,9 +59,9 @@ function EditorList() {
 							params={{ areaId: area.id }}
 							className="block text-ink"
 						>
-							<div className="bg-surface border border-border rounded-[14px] p-[18px] shadow-card cursor-pointer transition-[box-shadow,transform] duration-150 hover:shadow-[0_1px_2px_rgba(16,42,67,.06),0_10px_26px_rgba(16,42,67,.09)] hover:-translate-y-px">
-								<div className="flex items-center justify-between gap-[10px]">
-									<div className="text-[16px] font-bold min-w-0 truncate">
+							<div className="bg-surface border border-border rounded-lg p-4.5 shadow-card cursor-pointer transition-[box-shadow,transform] duration-150 hover:shadow-[0_1px_2px_rgba(16,42,67,.06),0_10px_26px_rgba(16,42,67,.09)] hover:-translate-y-px">
+								<div className="flex items-center justify-between gap-2.5">
+									<div className="text-base font-bold min-w-0 truncate">
 										{area.name}
 									</div>
 									{area.floorPlanName ? (
@@ -70,16 +70,16 @@ function EditorList() {
 										<Badge tone="warning">図面なし</Badge>
 									)}
 								</div>
-								<div className="text-[12.5px] text-faint mt-[5px] truncate">
+								<div className="text-[12.5px] text-faint mt-1.25 truncate">
 									{area.floorPlanName ?? "—"}
 								</div>
-								<div className="h-px bg-hairline my-[14px]" />
+								<div className="h-px bg-hairline my-3.5" />
 								<div className="flex items-center justify-between">
 									<div className="text-[13px] text-muted">
 										スポット{" "}
 										<b className="text-ink font-bold">{area.spotCount}</b> 箇所
 									</div>
-									<div className="flex items-center gap-[6px]">
+									<div className="flex items-center gap-1.5">
 										{area.currentVersion && (
 											<span className="text-[11.5px] font-bold text-faint">
 												{area.currentVersion}
@@ -99,36 +99,44 @@ function EditorList() {
 			</div>
 
 			{addOpen && (
+				// biome-ignore lint/a11y/noStaticElementInteractions: backdrop overlay pattern
+				// biome-ignore lint/a11y/useKeyWithClickEvents: backdrop overlay pattern
 				<div
 					className="fixed inset-0 bg-[rgba(16,28,44,.42)] flex items-center justify-center p-6 z-60"
 					onClick={() => setAddOpen(false)}
 				>
+					{/* biome-ignore lint/a11y/noStaticElementInteractions: modal content stops propagation */}
+					{/* biome-ignore lint/a11y/useKeyWithClickEvents: modal content stops propagation */}
 					<div
-						className="w-[460px] max-w-full bg-surface rounded-[16px] shadow-[0_24px_60px_rgba(16,42,67,.3)]"
+						className="w-115 max-w-full bg-surface rounded-section shadow-[0_24px_60px_rgba(16,42,67,.3)]"
 						onClick={(e) => e.stopPropagation()}
 					>
-						<div className="flex items-center justify-between px-[22px] py-[18px] border-b border-hairline">
-							<div className="text-[16px] font-bold">エリアを追加</div>
+						<div className="flex items-center justify-between px-5.5 py-4.5 border-b border-hairline">
+							<div className="text-base font-bold">エリアを追加</div>
 							<button
 								type="button"
 								onClick={() => setAddOpen(false)}
-								className="w-7 h-7 rounded-[8px] bg-app-bg text-faint flex items-center justify-center text-[16px] cursor-pointer border-none"
+								className="w-7 h-7 rounded-sm bg-app-bg text-faint flex items-center justify-center text-base cursor-pointer border-none"
 							>
 								×
 							</button>
 						</div>
-						<div className="p-[22px]">
-							<label className="block text-[12px] font-semibold text-muted mb-[6px]">
+						<div className="p-5.5">
+							<label
+								htmlFor="new-area-name"
+								className="block text-xs font-semibold text-muted mb-1.5"
+							>
 								エリア名
 							</label>
 							<input
+								id="new-area-name"
 								value={newAreaName}
 								onChange={(e) => setNewAreaName(e.target.value)}
 								onKeyDown={(e) => e.key === "Enter" && handleAddArea()}
 								placeholder="ライン3"
-								className="w-full font-sans text-[14px] px-3 py-[10px] rounded-[9px] border border-border bg-surface text-ink outline-none focus:border-primary"
+								className="w-full font-sans text-sm px-3 py-2.5 rounded-[9px] border border-border bg-surface text-ink outline-none focus:border-primary"
 							/>
-							<div className="flex justify-end gap-[10px] mt-6">
+							<div className="flex justify-end gap-2.5 mt-6">
 								<Button
 									variant="secondary"
 									onClick={() => {

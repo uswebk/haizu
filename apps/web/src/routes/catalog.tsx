@@ -26,7 +26,7 @@ function Section({
 }) {
 	return (
 		<section className="mb-12">
-			<h2 className="font-mono text-[11px] font-bold tracking-[.14em] uppercase text-faint m-0 mb-5 pb-[10px] border-b border-hairline">
+			<h2 className="font-mono text-[11px] font-bold tracking-[.14em] uppercase text-faint m-0 mb-5 pb-2.5 border-b border-hairline">
 				{title}
 			</h2>
 			<div className="flex flex-wrap gap-3 items-start">{children}</div>
@@ -74,12 +74,10 @@ function Catalog() {
 		<div className="min-h-screen bg-app-bg px-16 py-12 font-sans">
 			<div style={{ maxWidth: 900 }}>
 				<div className="mb-12">
-					<h1 className="text-[26px] font-bold text-ink m-0 mb-[6px]">
+					<h1 className="text-[26px] font-bold text-ink m-0 mb-1.5">
 						haiz コンポーネントカタログ
 					</h1>
-					<p className="text-muted text-[14px] m-0">
-						Design System — 案A ティール
-					</p>
+					<p className="text-muted text-sm m-0">Design System — 案A ティール</p>
 				</div>
 
 				<Section title="Avatar">
@@ -387,13 +385,13 @@ function Catalog() {
 							["--color-danger", "#e5484d"],
 						] as [string, string][]
 					).map(([name, hex]) => (
-						<div key={name} className="flex items-center gap-[10px]">
+						<div key={name} className="flex items-center gap-2.5">
 							<div
 								className="w-8 h-8 rounded-sm shrink-0 border border-border"
 								style={{ background: `var(${name})` }}
 							/>
 							<div>
-								<div className="font-mono text-[12px] text-ink">{name}</div>
+								<div className="font-mono text-xs text-ink">{name}</div>
 								<div className="text-[11px] text-faint">{hex}</div>
 							</div>
 						</div>

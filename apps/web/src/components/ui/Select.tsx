@@ -21,7 +21,7 @@ export function Select({
 	return (
 		<label className="block" style={{ width }}>
 			{label && (
-				<span className="block text-[12px] font-semibold text-muted mb-[6px]">
+				<span className="block text-xs font-semibold text-muted mb-1.5">
 					{label}
 				</span>
 			)}
@@ -29,7 +29,7 @@ export function Select({
 				<select
 					value={value}
 					onChange={onChange}
-					className={`w-full appearance-none font-sans text-[13.5px] pl-3 pr-8 py-[10px] rounded-sm border border-border bg-surface text-ink outline-none cursor-pointer${className ? ` ${className}` : ""}`}
+					className={`w-full appearance-none font-sans text-[13.5px] pl-3 pr-8 py-2.5 rounded-sm border border-border bg-surface text-ink outline-none cursor-pointer${className ? ` ${className}` : ""}`}
 					style={style}
 					{...rest}
 				>
@@ -43,7 +43,7 @@ export function Select({
 						);
 					})}
 				</select>
-				<span className="absolute right-3 top-1/2 -translate-y-1/2 text-faint pointer-events-none text-[12px]">
+				<span className="absolute right-3 top-1/2 -translate-y-1/2 text-faint pointer-events-none text-xs">
 					▾
 				</span>
 			</div>

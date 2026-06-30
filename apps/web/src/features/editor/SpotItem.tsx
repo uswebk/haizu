@@ -25,7 +25,8 @@ export function SpotItem({
 	const displaySize = spot.size * zoom;
 
 	return (
-		<div
+		<button
+			type="button"
 			style={{
 				position: "absolute",
 				left: `${spot.x}%`,
@@ -47,6 +48,8 @@ export function SpotItem({
 				boxShadow: isSelected ? "0 0 0 3px rgba(14,165,164,.2)" : "none",
 				touchAction: "none",
 				transition: "box-shadow 0.1s",
+				padding: 0,
+				outline: "none",
 			}}
 			onPointerDown={(e) => onPointerDown(e, spot.id)}
 			onClick={(e) => e.stopPropagation()}
@@ -69,6 +72,6 @@ export function SpotItem({
 					onPointerDown={(e) => onResizePointerDown(e, spot.id)}
 				/>
 			)}
-		</div>
+		</button>
 	);
 }

@@ -19,13 +19,13 @@ export function EmptyState({
 }: EmptyStateProps) {
 	return (
 		<div
-			className={`border-[1.6px] border-dashed border-dash rounded-md p-[22px] text-center bg-empty-bg${className ? ` ${className}` : ""}`}
+			className={`border-[1.6px] border-dashed border-dash rounded-md p-5.5 text-center bg-empty-bg${className ? ` ${className}` : ""}`}
 			style={{ width, ...style }}
 			{...rest}
 		>
 			<div className="text-[13.5px] font-bold text-muted">{title}</div>
-			{hint && <div className="text-[12px] text-faint mt-1">{hint}</div>}
-			{action && <div className="mt-[14px]">{action}</div>}
+			{hint && <div className="text-xs text-faint mt-1">{hint}</div>}
+			{action && <div className="mt-3.5">{action}</div>}
 		</div>
 	);
 }

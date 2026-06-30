@@ -12,8 +12,8 @@ interface ButtonProps
 }
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
-	md: "text-[13px] px-[18px] py-[10px] rounded-[10px]",
-	sm: "text-[12px] px-[13px] py-[9px] rounded-sm",
+	md: "text-[13px] px-4.5 py-2.5 rounded-[10px]",
+	sm: "text-xs px-3.25 py-2.25 rounded-sm",
 };
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {

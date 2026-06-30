@@ -16,7 +16,7 @@ export function VersionSelector({ versions, currentVersion, onSelect }: Props) {
 			<button
 				type="button"
 				onClick={() => setOpen((v) => !v)}
-				className="flex items-center gap-[7px] border border-border rounded-[9px] px-[11px] py-[6px] cursor-pointer bg-surface hover:bg-hairline"
+				className="flex items-center gap-1.75 border border-border rounded-[9px] px-2.75 py-1.5 cursor-pointer bg-surface hover:bg-hairline"
 			>
 				<span className="text-[10px] font-bold tracking-[.08em] text-faint">
 					VER
@@ -28,12 +28,14 @@ export function VersionSelector({ versions, currentVersion, onSelect }: Props) {
 			</button>
 			{open && (
 				<>
+					{/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop overlay pattern */}
+					{/* biome-ignore lint/a11y/useKeyWithClickEvents: backdrop overlay pattern */}
 					<div
 						className="fixed inset-0 z-[29]"
 						onClick={() => setOpen(false)}
 					/>
-					<div className="absolute top-[40px] right-0 w-[200px] bg-surface border border-border rounded-[11px] shadow-float p-[6px] z-30">
-						<div className="text-[10px] font-bold tracking-[.08em] text-faint px-[9px] py-[5px]">
+					<div className="absolute top-10 right-0 w-50 bg-surface border border-border rounded-[11px] shadow-float p-1.5 z-30">
+						<div className="text-[10px] font-bold tracking-[.08em] text-faint px-2.25 py-1.25">
 							バージョン
 						</div>
 						{versions.map((v) => (
@@ -44,7 +46,7 @@ export function VersionSelector({ versions, currentVersion, onSelect }: Props) {
 									onSelect(v);
 									setOpen(false);
 								}}
-								className="w-full flex items-center justify-between gap-2 px-[10px] py-[8px] rounded-[8px] text-[12.5px] font-semibold text-ink hover:bg-hairline cursor-pointer border-none bg-transparent"
+								className="w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-sm text-[12.5px] font-semibold text-ink hover:bg-hairline cursor-pointer border-none bg-transparent"
 							>
 								<span>{v.label}</span>
 								{v.isCurrent ? (
@@ -54,10 +56,10 @@ export function VersionSelector({ versions, currentVersion, onSelect }: Props) {
 								) : null}
 							</button>
 						))}
-						<div className="h-px bg-hairline mx-1 my-[5px]" />
+						<div className="h-px bg-hairline mx-1 my-1.25" />
 						<button
 							type="button"
-							className="w-full text-left px-[10px] py-[8px] rounded-[8px] text-[12.5px] font-bold text-primary hover:bg-hairline cursor-pointer border-none bg-transparent"
+							className="w-full text-left px-2.5 py-2 rounded-sm text-[12.5px] font-bold text-primary hover:bg-hairline cursor-pointer border-none bg-transparent"
 						>
 							＋ 現在を複製して新バージョン
 						</button>

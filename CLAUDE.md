@@ -58,6 +58,8 @@ docker compose up -d
 - **キャンバス**: フロアプラン編集に `react-konva`（Konva.js）を使用（`features/editor/`）。
 - **パスエイリアス**: `#/*` → `./src/*`（`package.json` の `imports` で定義）。
 - **スタイル**: Tailwind CSS v4（カスタムカラートークンを使用）。
+  - Tailwindの任意値 `[Npx]` は使わず、標準スケールまたはカスタムトークンを使うこと
+  - 標準スケールに存在しない値（`text-[13px]`、`rounded-[9px]` など）は任意値のまま使用してよい
 
 ### ルート構成
 

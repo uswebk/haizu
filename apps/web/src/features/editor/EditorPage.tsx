@@ -92,7 +92,7 @@ export function EditorPage({ areaId }: Props) {
 
 	if (!areaData || !resolvedVersion) {
 		return (
-			<div className="p-7 h-full flex items-center justify-center text-faint text-[14px]">
+			<div className="p-7 h-full flex items-center justify-center text-faint text-sm">
 				読み込み中…
 			</div>
 		);
@@ -100,28 +100,28 @@ export function EditorPage({ areaId }: Props) {
 
 	return (
 		<div className="p-7 h-full flex flex-col">
-			<div className="flex-1 min-h-0 flex flex-col bg-surface border border-border rounded-[14px] overflow-hidden shadow-card">
+			<div className="flex-1 min-h-0 flex flex-col bg-surface border border-border rounded-lg overflow-hidden shadow-card">
 				{/* Toolbar */}
-				<div className="h-[50px] shrink-0 flex items-center justify-between px-[14px] border-b border-border">
-					<div className="flex items-center gap-[10px] min-w-0">
+				<div className="h-12.5 shrink-0 flex items-center justify-between px-3.5 border-b border-border">
+					<div className="flex items-center gap-2.5 min-w-0">
 						<button
 							type="button"
 							onClick={() => navigate({ to: "/editor" })}
-							className="font-sans text-[12.5px] font-semibold text-muted bg-transparent border-none px-2 py-[6px] rounded-[8px] cursor-pointer hover:bg-hairline shrink-0"
+							className="font-sans text-[12.5px] font-semibold text-muted bg-transparent border-none px-2 py-1.5 rounded-sm cursor-pointer hover:bg-hairline shrink-0"
 						>
 							← エリア一覧
 						</button>
-						<div className="w-px h-[18px] bg-border shrink-0" />
-						<div className="text-[14px] font-bold truncate">{resolvedName}</div>
+						<div className="w-px h-4.5 bg-border shrink-0" />
+						<div className="text-sm font-bold truncate">{resolvedName}</div>
 						<button
 							type="button"
 							onClick={editor.addSpot}
-							className="font-sans text-[12.5px] font-bold text-ink bg-surface border border-border px-3 py-[6px] rounded-[8px] cursor-pointer hover:bg-hairline shrink-0"
+							className="font-sans text-[12.5px] font-bold text-ink bg-surface border border-border px-3 py-1.5 rounded-sm cursor-pointer hover:bg-hairline shrink-0"
 						>
 							＋ 配置スポット
 						</button>
 					</div>
-					<div className="flex items-center gap-[10px] shrink-0">
+					<div className="flex items-center gap-2.5 shrink-0">
 						<VersionSelector
 							versions={areaData.versions}
 							currentVersion={resolvedVersion}
@@ -158,7 +158,7 @@ export function EditorPage({ areaId }: Props) {
 								>
 									保存
 								</Button>
-								<span className="text-[12px] font-semibold text-success px-[10px] py-[6px] bg-success/10 rounded-[8px]">
+								<span className="text-xs font-semibold text-success px-2.5 py-1.5 bg-success/10 rounded-sm">
 									公開済み
 								</span>
 								<Button
@@ -172,7 +172,9 @@ export function EditorPage({ areaId }: Props) {
 									}
 									disabled={unpublishMutation.isPending}
 								>
-									{unpublishMutation.isPending ? "取り消し中…" : "公開を取り消す"}
+									{unpublishMutation.isPending
+										? "取り消し中…"
+										: "公開を取り消す"}
 								</Button>
 							</>
 						)}

@@ -20,12 +20,12 @@ export function Card({
 }: CardProps) {
 	return (
 		<div
-			className={`bg-surface border border-border rounded-lg p-[18px] shadow-card${className ? ` ${className}` : ""}`}
+			className={`bg-surface border border-border rounded-lg p-4.5 shadow-card${className ? ` ${className}` : ""}`}
 			style={{ width, ...style }}
 			{...rest}
 		>
 			{(title || status) && (
-				<div className="flex justify-between items-center gap-[10px]">
+				<div className="flex justify-between items-center gap-2.5">
 					{title && <div className="font-bold text-[15px]">{title}</div>}
 					{status}
 				</div>
@@ -33,8 +33,8 @@ export function Card({
 			{children}
 			{footer && (
 				<>
-					<div className="h-px bg-hairline my-[14px]" />
-					<div className="text-[12px] text-faint">{footer}</div>
+					<div className="h-px bg-hairline my-3.5" />
+					<div className="text-xs text-faint">{footer}</div>
 				</>
 			)}
 		</div>

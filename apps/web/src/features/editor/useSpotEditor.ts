@@ -8,7 +8,7 @@ export function useSpotEditor(
 ) {
 	const [spots, setSpots] = useState<SpotState[]>(initialSpots ?? []);
 
-	// versionId が変わったとき（バージョン切り替え）、またはデータが届いたときに同期する
+	// biome-ignore lint/correctness/useExhaustiveDependencies: versionId はバージョン切り替え時のリセットトリガーとして意図的に追加
 	useEffect(() => {
 		if (initialSpots !== undefined) {
 			setSpots(initialSpots);

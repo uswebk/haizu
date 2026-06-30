@@ -24,7 +24,7 @@ export function Input({
 			defaultValue={defaultValue}
 			placeholder={placeholder}
 			onChange={onChange}
-			className={`w-full font-sans text-[13.5px] px-3 py-[10px] rounded-sm border border-border bg-surface text-ink outline-none transition-[border-color,box-shadow] duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary-soft${className ? ` ${className}` : ""}`}
+			className={`w-full font-sans text-[13.5px] px-3 py-2.5 rounded-sm border border-border bg-surface text-ink outline-none transition-[border-color,box-shadow] duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary-soft${className ? ` ${className}` : ""}`}
 			style={style}
 			{...rest}
 		/>
@@ -35,7 +35,7 @@ export function Input({
 		<div style={{ width }}>
 			<label
 				htmlFor={inputId}
-				className="block text-[12px] font-semibold text-muted mb-[6px]"
+				className="block text-xs font-semibold text-muted mb-1.5"
 			>
 				{label}
 			</label>
