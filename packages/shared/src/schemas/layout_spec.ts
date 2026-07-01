@@ -36,6 +36,9 @@ export const LayoutSpecVersionSchema = z.object({
   planImageUrl: z.string().url().nullable(),
   planImageName: z.string().nullable(),
   planAspectRatio: z.number().positive().optional(), // 幅/高さ比（例: 4/3 → 1.333）。画像アップロード時に保存
+  planImageScale: z.number().positive().default(1), // 図面画像の表示倍率（手動拡大縮小）
+  planImageOffsetX: z.number().default(0), // 図面画像の表示位置オフセット（キャンバス幅に対する%）
+  planImageOffsetY: z.number().default(0), // 図面画像の表示位置オフセット（キャンバス高さに対する%）
   spots: z.array(SpotSchema).max(100),
   publishedAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),

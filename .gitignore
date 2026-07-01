@@ -19,3 +19,6 @@ dist
 
 # OS
 .DS_Store
+
+# Local file uploads (dev only)
+apps/api/uploads

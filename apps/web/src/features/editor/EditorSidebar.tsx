@@ -6,11 +6,15 @@ type Props = {
 	areaName: string;
 	hasFloorPlan: boolean;
 	floorPlanName: string | null;
+	imageScale: number;
 	spotCount: number;
 	onAreaNameChange: (name: string) => void;
 	onUpdateSpotLabel: (spotId: string, label: string) => void;
 	onUpdateSpotSize: (spotId: string, delta: number) => void;
 	onDeleteSpot: (spotId: string) => void;
+	onUploadClick: () => void;
+	onDeleteImageClick: () => void;
+	onImageScaleChange: (scale: number) => void;
 };
 
 export function EditorSidebar({
@@ -18,11 +22,15 @@ export function EditorSidebar({
 	areaName,
 	hasFloorPlan,
 	floorPlanName,
+	imageScale,
 	spotCount,
 	onAreaNameChange,
 	onUpdateSpotLabel,
 	onUpdateSpotSize,
 	onDeleteSpot,
+	onUploadClick,
+	onDeleteImageClick,
+	onImageScaleChange,
 }: Props) {
 	return (
 		<div className="w-60 shrink-0 border-l border-border p-4 overflow-auto">
@@ -89,21 +97,70 @@ export function EditorSidebar({
 						value={areaName}
 						onChange={(e) => onAreaNameChange(e.target.value)}
 					/>
-					<div className="mt-4">
-						<div className="block text-xs font-semibold text-muted mb-1.5">
+					<div className="mt-4 p-2.75 border border-border rounded-[9px]">
+						<div className="text-[10.5px] font-bold tracking-[.1em] text-faint mb-2.5">
 							図面
 						</div>
 						{hasFloorPlan ? (
-							<div className="flex items-center gap-2.25 border border-border rounded-[9px] px-2.75 py-2.25">
-								<div className="w-6.5 h-6.5 rounded-[6px] bg-primary-soft shrink-0" />
-								<div className="text-[11.5px] font-semibold text-ink min-w-0 truncate">
-									{floorPlanName}
+							<>
+								<div className="flex items-center gap-2.25 border border-border rounded-[9px] px-2.75 py-2.25 bg-table-head">
+									<div className="w-6.5 h-6.5 rounded-[6px] bg-primary-soft shrink-0" />
+									<div className="text-[11.5px] font-semibold text-ink min-w-0 truncate">
+										{floorPlanName}
+									</div>
 								</div>
-							</div>
+								<div className="mt-3">
+									<div className="block text-xs font-semibold text-muted mb-1.5">
+										サイズ
+									</div>
+									<div className="flex items-center gap-3">
+										<button
+											type="button"
+											onClick={() => onImageScaleChange(imageScale - 0.1)}
+											className="w-8.5 h-8.5 rounded-sm border border-border flex items-center justify-center text-lg font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface"
+										>
+											−
+										</button>
+										<div className="text-[15px] font-bold min-w-13.5 text-center tabular-nums">
+											{Math.round(imageScale * 100)}%
+										</div>
+										<button
+											type="button"
+											onClick={() => onImageScaleChange(imageScale + 0.1)}
+											className="w-8.5 h-8.5 rounded-sm border border-border flex items-center justify-center text-lg font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface"
+										>
+											＋
+										</button>
+									</div>
+								</div>
+								<button
+									type="button"
+									onClick={onUploadClick}
+									className="w-full mt-3 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-border bg-surface text-ink cursor-pointer hover:bg-hairline"
+								>
+									画像を変更
+								</button>
+								<button
+									type="button"
+									onClick={onDeleteImageClick}
+									className="w-full mt-2 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft"
+								>
+									図面を削除
+								</button>
+							</>
 						) : (
-							<div className="text-xs text-faint border-[1.4px] border-dashed border-slot-border rounded-[9px] px-2.75 py-2.75 text-center bg-empty-bg">
-								図面が未アップロードです
-							</div>
+							<>
+								<div className="text-xs text-faint border-[1.4px] border-dashed border-slot-border rounded-[9px] px-2.75 py-2.75 text-center bg-empty-bg">
+									図面が未アップロードです
+								</div>
+								<button
+									type="button"
+									onClick={onUploadClick}
+									className="w-full mt-3 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border-none bg-primary-soft text-primary cursor-pointer hover:brightness-95"
+								>
+									画像をアップロード
+								</button>
+							</>
 						)}
 					</div>
 					<div className="mt-3.5 p-2.75 border border-border rounded-[9px] bg-table-head">

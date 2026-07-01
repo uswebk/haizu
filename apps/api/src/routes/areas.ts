@@ -1,9 +1,12 @@
 import { zValidator } from "@hono/zod-validator";
 import { eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
+import { imageSize } from "image-size";
 import { z } from "zod";
 import { db } from "../db/client";
 import { areas, layoutSpecVersions, spots } from "../db/schema";
+import { storage } from "../storage";
 
 export const areasRoute = new Hono()
 	.get("/", async (c) => {
@@ -15,7 +18,9 @@ export const areasRoute = new Hono()
 			spotCount: number;
 			currentVersion: string | null;
 			currentStatus: "draft" | "published" | null;
-		}>(sql`
+		}>(
+			// todo: 生SQLを使用しなくて良い方法を考える
+			sql`
 			SELECT
 				a.id,
 				a.name,
@@ -35,7 +40,8 @@ export const areasRoute = new Hono()
 				LIMIT 1
 			) av ON true
 			ORDER BY a.created_at
-		`);
+		`,
+		);
 
 		return c.json({ areas: rows });
 	})
@@ -68,7 +74,11 @@ export const areasRoute = new Hono()
 			name: area.name,
 			hasFloorPlan: versions.some((v) => v.planImageName),
 			floorPlanName: activeVersion?.planImageName ?? null,
+			planImageUrl: activeVersion?.planImageUrl ?? null,
 			planAspectRatio: activeVersion?.planAspectRatio ?? undefined,
+			planImageScale: activeVersion?.planImageScale ?? 1,
+			planImageOffsetX: activeVersion?.planImageOffsetX ?? 0,
+			planImageOffsetY: activeVersion?.planImageOffsetY ?? 0,
 			versions: versions.map((v) => ({
 				id: v.id,
 				label: `v${v.version}`,
@@ -132,11 +142,12 @@ export const areasRoute = new Hono()
 						size: z.number().int(),
 					}),
 				),
+				imageScale: z.number().positive().optional(),
 			}),
 		),
 		async (c) => {
 			const { versionId } = c.req.param();
-			const { spots: newSpots } = c.req.valid("json");
+			const { spots: newSpots, imageScale } = c.req.valid("json");
 
 			await db.delete(spots).where(eq(spots.layoutSpecVersionId, versionId));
 
@@ -155,12 +166,83 @@ export const areasRoute = new Hono()
 
 			await db
 				.update(layoutSpecVersions)
-				.set({ updatedAt: new Date() })
+				.set({
+					...(imageScale !== undefined ? { planImageScale: imageScale } : {}),
+					updatedAt: new Date(),
+				})
 				.where(eq(layoutSpecVersions.id, versionId));
 
 			return c.json({ ok: true });
 		},
 	)
+
+	.post(
+		"/:id/versions/:versionId/floor-plan",
+		bodyLimit({ maxSize: 15 * 1024 * 1024 }),
+		async (c) => {
+			const { versionId } = c.req.param();
+
+			const body = await c.req.parseBody();
+			const file = body.file;
+			if (!(file instanceof File)) {
+				return c.json({ error: "file is required" }, 400);
+			}
+
+			const buffer = Buffer.from(await file.arrayBuffer());
+			const { url } = await storage.save(file.name, buffer);
+
+			let aspectRatio: number | null;
+			try {
+				const { width, height } = imageSize(buffer);
+				aspectRatio = width / height;
+			} catch {
+				aspectRatio = null;
+			}
+
+			await db
+				.update(layoutSpecVersions)
+				.set({
+					planImageUrl: url,
+					planImageName: file.name,
+					planAspectRatio: aspectRatio,
+					planImageScale: 1,
+					planImageOffsetX: 0,
+					planImageOffsetY: 0,
+					updatedAt: new Date(),
+				})
+				.where(eq(layoutSpecVersions.id, versionId));
+
+			return c.json({ url, name: file.name, aspectRatio });
+		},
+	)
+
+	.delete("/:id/versions/:versionId/floor-plan", async (c) => {
+		const { versionId } = c.req.param();
+
+		const version = await db.query.layoutSpecVersions.findFirst({
+			where: eq(layoutSpecVersions.id, versionId),
+		});
+		if (!version) return c.json({ error: "Not found" }, 404);
+
+		if (version.planImageUrl) {
+			await storage.remove(version.planImageUrl);
+		}
+
+		await db
+			.update(layoutSpecVersions)
+			.set({
+				planImageUrl: null,
+				planImageName: null,
+				planAspectRatio: null,
+				planImageScale: 1,
+				planImageOffsetX: 0,
+				planImageOffsetY: 0,
+				updatedAt: new Date(),
+			})
+			.where(eq(layoutSpecVersions.id, versionId));
+
+		return c.json({ ok: true });
+	})
 
 	.post("/:id/versions/:versionId/publish", async (c) => {
 		const { id, versionId } = c.req.param();

@@ -5,6 +5,8 @@ import type { SpotState } from "./types";
 type Props = {
 	hasFloorPlan: boolean;
 	floorPlanName: string | null;
+	floorPlanImageUrl: string | null;
+	imageScale: number;
 	canvasWidth: number;
 	canvasHeight: number;
 	spots: SpotState[];
@@ -32,6 +34,8 @@ type Props = {
 export function FloorPlanCanvas({
 	hasFloorPlan,
 	floorPlanName,
+	floorPlanImageUrl,
+	imageScale,
 	canvasWidth,
 	canvasHeight,
 	spots,
@@ -58,33 +62,25 @@ export function FloorPlanCanvas({
 						／ {spotCount} 箇所
 					</span>
 				</div>
-				<div className="flex items-center gap-2.5 shrink-0">
-					<div className="flex items-center gap-1 border border-border rounded-sm bg-surface px-1 py-0.5">
-						<button
-							type="button"
-							onClick={() => onZoomChange(-0.25)}
-							disabled={zoom <= zoomMin}
-							className="w-6.5 h-6.5 rounded-[6px] text-base font-bold text-ink hover:bg-hairline disabled:text-disabled cursor-pointer disabled:cursor-not-allowed border-none bg-transparent"
-						>
-							−
-						</button>
-						<div className="text-xs font-bold text-muted min-w-10.5 text-center tabular-nums">
-							{Math.round(zoom * 100)}%
-						</div>
-						<button
-							type="button"
-							onClick={() => onZoomChange(0.25)}
-							disabled={zoom >= zoomMax}
-							className="w-6.5 h-6.5 rounded-[6px] text-base font-bold text-ink hover:bg-hairline disabled:text-disabled cursor-pointer disabled:cursor-not-allowed border-none bg-transparent"
-						>
-							＋
-						</button>
+				<div className="flex items-center gap-1 border border-border rounded-sm bg-surface px-1 py-0.5 shrink-0">
+					<button
+						type="button"
+						onClick={() => onZoomChange(-0.25)}
+						disabled={zoom <= zoomMin}
+						className="w-6.5 h-6.5 rounded-[6px] text-base font-bold text-ink hover:bg-hairline disabled:text-disabled cursor-pointer disabled:cursor-not-allowed border-none bg-transparent"
+					>
+						−
+					</button>
+					<div className="text-xs font-bold text-muted min-w-10.5 text-center tabular-nums">
+						{Math.round(zoom * 100)}%
 					</div>
 					<button
 						type="button"
-						className="text-[11.5px] font-bold text-primary bg-primary-soft border-none px-3 py-1.5 rounded-sm cursor-pointer"
+						onClick={() => onZoomChange(0.25)}
+						disabled={zoom >= zoomMax}
+						className="w-6.5 h-6.5 rounded-[6px] text-base font-bold text-ink hover:bg-hairline disabled:text-disabled cursor-pointer disabled:cursor-not-allowed border-none bg-transparent"
 					>
-						図面をアップロード
+						＋
 					</button>
 				</div>
 			</div>
@@ -118,6 +114,15 @@ export function FloorPlanCanvas({
 							cursor: "default",
 						}}
 					>
+						{floorPlanImageUrl && (
+							<img
+								src={floorPlanImageUrl}
+								alt=""
+								draggable={false}
+								className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+								style={{ transform: `scale(${imageScale})` }}
+							/>
+						)}
 						{spots.map((spot) => (
 							<SpotItem
 								key={spot.id}
@@ -138,7 +143,7 @@ export function FloorPlanCanvas({
 									図面が未設定です
 								</div>
 								<div className="text-[11px] text-faint">
-									図面は任意です。アップロードすると背景に表示されます
+									図面は任意です。右のパネルからアップロードできます
 								</div>
 							</div>
 						)}

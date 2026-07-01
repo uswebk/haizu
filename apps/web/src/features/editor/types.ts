@@ -19,6 +19,10 @@ export type AreaData = {
 	name: string;
 	hasFloorPlan: boolean;
 	floorPlanName: string | null;
+	planImageUrl: string | null;
 	planAspectRatio?: number;
+	planImageScale: number;
+	planImageOffsetX: number;
+	planImageOffsetY: number;
 	versions: VersionState[];
 };

@@ -6,6 +6,10 @@ export const MOCK_AREAS: Record<string, AreaData> = {
 		name: "ライン1",
 		hasFloorPlan: true,
 		floorPlanName: "1F フロア図.png",
+		planImageUrl: null,
+		planImageScale: 1,
+		planImageOffsetX: 0,
+		planImageOffsetY: 0,
 		versions: [
 			{
 				id: "v1",
@@ -28,6 +32,10 @@ export const MOCK_AREAS: Record<string, AreaData> = {
 		name: "ライン2",
 		hasFloorPlan: true,
 		floorPlanName: "1F フロア図.png",
+		planImageUrl: null,
+		planImageScale: 1,
+		planImageOffsetX: 0,
+		planImageOffsetY: 0,
 		versions: [
 			{
 				id: "v1",
@@ -43,6 +51,10 @@ export const MOCK_AREAS: Record<string, AreaData> = {
 		name: "検収室",
 		hasFloorPlan: false,
 		floorPlanName: null,
+		planImageUrl: null,
+		planImageScale: 1,
+		planImageOffsetX: 0,
+		planImageOffsetY: 0,
 		versions: [
 			{
 				id: "v1",
@@ -58,6 +70,10 @@ export const MOCK_AREAS: Record<string, AreaData> = {
 		name: "仕分室",
 		hasFloorPlan: false,
 		floorPlanName: null,
+		planImageUrl: null,
+		planImageScale: 1,
+		planImageOffsetX: 0,
+		planImageOffsetY: 0,
 		versions: [
 			{
 				id: "v1",

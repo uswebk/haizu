@@ -59,18 +59,49 @@ export type SaveDraftParams = {
 	areaId: string;
 	versionId: string;
 	spots: { id?: string; label: string; x: number; y: number; size: number }[];
+	imageScale?: number;
 };
 
 export async function saveAreaDraft({
 	areaId,
 	versionId,
 	spots,
+	imageScale,
 }: SaveDraftParams): Promise<void> {
 	const res = await fetch(`${API_BASE}/areas/${areaId}/versions/${versionId}`, {
 		method: "PUT",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ spots }),
+		body: JSON.stringify({ spots, imageScale }),
 	});
+	await handleResponse(res);
+}
+
+export async function uploadFloorPlan({
+	areaId,
+	versionId,
+	file,
+}: {
+	areaId: string;
+	versionId: string;
+	file: File;
+}): Promise<{ url: string; name: string; aspectRatio: number | null }> {
+	const formData = new FormData();
+	formData.append("file", file);
+	const res = await fetch(
+		`${API_BASE}/areas/${areaId}/versions/${versionId}/floor-plan`,
+		{ method: "POST", body: formData },
+	);
+	return handleResponse(res);
+}
+
+export async function deleteFloorPlan(params: {
+	areaId: string;
+	versionId: string;
+}): Promise<void> {
+	const res = await fetch(
+		`${API_BASE}/areas/${params.areaId}/versions/${params.versionId}/floor-plan`,
+		{ method: "DELETE" },
+	);
 	await handleResponse(res);
 }
 

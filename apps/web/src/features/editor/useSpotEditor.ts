@@ -1,12 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import type { SpotState } from "./types";
 
+const DEFAULT_IMAGE_SCALE = 1;
+
 export function useSpotEditor(
 	initialSpots: SpotState[] | undefined,
 	versionId: string | undefined,
 	zoom: number,
+	initialImageScale?: number,
 ) {
 	const [spots, setSpots] = useState<SpotState[]>(initialSpots ?? []);
+	const [imageScale, setImageScaleState] = useState<number>(
+		initialImageScale ?? DEFAULT_IMAGE_SCALE,
+	);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: versionId はバージョン切り替え時のリセットトリガーとして意図的に追加
 	useEffect(() => {
@@ -14,6 +20,11 @@ export function useSpotEditor(
 			setSpots(initialSpots);
 		}
 	}, [versionId, initialSpots]);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: versionId はバージョン切り替え時のリセットトリガーとして意図的に追加
+	useEffect(() => {
+		setImageScaleState(initialImageScale ?? DEFAULT_IMAGE_SCALE);
+	}, [versionId, initialImageScale]);
 	const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null);
 
 	const selectedSpot = spots.find((s) => s.id === selectedSpotId) ?? null;
@@ -32,7 +43,6 @@ export function useSpotEditor(
 		startClientY: number;
 		startSize: number;
 	} | null>(null);
-
 	const handleSpotPointerDown = (
 		e: React.PointerEvent<HTMLElement>,
 		spotId: string,
@@ -136,12 +146,24 @@ export function useSpotEditor(
 		);
 	};
 
+	const setImageScale = (scale: number) => {
+		const clamped = Math.max(0.2, Math.min(5, scale));
+		setImageScaleState(clamped);
+	};
+
+	const resetImageScale = () => {
+		setImageScaleState(DEFAULT_IMAGE_SCALE);
+	};
+
 	return {
 		spots,
 		selectedSpotId,
 		selectedSpot,
 		setSelectedSpotId,
 		containerRef,
+		imageScale,
+		setImageScale,
+		resetImageScale,
 		handleSpotPointerDown,
 		handleResizePointerDown,
 		handleContainerPointerMove,

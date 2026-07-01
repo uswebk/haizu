@@ -1,14 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import type * as React from "react";
+import { useRef, useState } from "react";
 import { Button } from "#/components/ui/Button";
+import { API_BASE } from "#/lib/api";
 import {
 	areaKeys,
+	deleteFloorPlan,
 	fetchArea,
 	fetchVersionSpots,
 	publishVersion,
 	saveAreaDraft,
 	unpublishVersion,
+	uploadFloorPlan,
 } from "#/lib/api/areas";
 import { EditorSidebar } from "./EditorSidebar";
 import { FloorPlanCanvas } from "./FloorPlanCanvas";
@@ -64,11 +68,17 @@ export function EditorPage({ areaId }: Props) {
 			),
 		);
 
-	const editor = useSpotEditor(spotsData, resolvedVersion?.id, zoom);
+	const editor = useSpotEditor(
+		spotsData,
+		resolvedVersion?.id,
+		zoom,
+		areaData?.planImageScale,
+	);
 
 	const saveMutation = useMutation({
 		mutationFn: saveAreaDraft,
 		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
 			void queryClient.invalidateQueries({
 				queryKey: areaKeys.versionSpots(areaId, resolvedVersion?.id ?? ""),
 			});
@@ -77,7 +87,11 @@ export function EditorPage({ areaId }: Props) {
 	});
 
 	const publishMutation = useMutation({
-		mutationFn: async (params: { areaId: string; versionId: string }) => {
+		mutationFn: async (params: {
+			areaId: string;
+			versionId: string;
+			imageScale: number;
+		}) => {
 			await saveAreaDraft({ ...params, spots: editor.spots });
 			await publishVersion(params);
 		},
@@ -92,6 +106,29 @@ export function EditorPage({ areaId }: Props) {
 	const unpublishMutation = useMutation({
 		mutationFn: unpublishVersion,
 		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
+		},
+	});
+
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const uploadMutation = useMutation({
+		mutationFn: uploadFloorPlan,
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
+		},
+	});
+
+	const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		e.target.value = "";
+		if (!file || !resolvedVersion) return;
+		uploadMutation.mutate({ areaId, versionId: resolvedVersion.id, file });
+	};
+
+	const deleteFloorPlanMutation = useMutation({
+		mutationFn: deleteFloorPlan,
+		onSuccess: () => {
+			editor.resetImageScale();
 			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
 		},
 	});
@@ -148,6 +185,7 @@ export function EditorPage({ areaId }: Props) {
 										publishMutation.mutate({
 											areaId: areaData.id,
 											versionId: resolvedVersion.id,
+											imageScale: editor.imageScale,
 										})
 									}
 									disabled={publishMutation.isPending}
@@ -191,6 +229,12 @@ export function EditorPage({ areaId }: Props) {
 					<FloorPlanCanvas
 						hasFloorPlan={areaData.hasFloorPlan}
 						floorPlanName={areaData.floorPlanName}
+						floorPlanImageUrl={
+							areaData.planImageUrl
+								? `${API_BASE}${areaData.planImageUrl}`
+								: null
+						}
+						imageScale={editor.imageScale}
 						canvasWidth={canvasWidth}
 						canvasHeight={canvasHeight}
 						spots={editor.spots}
@@ -213,14 +257,31 @@ export function EditorPage({ areaId }: Props) {
 						areaName={resolvedName}
 						hasFloorPlan={areaData.hasFloorPlan}
 						floorPlanName={areaData.floorPlanName}
+						imageScale={editor.imageScale}
 						spotCount={editor.spots.length}
 						onAreaNameChange={setAreaName}
 						onUpdateSpotLabel={editor.updateSpotLabel}
 						onUpdateSpotSize={editor.updateSpotSize}
 						onDeleteSpot={editor.deleteSpot}
+						onUploadClick={() => fileInputRef.current?.click()}
+						onDeleteImageClick={() =>
+							deleteFloorPlanMutation.mutate({
+								areaId,
+								versionId: resolvedVersion.id,
+							})
+						}
+						onImageScaleChange={editor.setImageScale}
 					/>
 				</div>
 			</div>
+
+			<input
+				ref={fileInputRef}
+				type="file"
+				accept="image/png,image/jpeg"
+				className="hidden"
+				onChange={handleFileSelected}
+			/>
 
 			<SaveDraftDialog
 				open={saveDialogOpen}
@@ -231,6 +292,7 @@ export function EditorPage({ areaId }: Props) {
 						areaId: areaData.id,
 						versionId: resolvedVersion.id,
 						spots: editor.spots,
+						imageScale: editor.imageScale,
 					})
 				}
 				onCancel={() => setSaveDialogOpen(false)}

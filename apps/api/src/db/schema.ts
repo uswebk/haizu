@@ -33,6 +33,9 @@ export const layoutSpecVersions = pgTable(
 		planImageUrl: text("plan_image_url"),
 		planImageName: text("plan_image_name"),
 		planAspectRatio: real("plan_aspect_ratio"),
+		planImageScale: real("plan_image_scale").notNull().default(1),
+		planImageOffsetX: real("plan_image_offset_x").notNull().default(0),
+		planImageOffsetY: real("plan_image_offset_y").notNull().default(0),
 		publishedAt: timestamp("published_at", { withTimezone: true }),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
