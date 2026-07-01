@@ -181,7 +181,6 @@ export function EditorPage({ areaId }: Props) {
 					</div>
 				</div>
 
-				{/* Body */}
 				<div className="flex-1 min-h-0 flex">
 					<FloorPlanCanvas
 						hasFloorPlan={areaData.hasFloorPlan}

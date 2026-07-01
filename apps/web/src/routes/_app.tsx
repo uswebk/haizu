@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { NavItem } from "#/components/ui/NavItem";
+import { useDismiss } from "#/hooks/useDismiss";
 
 export const Route = createFileRoute("/_app")({
 	component: AppLayout,
@@ -22,6 +23,8 @@ const ADMIN_NAV = [
 
 function AppLayout() {
 	const [userMenuOpen, setUserMenuOpen] = useState(false);
+	const userMenuRef = useRef<HTMLDivElement>(null);
+	useDismiss(userMenuOpen, () => setUserMenuOpen(false), userMenuRef);
 
 	return (
 		<div className="flex h-screen bg-app-bg overflow-hidden">
@@ -100,7 +103,7 @@ function AppLayout() {
 						<span className="text-[11.5px] font-bold text-ink bg-hairline px-2.75 py-1.25 rounded-pill leading-none">
 							管理者
 						</span>
-						<div className="relative">
+						<div className="relative" ref={userMenuRef}>
 							<button
 								type="button"
 								onClick={() => setUserMenuOpen((v) => !v)}
@@ -109,46 +112,38 @@ function AppLayout() {
 								管
 							</button>
 							{userMenuOpen && (
-								<>
-									{/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop overlay pattern */}
-									{/* biome-ignore lint/a11y/useKeyWithClickEvents: backdrop overlay pattern */}
-									<div
-										className="fixed inset-0 z-[39]"
-										onClick={() => setUserMenuOpen(false)}
-									/>
-									<div className="absolute top-11.5 right-0 w-62 bg-surface border border-border rounded-[13px] shadow-float z-40 overflow-hidden">
-										<div className="px-4 py-3.75 border-b border-hairline">
-											<div className="text-sm font-bold">管理 太郎</div>
-											<div className="text-xs text-faint mt-0.5">
-												admin@haiz.co.jp
-											</div>
-											<div className="text-[11.5px] text-muted mt-1.5">
-												株式会社haiz
-											</div>
+								<div className="absolute top-11.5 right-0 w-62 bg-surface border border-border rounded-[13px] shadow-float z-40 overflow-hidden">
+									<div className="px-4 py-3.75 border-b border-hairline">
+										<div className="text-sm font-bold">管理 太郎</div>
+										<div className="text-xs text-faint mt-0.5">
+											admin@haiz.co.jp
 										</div>
-										<div className="p-1.5">
-											{(
-												[
-													{ label: "アカウント設定", danger: false },
-													{ label: "事業所情報", danger: false },
-													{ label: "ログアウト", danger: true },
-												] as const
-											).map(({ label, danger }) => (
-												<button
-													key={label}
-													type="button"
-													className={`w-full text-left px-2.75 py-2.5 rounded-[9px] text-[13px] font-semibold cursor-pointer border-none bg-transparent ${
-														danger
-															? "text-danger hover:bg-danger-soft"
-															: "text-ink hover:bg-hairline"
-													}`}
-												>
-													{label}
-												</button>
-											))}
+										<div className="text-[11.5px] text-muted mt-1.5">
+											株式会社haiz
 										</div>
 									</div>
-								</>
+									<div className="p-1.5">
+										{(
+											[
+												{ label: "アカウント設定", danger: false },
+												{ label: "事業所情報", danger: false },
+												{ label: "ログアウト", danger: true },
+											] as const
+										).map(({ label, danger }) => (
+											<button
+												key={label}
+												type="button"
+												className={`w-full text-left px-2.75 py-2.5 rounded-[9px] text-[13px] font-semibold cursor-pointer border-none bg-transparent ${
+													danger
+														? "text-danger hover:bg-danger-soft"
+														: "text-ink hover:bg-hairline"
+												}`}
+											>
+												{label}
+											</button>
+										))}
+									</div>
+								</div>
 							)}
 						</div>
 					</div>

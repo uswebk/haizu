@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
+import { useDismiss } from "#/hooks/useDismiss";
 import { areaKeys, createArea, fetchAreas } from "#/lib/api/areas";
 
 export const Route = createFileRoute("/_app/editor/")({
@@ -13,6 +14,8 @@ function EditorList() {
 	const queryClient = useQueryClient();
 	const [addOpen, setAddOpen] = useState(false);
 	const [newAreaName, setNewAreaName] = useState("");
+	const addDialogRef = useRef<HTMLDivElement>(null);
+	useDismiss(addOpen, () => setAddOpen(false), addDialogRef);
 
 	const { data: areas = [] } = useQuery({
 		queryKey: areaKeys.all,
@@ -99,17 +102,10 @@ function EditorList() {
 			</div>
 
 			{addOpen && (
-				// biome-ignore lint/a11y/noStaticElementInteractions: backdrop overlay pattern
-				// biome-ignore lint/a11y/useKeyWithClickEvents: backdrop overlay pattern
-				<div
-					className="fixed inset-0 bg-[rgba(16,28,44,.42)] flex items-center justify-center p-6 z-60"
-					onClick={() => setAddOpen(false)}
-				>
-					{/* biome-ignore lint/a11y/noStaticElementInteractions: modal content stops propagation */}
-					{/* biome-ignore lint/a11y/useKeyWithClickEvents: modal content stops propagation */}
+				<div className="fixed inset-0 bg-[rgba(16,28,44,.42)] flex items-center justify-center p-6 z-60">
 					<div
+						ref={addDialogRef}
 						className="w-115 max-w-full bg-surface rounded-section shadow-[0_24px_60px_rgba(16,42,67,.3)]"
-						onClick={(e) => e.stopPropagation()}
 					>
 						<div className="flex items-center justify-between px-5.5 py-4.5 border-b border-hairline">
 							<div className="text-base font-bold">エリアを追加</div>
@@ -133,7 +129,7 @@ function EditorList() {
 								value={newAreaName}
 								onChange={(e) => setNewAreaName(e.target.value)}
 								onKeyDown={(e) => e.key === "Enter" && handleAddArea()}
-								placeholder="ライン3"
+								placeholder="荷捌き場"
 								className="w-full font-sans text-sm px-3 py-2.5 rounded-[9px] border border-border bg-surface text-ink outline-none focus:border-primary"
 							/>
 							<div className="flex justify-end gap-2.5 mt-6">

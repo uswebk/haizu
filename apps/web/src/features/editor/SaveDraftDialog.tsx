@@ -1,4 +1,6 @@
+import { useRef } from "react";
 import { Button } from "#/components/ui/Button";
+import { useDismiss } from "#/hooks/useDismiss";
 
 type Props = {
 	open: boolean;
@@ -15,22 +17,18 @@ export function SaveDraftDialog({
 	onConfirm,
 	onCancel,
 }: Props) {
+	const contentRef = useRef<HTMLDivElement>(null);
+	useDismiss(open, onCancel, contentRef);
+
 	if (!open) return null;
 
 	const isDraft = status === "draft";
 
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: backdrop overlay pattern
-		// biome-ignore lint/a11y/useKeyWithClickEvents: backdrop overlay pattern
-		<div
-			className="fixed inset-0 bg-[rgba(16,28,44,.42)] flex items-center justify-center p-6 z-60"
-			onClick={onCancel}
-		>
-			{/* biome-ignore lint/a11y/noStaticElementInteractions: modal content stops propagation */}
-			{/* biome-ignore lint/a11y/useKeyWithClickEvents: modal content stops propagation */}
+		<div className="fixed inset-0 bg-[rgba(16,28,44,.42)] flex items-center justify-center p-6 z-60">
 			<div
+				ref={contentRef}
 				className="w-105 max-w-full bg-surface rounded-section shadow-[0_24px_60px_rgba(16,42,67,.3)]"
-				onClick={(e) => e.stopPropagation()}
 			>
 				<div className="px-5.5 py-5 border-b border-hairline">
 					<div className="text-base font-bold">

@@ -104,3 +104,4 @@ docker compose up -d
 - フロントエンドのルートファイルを追加・変更したら `pnpm generate-routes`（または `tsr generate`）でルートツリーを再生成する。
 - `biome` を使用しているため `eslint` / `prettier` は不要。
 - `@haiz/shared` のスキーマ変更は `packages/shared/src/schemas/` を編集し、`src/index.ts` からエクスポートする。
+- `{/* Body */}` のような、コードを読めば自明なコメントは書かない・復元しない。コメントはWHY（非自明な制約・理由）がある場合のみ付ける。
