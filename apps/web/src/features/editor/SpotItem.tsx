@@ -5,12 +5,9 @@ type Props = {
 	spot: SpotState;
 	isSelected: boolean;
 	zoom: number;
-	onPointerDown: (
-		e: React.PointerEvent<HTMLDivElement>,
-		spotId: string,
-	) => void;
+	onPointerDown: (e: React.PointerEvent<HTMLElement>, spotId: string) => void;
 	onResizePointerDown: (
-		e: React.PointerEvent<HTMLDivElement>,
+		e: React.PointerEvent<HTMLElement>,
 		spotId: string,
 	) => void;
 };

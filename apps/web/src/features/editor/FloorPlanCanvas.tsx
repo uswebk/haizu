@@ -17,11 +17,11 @@ type Props = {
 	onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => void;
 	onPointerUp: () => void;
 	onSpotPointerDown: (
-		e: React.PointerEvent<HTMLDivElement>,
+		e: React.PointerEvent<HTMLElement>,
 		spotId: string,
 	) => void;
 	onResizePointerDown: (
-		e: React.PointerEvent<HTMLDivElement>,
+		e: React.PointerEvent<HTMLElement>,
 		spotId: string,
 	) => void;
 	onZoomChange: (delta: number) => void;
@@ -89,65 +89,62 @@ export function FloorPlanCanvas({
 				</div>
 			</div>
 
-			{hasFloorPlan ? (
-				<div className="flex-1 min-h-0 overflow-auto">
+			<div className="flex-1 min-h-0 overflow-auto">
+				<div
+					style={{
+						minWidth: `${canvasWidth + 32}px`,
+						minHeight: `${canvasHeight + 32}px`,
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						padding: "16px",
+					}}
+				>
+					{/* biome-ignore lint/a11y/noStaticElementInteractions: canvas interaction area */}
+					{/* biome-ignore lint/a11y/useKeyWithClickEvents: canvas interaction area */}
 					<div
+						ref={containerRef}
+						onClick={onCanvasClick}
+						onPointerMove={onPointerMove}
+						onPointerUp={onPointerUp}
+						className="relative shrink-0 rounded-md border border-border overflow-hidden select-none shadow-card"
 						style={{
-							minWidth: `${canvasWidth + 32}px`,
-							minHeight: `${canvasHeight + 32}px`,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-							padding: "16px",
+							width: `${canvasWidth}px`,
+							height: `${canvasHeight}px`,
+							backgroundColor: "#fbfcfe",
+							backgroundImage:
+								"linear-gradient(#eef2f8 1px, transparent 1px), linear-gradient(90deg, #eef2f8 1px, transparent 1px)",
+							backgroundSize: "27px 27px",
+							cursor: "default",
 						}}
 					>
-						{/* biome-ignore lint/a11y/noStaticElementInteractions: canvas interaction area */}
-						{/* biome-ignore lint/a11y/useKeyWithClickEvents: canvas interaction area */}
-						<div
-							ref={containerRef}
-							onClick={onCanvasClick}
-							onPointerMove={onPointerMove}
-							onPointerUp={onPointerUp}
-							className="relative shrink-0 rounded-md border border-border overflow-hidden select-none shadow-card"
-							style={{
-								width: `${canvasWidth}px`,
-								height: `${canvasHeight}px`,
-								backgroundColor: "#fbfcfe",
-								backgroundImage:
-									"linear-gradient(#eef2f8 1px, transparent 1px), linear-gradient(90deg, #eef2f8 1px, transparent 1px)",
-								backgroundSize: "27px 27px",
-								cursor: "default",
-							}}
-						>
-							{spots.map((spot) => (
-								<SpotItem
-									key={spot.id}
-									spot={spot}
-									isSelected={spot.id === selectedSpotId}
-									zoom={zoom}
-									onPointerDown={onSpotPointerDown}
-									onResizePointerDown={onResizePointerDown}
-								/>
-							))}
+						{spots.map((spot) => (
+							<SpotItem
+								key={spot.id}
+								spot={spot}
+								isSelected={spot.id === selectedSpotId}
+								zoom={zoom}
+								onPointerDown={onSpotPointerDown}
+								onResizePointerDown={onResizePointerDown}
+							/>
+						))}
+						{hasFloorPlan ? (
 							<div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 font-mono text-[10.5px] text-faint pointer-events-none whitespace-nowrap">
 								{floorPlanName}
 							</div>
-						</div>
+						) : (
+							<div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none">
+								<div className="text-xs font-bold text-faint">
+									図面が未設定です
+								</div>
+								<div className="text-[11px] text-faint">
+									図面は任意です。アップロードすると背景に表示されます
+								</div>
+							</div>
+						)}
 					</div>
 				</div>
-			) : (
-				<div className="flex-1 rounded-md border-[1.6px] border-dashed border-slot-border bg-empty-bg flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-primary transition-colors">
-					<div className="w-13.5 h-13.5 rounded-lg bg-primary-soft flex items-center justify-center">
-						<div className="w-5.5 h-5.5 rounded-[5px] border-[2.5px] border-primary" />
-					</div>
-					<div className="text-sm font-bold text-ink">
-						このエリアの図面をアップロード
-					</div>
-					<div className="text-xs text-faint">
-						PDF / PNG / JPG をドラッグ&ドロップ、またはクリックして選択
-					</div>
-				</div>
-			)}
+			</div>
 		</div>
 	);
 }

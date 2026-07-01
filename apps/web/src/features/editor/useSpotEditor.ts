@@ -34,7 +34,7 @@ export function useSpotEditor(
 	} | null>(null);
 
 	const handleSpotPointerDown = (
-		e: React.PointerEvent<HTMLDivElement>,
+		e: React.PointerEvent<HTMLElement>,
 		spotId: string,
 	) => {
 		e.stopPropagation();
@@ -52,7 +52,7 @@ export function useSpotEditor(
 	};
 
 	const handleResizePointerDown = (
-		e: React.PointerEvent<HTMLDivElement>,
+		e: React.PointerEvent<HTMLElement>,
 		spotId: string,
 	) => {
 		e.stopPropagation();

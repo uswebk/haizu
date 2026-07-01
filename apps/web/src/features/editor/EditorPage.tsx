@@ -77,9 +77,15 @@ export function EditorPage({ areaId }: Props) {
 	});
 
 	const publishMutation = useMutation({
-		mutationFn: publishVersion,
+		mutationFn: async (params: { areaId: string; versionId: string }) => {
+			await saveAreaDraft({ ...params, spots: editor.spots });
+			await publishVersion(params);
+		},
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
+			void queryClient.invalidateQueries({
+				queryKey: areaKeys.versionSpots(areaId, resolvedVersion?.id ?? ""),
+			});
 		},
 	});
 
