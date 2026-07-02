@@ -350,4 +350,22 @@ export const areasRoute = new Hono()
 		if (!updated[0]) return c.json({ error: "Not found" }, 404);
 
 		return c.json({ ok: true });
+	})
+
+	.delete("/:id", async (c) => {
+		const { id } = c.req.param();
+
+		// TODO: assignments テーブル実装後、エリア内のいずれかのバージョンへの参照があれば 409 を返す
+		// const versionIds = (await db.select({ id: layoutSpecVersions.id }).from(layoutSpecVersions).where(eq(layoutSpecVersions.areaId, id))).map((v) => v.id);
+		// const hasAssignments = await db.query.assignments.findFirst({ where: inArray(assignments.layoutSpecVersionId, versionIds) });
+		// if (hasAssignments) return c.json({ error: "配置決めに使用された規格があるエリアは削除できません" }, 409);
+
+		const deleted = await db
+			.delete(areas)
+			.where(eq(areas.id, id))
+			.returning({ id: areas.id });
+
+		if (!deleted[0]) return c.json({ error: "Not found" }, 404);
+
+		return c.json({ ok: true });
 	});

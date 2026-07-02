@@ -55,6 +55,11 @@ export async function createArea(
 	return handleResponse(res);
 }
 
+export async function deleteArea(id: string): Promise<void> {
+	const res = await fetch(`${API_BASE}/areas/${id}`, { method: "DELETE" });
+	await handleResponse(res);
+}
+
 export type SaveDraftParams = {
 	areaId: string;
 	versionId: string;

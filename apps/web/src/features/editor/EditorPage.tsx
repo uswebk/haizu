@@ -1,9 +1,9 @@
-import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {useNavigate} from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import type * as React from "react";
-import {useRef, useState} from "react";
-import {Button} from "#/components/ui/Button";
-import {API_BASE} from "#/lib/api";
+import { useRef, useState } from "react";
+import { Button } from "#/components/ui/Button";
+import { API_BASE } from "#/lib/api";
 import {
 	areaKeys,
 	deleteFloorPlan,
@@ -15,12 +15,12 @@ import {
 	unpublishVersion,
 	uploadFloorPlan,
 } from "#/lib/api/areas";
-import {EditorSidebar} from "./EditorSidebar";
-import {FloorPlanCanvas} from "./FloorPlanCanvas";
-import {SaveDraftDialog} from "./SaveDraftDialog";
-import type {VersionState} from "./types";
-import {useSpotEditor} from "./useSpotEditor";
-import {VersionSelector} from "./VersionSelector";
+import { EditorSidebar } from "./EditorSidebar";
+import { FloorPlanCanvas } from "./FloorPlanCanvas";
+import { SaveDraftDialog } from "./SaveDraftDialog";
+import type { VersionState } from "./types";
+import { useSpotEditor } from "./useSpotEditor";
+import { VersionSelector } from "./VersionSelector";
 
 const BASE_WIDTH = 760;
 const ZOOM_MIN = 0.5;
@@ -90,7 +90,7 @@ export function EditorPage({ areaId }: Props) {
 		return await duplicateVersion({
 			areaId: areaData.id,
 			versionId: pendingDuplicate.sourceVersionId,
-			spots: editor.spots.map(({label, x, y, size}) => ({
+			spots: editor.spots.map(({ label, x, y, size }) => ({
 				label,
 				x,
 				y,
