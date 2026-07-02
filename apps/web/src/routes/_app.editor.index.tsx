@@ -4,13 +4,7 @@ import { useRef, useState } from "react";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
 import { useDismiss } from "#/hooks/useDismiss";
-import {
-	type AreaListItem,
-	areaKeys,
-	createArea,
-	deleteArea,
-	fetchAreas,
-} from "#/lib/api/areas";
+import { areaKeys, createArea, fetchAreas } from "#/lib/api/areas";
 
 export const Route = createFileRoute("/_app/editor/")({
 	component: EditorList,
@@ -22,8 +16,6 @@ function EditorList() {
 	const [newAreaName, setNewAreaName] = useState("");
 	const addDialogRef = useRef<HTMLDivElement>(null);
 	useDismiss(addOpen, () => setAddOpen(false), addDialogRef);
-
-	const [deleteTarget, setDeleteTarget] = useState<AreaListItem | null>(null);
 
 	const { data: areas = [] } = useQuery({
 		queryKey: areaKeys.all,
@@ -43,14 +35,6 @@ function EditorList() {
 		if (!newAreaName.trim()) return;
 		addMutation.mutate(newAreaName.trim());
 	};
-
-	const deleteMutation = useMutation({
-		mutationFn: deleteArea,
-		onSuccess: () => {
-			void queryClient.invalidateQueries({ queryKey: areaKeys.all });
-			setDeleteTarget(null);
-		},
-	});
 
 	return (
 		<div className="p-7 overflow-auto h-full">
@@ -72,15 +56,13 @@ function EditorList() {
 					}}
 				>
 					{areas.map((area) => (
-						<div
+						<Link
 							key={area.id}
-							className="bg-surface border border-border rounded-lg shadow-card overflow-hidden transition-[box-shadow,transform] duration-150 hover:shadow-[0_1px_2px_rgba(16,42,67,.06),0_10px_26px_rgba(16,42,67,.09)] hover:-translate-y-px"
+							to="/editor/$areaId"
+							params={{ areaId: area.id }}
+							className="block text-ink"
 						>
-							<Link
-								to="/editor/$areaId"
-								params={{ areaId: area.id }}
-								className="block text-ink p-4.5"
-							>
+							<div className="bg-surface border border-border rounded-lg p-4.5 shadow-card cursor-pointer transition-[box-shadow,transform] duration-150 hover:shadow-[0_1px_2px_rgba(16,42,67,.06),0_10px_26px_rgba(16,42,67,.09)] hover:-translate-y-px">
 								<div className="flex items-center justify-between gap-2.5">
 									<div className="text-base font-bold min-w-0 truncate">
 										{area.name}
@@ -113,17 +95,8 @@ function EditorList() {
 										) : null}
 									</div>
 								</div>
-							</Link>
-							<div className="border-t border-hairline px-4.5 py-2 flex justify-end">
-								<button
-									type="button"
-									onClick={() => setDeleteTarget(area)}
-									className="text-[12px] font-semibold text-faint hover:text-danger cursor-pointer bg-transparent border-none px-2 py-1 rounded-sm hover:bg-hairline"
-								>
-									削除
-								</button>
 							</div>
-						</div>
+						</Link>
 					))}
 				</div>
 			</div>
@@ -176,33 +149,6 @@ function EditorList() {
 									{addMutation.isPending ? "追加中…" : "追加する"}
 								</Button>
 							</div>
-						</div>
-					</div>
-				</div>
-			)}
-
-			{deleteTarget && (
-				<div className="fixed inset-0 bg-[rgba(16,28,44,.42)] flex items-center justify-center p-6 z-60">
-					<div className="w-105 max-w-full bg-surface rounded-section shadow-[0_24px_60px_rgba(16,42,67,.3)] p-5.5">
-						<div className="text-base font-bold mb-2">エリアを削除</div>
-						<div className="text-[13.5px] text-muted">
-							「{deleteTarget.name}
-							」を削除します。図面・配置スポットもすべて削除され、元に戻せません。
-						</div>
-						<div className="flex justify-end gap-2.5 mt-6">
-							<Button
-								variant="secondary"
-								onClick={() => setDeleteTarget(null)}
-								disabled={deleteMutation.isPending}
-							>
-								キャンセル
-							</Button>
-							<Button
-								onClick={() => deleteMutation.mutate(deleteTarget.id)}
-								disabled={deleteMutation.isPending}
-							>
-								{deleteMutation.isPending ? "削除中…" : "削除する"}
-							</Button>
 						</div>
 					</div>
 				</div>
