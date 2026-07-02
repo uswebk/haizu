@@ -19,7 +19,7 @@ import {
 import { EditorSidebar } from "./EditorSidebar";
 import { FloorPlanCanvas } from "./FloorPlanCanvas";
 import { SaveDraftDialog } from "./SaveDraftDialog";
-import type { VersionState } from "./types";
+import type { PendingFloorPlan, VersionState } from "./types";
 import { useSpotEditor } from "./useSpotEditor";
 import { VersionSelector } from "./VersionSelector";
 
@@ -50,6 +50,10 @@ export function EditorPage({ areaId }: Props) {
 	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 	const [deleteAreaDialogOpen, setDeleteAreaDialogOpen] = useState(false);
 
+	const [pendingImage, setPendingImage] = useState<PendingFloorPlan | null>(
+		null,
+	);
+
 	const resolvedName = areaName ?? areaData?.name ?? "";
 	const resolvedVersion =
 		currentVersion ??
@@ -68,9 +72,33 @@ export function EditorPage({ areaId }: Props) {
 		enabled: !!resolvedVersion && !isNewDraft,
 	});
 
-	const aspectRatio = areaData?.planAspectRatio ?? 4 / 3;
+	const savedFloorPlan = {
+		hasFloorPlan: areaData?.hasFloorPlan ?? false,
+		floorPlanName: areaData?.floorPlanName ?? null,
+		imageUrl: areaData?.planImageUrl
+			? `${API_BASE}${areaData.planImageUrl}`
+			: null,
+		aspectRatio: areaData?.planAspectRatio ?? 4 / 3,
+	};
+	const displayedFloorPlan =
+		pendingImage?.action === "delete"
+			? {
+					...savedFloorPlan,
+					hasFloorPlan: false,
+					floorPlanName: null,
+					imageUrl: null,
+				}
+			: pendingImage?.action === "upload"
+				? {
+						hasFloorPlan: true,
+						floorPlanName: pendingImage.file.name,
+						imageUrl: pendingImage.previewUrl,
+						aspectRatio: pendingImage.aspectRatio,
+					}
+				: savedFloorPlan;
+
 	const canvasWidth = Math.round(BASE_WIDTH * zoom);
-	const canvasHeight = Math.round(canvasWidth / aspectRatio);
+	const canvasHeight = Math.round(canvasWidth / displayedFloorPlan.aspectRatio);
 
 	const changeZoom = (delta: number) =>
 		setZoom((z) =>
@@ -86,6 +114,22 @@ export function EditorPage({ areaId }: Props) {
 		zoom,
 		isNewDraft ? undefined : areaData?.planImageScale,
 	);
+
+	const persistPendingImage = async (versionId: string) => {
+		if (!pendingImage) return;
+		if (pendingImage.action === "delete") {
+			await deleteFloorPlan({ areaId, versionId });
+		} else {
+			await uploadFloorPlan({ areaId, versionId, file: pendingImage.file });
+		}
+	};
+
+	const clearPendingImage = () => {
+		if (pendingImage?.action === "upload") {
+			URL.revokeObjectURL(pendingImage.previewUrl);
+		}
+		setPendingImage(null);
+	};
 
 	const materializeDuplicate = async () => {
 		if (!pendingDuplicate || !areaData) throw new Error("no pending duplicate");
@@ -106,7 +150,9 @@ export function EditorPage({ areaId }: Props) {
 		mutationFn: async () => {
 			if (!resolvedVersion) return;
 			if (isNewDraft) {
-				return materializeDuplicate();
+				const created = await materializeDuplicate();
+				await persistPendingImage(created.id);
+				return created;
 			}
 			await saveAreaDraft({
 				areaId,
@@ -114,10 +160,12 @@ export function EditorPage({ areaId }: Props) {
 				spots: editor.spots,
 				imageScale: editor.imageScale,
 			});
+			await persistPendingImage(resolvedVersion.id);
 			return null;
 		},
 		onSuccess: (created) => {
 			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
+			clearPendingImage();
 			if (created) {
 				setPendingDuplicate(null);
 				setCurrentVersion({
@@ -144,6 +192,7 @@ export function EditorPage({ areaId }: Props) {
 			if (!resolvedVersion || !areaData) throw new Error("no version");
 			if (isNewDraft) {
 				const created = await materializeDuplicate();
+				await persistPendingImage(created.id);
 				await publishVersion({ areaId: areaData.id, versionId: created.id });
 				return created.id;
 			}
@@ -153,6 +202,7 @@ export function EditorPage({ areaId }: Props) {
 				spots: editor.spots,
 				imageScale: editor.imageScale,
 			});
+			await persistPendingImage(resolvedVersion.id);
 			await publishVersion({
 				areaId: areaData.id,
 				versionId: resolvedVersion.id,
@@ -164,6 +214,7 @@ export function EditorPage({ areaId }: Props) {
 			void queryClient.invalidateQueries({
 				queryKey: areaKeys.versionSpots(areaId, versionId),
 			});
+			clearPendingImage();
 			if (isNewDraft) {
 				setPendingDuplicate(null);
 				setCurrentVersion(null);
@@ -197,27 +248,36 @@ export function EditorPage({ areaId }: Props) {
 	};
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const uploadMutation = useMutation({
-		mutationFn: uploadFloorPlan,
-		onSuccess: () => {
-			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
-		},
-	});
 
 	const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		e.target.value = "";
-		if (!file || !resolvedVersion || isNewDraft) return;
-		uploadMutation.mutate({ areaId, versionId: resolvedVersion.id, file });
+		if (!file || !resolvedVersion) return;
+		if (pendingImage?.action === "upload") {
+			URL.revokeObjectURL(pendingImage.previewUrl);
+		}
+		const previewUrl = URL.createObjectURL(file);
+		const img = new Image();
+		img.onload = () => {
+			setPendingImage({
+				action: "upload",
+				file,
+				previewUrl,
+				aspectRatio: img.naturalWidth / img.naturalHeight,
+			});
+		};
+		img.src = previewUrl;
+		editor.setImageScale(1);
 	};
 
-	const deleteFloorPlanMutation = useMutation({
-		mutationFn: deleteFloorPlan,
-		onSuccess: () => {
-			editor.resetImageScale();
-			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
-		},
-	});
+	const handleDeleteImageClick = () => {
+		if (!resolvedVersion || !displayedFloorPlan.hasFloorPlan) return;
+		if (pendingImage?.action === "upload") {
+			URL.revokeObjectURL(pendingImage.previewUrl);
+		}
+		setPendingImage({ action: "delete" });
+		editor.resetImageScale();
+	};
 
 	const deleteAreaMutation = useMutation({
 		mutationFn: deleteArea,
@@ -266,9 +326,13 @@ export function EditorPage({ areaId }: Props) {
 								if (v.id !== pendingDuplicate?.draft.id) {
 									setPendingDuplicate(null);
 								}
+								clearPendingImage();
 								setCurrentVersion(v);
 							}}
-							onDuplicate={handleDuplicate}
+							onDuplicate={() => {
+								clearPendingImage();
+								handleDuplicate();
+							}}
 						/>
 						{resolvedVersion.status === "draft" ? (
 							<>
@@ -321,13 +385,9 @@ export function EditorPage({ areaId }: Props) {
 
 				<div className="flex-1 min-h-0 flex">
 					<FloorPlanCanvas
-						hasFloorPlan={areaData.hasFloorPlan}
-						floorPlanName={areaData.floorPlanName}
-						floorPlanImageUrl={
-							areaData.planImageUrl
-								? `${API_BASE}${areaData.planImageUrl}`
-								: null
-						}
+						hasFloorPlan={displayedFloorPlan.hasFloorPlan}
+						floorPlanName={displayedFloorPlan.floorPlanName}
+						floorPlanImageUrl={displayedFloorPlan.imageUrl}
 						imageScale={editor.imageScale}
 						canvasWidth={canvasWidth}
 						canvasHeight={canvasHeight}
@@ -349,22 +409,16 @@ export function EditorPage({ areaId }: Props) {
 					<EditorSidebar
 						selectedSpot={editor.selectedSpot}
 						areaName={resolvedName}
-						hasFloorPlan={areaData.hasFloorPlan}
-						floorPlanName={areaData.floorPlanName}
+						hasFloorPlan={displayedFloorPlan.hasFloorPlan}
+						floorPlanName={displayedFloorPlan.floorPlanName}
 						imageScale={editor.imageScale}
 						spotCount={editor.spots.length}
 						onAreaNameChange={setAreaName}
 						onUpdateSpotLabel={editor.updateSpotLabel}
 						onUpdateSpotSize={editor.updateSpotSize}
 						onDeleteSpot={editor.deleteSpot}
-						onUploadClick={() => !isNewDraft && fileInputRef.current?.click()}
-						onDeleteImageClick={() =>
-							!isNewDraft &&
-							deleteFloorPlanMutation.mutate({
-								areaId,
-								versionId: resolvedVersion.id,
-							})
-						}
+						onUploadClick={() => fileInputRef.current?.click()}
+						onDeleteImageClick={handleDeleteImageClick}
 						onImageScaleChange={editor.setImageScale}
 						onDeleteAreaClick={() => setDeleteAreaDialogOpen(true)}
 					/>

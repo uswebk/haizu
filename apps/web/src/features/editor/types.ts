@@ -14,6 +14,11 @@ export type VersionState = {
 	isCurrent: boolean;
 };
 
+// 図面の保存前の変更内容。保存/公開されるまではサーバーに反映されない。
+export type PendingFloorPlan =
+	| { action: "upload"; file: File; previewUrl: string; aspectRatio: number }
+	| { action: "delete" };
+
 export type AreaData = {
 	id: string;
 	name: string;
