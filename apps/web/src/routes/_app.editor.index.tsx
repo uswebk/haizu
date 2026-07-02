@@ -73,9 +73,6 @@ function EditorList() {
 										<Badge tone="warning">図面なし</Badge>
 									)}
 								</div>
-								<div className="text-[12.5px] text-faint mt-1.25 truncate">
-									{area.floorPlanName ?? "—"}
-								</div>
 								<div className="h-px bg-hairline my-3.5" />
 								<div className="flex items-center justify-between">
 									<div className="text-[13px] text-muted">
