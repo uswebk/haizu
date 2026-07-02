@@ -6,6 +6,7 @@ import { Button } from "#/components/ui/Button";
 import { API_BASE } from "#/lib/api";
 import {
 	areaKeys,
+	deleteArea,
 	deleteFloorPlan,
 	duplicateVersion,
 	fetchArea,
@@ -47,6 +48,7 @@ export function EditorPage({ areaId }: Props) {
 	} | null>(null);
 	const [zoom, setZoom] = useState(1);
 	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+	const [deleteAreaDialogOpen, setDeleteAreaDialogOpen] = useState(false);
 
 	const resolvedName = areaName ?? areaData?.name ?? "";
 	const resolvedVersion =
@@ -217,6 +219,14 @@ export function EditorPage({ areaId }: Props) {
 		},
 	});
 
+	const deleteAreaMutation = useMutation({
+		mutationFn: deleteArea,
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: areaKeys.all });
+			navigate({ to: "/editor" });
+		},
+	});
+
 	if (!areaData || !resolvedVersion) {
 		return (
 			<div className="p-7 h-full flex items-center justify-center text-faint text-sm">
@@ -356,6 +366,7 @@ export function EditorPage({ areaId }: Props) {
 							})
 						}
 						onImageScaleChange={editor.setImageScale}
+						onDeleteAreaClick={() => setDeleteAreaDialogOpen(true)}
 					/>
 				</div>
 			</div>
@@ -375,6 +386,33 @@ export function EditorPage({ areaId }: Props) {
 				onConfirm={() => saveMutation.mutate()}
 				onCancel={() => setSaveDialogOpen(false)}
 			/>
+
+			{deleteAreaDialogOpen && (
+				<div className="fixed inset-0 bg-[rgba(16,28,44,.42)] flex items-center justify-center p-6 z-60">
+					<div className="w-105 max-w-full bg-surface rounded-section shadow-[0_24px_60px_rgba(16,42,67,.3)] p-5.5">
+						<div className="text-base font-bold mb-2">エリアを削除</div>
+						<div className="text-[13.5px] text-muted">
+							「{resolvedName}
+							」を削除します。図面・配置スポットもすべて削除され、元に戻せません。
+						</div>
+						<div className="flex justify-end gap-2.5 mt-6">
+							<Button
+								variant="secondary"
+								onClick={() => setDeleteAreaDialogOpen(false)}
+								disabled={deleteAreaMutation.isPending}
+							>
+								キャンセル
+							</Button>
+							<Button
+								onClick={() => deleteAreaMutation.mutate(areaData.id)}
+								disabled={deleteAreaMutation.isPending}
+							>
+								{deleteAreaMutation.isPending ? "削除中…" : "削除する"}
+							</Button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

@@ -15,6 +15,7 @@ type Props = {
 	onUploadClick: () => void;
 	onDeleteImageClick: () => void;
 	onImageScaleChange: (scale: number) => void;
+	onDeleteAreaClick: () => void;
 };
 
 export function EditorSidebar({
@@ -31,6 +32,7 @@ export function EditorSidebar({
 	onUploadClick,
 	onDeleteImageClick,
 	onImageScaleChange,
+	onDeleteAreaClick,
 }: Props) {
 	return (
 		<div className="w-60 shrink-0 border-l border-border p-4 overflow-auto">
@@ -172,6 +174,7 @@ export function EditorSidebar({
 					</div>
 					<button
 						type="button"
+						onClick={onDeleteAreaClick}
 						className="w-full mt-5 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft"
 					>
 						エリアを削除
