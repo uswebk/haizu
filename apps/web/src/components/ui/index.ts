@@ -1,3 +1,4 @@
+export { AddCard } from "./AddCard";
 export { Avatar } from "./Avatar";
 export { AvatarStack, type Person } from "./AvatarStack";
 export { Badge, type BadgeTone } from "./Badge";

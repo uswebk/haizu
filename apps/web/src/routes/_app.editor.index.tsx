@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { AddCard } from "#/components/ui/AddCard";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
 import { useDismiss } from "#/hooks/useDismiss";
@@ -52,7 +53,7 @@ function EditorList() {
 				<div
 					className="grid gap-4"
 					style={{
-						gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+						gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
 					}}
 				>
 					{areas.map((area) => (
@@ -62,7 +63,7 @@ function EditorList() {
 							params={{ areaId: area.id }}
 							className="block text-ink"
 						>
-							<div className="bg-surface border border-border rounded-lg p-4.5 shadow-card cursor-pointer transition-[box-shadow,transform] duration-150 hover:shadow-[0_1px_2px_rgba(16,42,67,.06),0_10px_26px_rgba(16,42,67,.09)] hover:-translate-y-px">
+							<div className="min-h-40 bg-surface border border-border rounded-lg p-6 shadow-card cursor-pointer transition-[box-shadow,transform] duration-150 hover:shadow-[0_1px_2px_rgba(16,42,67,.06),0_10px_26px_rgba(16,42,67,.09)] hover:-translate-y-px">
 								<div className="flex items-center justify-between gap-2.5">
 									<div className="text-base font-bold min-w-0 truncate">
 										{area.name}
@@ -95,6 +96,7 @@ function EditorList() {
 							</div>
 						</Link>
 					))}
+					<AddCard label="エリアを追加" onClick={() => setAddOpen(true)} />
 				</div>
 			</div>
 
