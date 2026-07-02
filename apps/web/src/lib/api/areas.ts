@@ -116,6 +116,26 @@ export async function publishVersion(params: {
 	await handleResponse(res);
 }
 
+export async function duplicateVersion(params: {
+	areaId: string;
+	versionId: string;
+	spots: { label: string; x: number; y: number; size: number }[];
+	imageScale?: number;
+}): Promise<{ id: string; label: string }> {
+	const res = await fetch(
+		`${API_BASE}/areas/${params.areaId}/versions/${params.versionId}/duplicate`,
+		{
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				spots: params.spots,
+				imageScale: params.imageScale,
+			}),
+		},
+	);
+	return handleResponse(res);
+}
+
 export async function unpublishVersion(params: {
 	areaId: string;
 	versionId: string;

@@ -7,9 +7,15 @@ type Props = {
 	versions: VersionState[];
 	currentVersion: VersionState;
 	onSelect: (version: VersionState) => void;
+	onDuplicate: () => void;
 };
 
-export function VersionSelector({ versions, currentVersion, onSelect }: Props) {
+export function VersionSelector({
+	versions,
+	currentVersion,
+	onSelect,
+	onDuplicate,
+}: Props) {
 	const [open, setOpen] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 	useDismiss(open, () => setOpen(false), containerRef);
@@ -55,6 +61,10 @@ export function VersionSelector({ versions, currentVersion, onSelect }: Props) {
 					<div className="h-px bg-hairline mx-1 my-1.25" />
 					<button
 						type="button"
+						onClick={() => {
+							onDuplicate();
+							setOpen(false);
+						}}
 						className="w-full text-left px-2.5 py-2 rounded-sm text-[12.5px] font-bold text-primary hover:bg-hairline cursor-pointer border-none bg-transparent"
 					>
 						＋ 現在を複製して新バージョン

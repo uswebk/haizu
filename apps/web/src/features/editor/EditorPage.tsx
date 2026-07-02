@@ -1,12 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {useNavigate} from "@tanstack/react-router";
 import type * as React from "react";
-import { useRef, useState } from "react";
-import { Button } from "#/components/ui/Button";
-import { API_BASE } from "#/lib/api";
+import {useRef, useState} from "react";
+import {Button} from "#/components/ui/Button";
+import {API_BASE} from "#/lib/api";
 import {
 	areaKeys,
 	deleteFloorPlan,
+	duplicateVersion,
 	fetchArea,
 	fetchVersionSpots,
 	publishVersion,
@@ -14,12 +15,12 @@ import {
 	unpublishVersion,
 	uploadFloorPlan,
 } from "#/lib/api/areas";
-import { EditorSidebar } from "./EditorSidebar";
-import { FloorPlanCanvas } from "./FloorPlanCanvas";
-import { SaveDraftDialog } from "./SaveDraftDialog";
-import type { VersionState } from "./types";
-import { useSpotEditor } from "./useSpotEditor";
-import { VersionSelector } from "./VersionSelector";
+import {EditorSidebar} from "./EditorSidebar";
+import {FloorPlanCanvas} from "./FloorPlanCanvas";
+import {SaveDraftDialog} from "./SaveDraftDialog";
+import type {VersionState} from "./types";
+import {useSpotEditor} from "./useSpotEditor";
+import {VersionSelector} from "./VersionSelector";
 
 const BASE_WIDTH = 760;
 const ZOOM_MIN = 0.5;
@@ -40,6 +41,10 @@ export function EditorPage({ areaId }: Props) {
 	const [currentVersion, setCurrentVersion] = useState<VersionState | null>(
 		null,
 	);
+	const [pendingDuplicate, setPendingDuplicate] = useState<{
+		sourceVersionId: string;
+		draft: VersionState;
+	} | null>(null);
 	const [zoom, setZoom] = useState(1);
 	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
@@ -49,11 +54,16 @@ export function EditorPage({ areaId }: Props) {
 		areaData?.versions.find((v) => v.isActive) ??
 		areaData?.versions[0] ??
 		null;
+	const isNewDraft = resolvedVersion?.id === pendingDuplicate?.draft.id;
+	const displayedVersions =
+		pendingDuplicate && areaData
+			? [...areaData.versions, pendingDuplicate.draft]
+			: (areaData?.versions ?? []);
 
 	const { data: spotsData } = useQuery({
 		queryKey: areaKeys.versionSpots(areaId, resolvedVersion?.id ?? ""),
 		queryFn: () => fetchVersionSpots(areaId, resolvedVersion?.id ?? ""),
-		enabled: !!resolvedVersion,
+		enabled: !!resolvedVersion && !isNewDraft,
 	});
 
 	const aspectRatio = areaData?.planAspectRatio ?? 4 / 3;
@@ -72,34 +82,90 @@ export function EditorPage({ areaId }: Props) {
 		spotsData,
 		resolvedVersion?.id,
 		zoom,
-		areaData?.planImageScale,
+		isNewDraft ? undefined : areaData?.planImageScale,
 	);
 
+	const materializeDuplicate = async () => {
+		if (!pendingDuplicate || !areaData) throw new Error("no pending duplicate");
+		return await duplicateVersion({
+			areaId: areaData.id,
+			versionId: pendingDuplicate.sourceVersionId,
+			spots: editor.spots.map(({label, x, y, size}) => ({
+				label,
+				x,
+				y,
+				size,
+			})),
+			imageScale: editor.imageScale,
+		});
+	};
+
 	const saveMutation = useMutation({
-		mutationFn: saveAreaDraft,
-		onSuccess: () => {
-			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
-			void queryClient.invalidateQueries({
-				queryKey: areaKeys.versionSpots(areaId, resolvedVersion?.id ?? ""),
+		mutationFn: async () => {
+			if (!resolvedVersion) return;
+			if (isNewDraft) {
+				return materializeDuplicate();
+			}
+			await saveAreaDraft({
+				areaId,
+				versionId: resolvedVersion.id,
+				spots: editor.spots,
+				imageScale: editor.imageScale,
 			});
+			return null;
+		},
+		onSuccess: (created) => {
+			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
+			if (created) {
+				setPendingDuplicate(null);
+				setCurrentVersion({
+					id: created.id,
+					label: created.label,
+					status: "draft",
+					isActive: false,
+					isCurrent: false,
+				});
+				void queryClient.invalidateQueries({
+					queryKey: areaKeys.versionSpots(areaId, created.id),
+				});
+			} else {
+				void queryClient.invalidateQueries({
+					queryKey: areaKeys.versionSpots(areaId, resolvedVersion?.id ?? ""),
+				});
+			}
 			setSaveDialogOpen(false);
 		},
 	});
 
 	const publishMutation = useMutation({
-		mutationFn: async (params: {
-			areaId: string;
-			versionId: string;
-			imageScale: number;
-		}) => {
-			await saveAreaDraft({ ...params, spots: editor.spots });
-			await publishVersion(params);
+		mutationFn: async () => {
+			if (!resolvedVersion || !areaData) throw new Error("no version");
+			if (isNewDraft) {
+				const created = await materializeDuplicate();
+				await publishVersion({ areaId: areaData.id, versionId: created.id });
+				return created.id;
+			}
+			await saveAreaDraft({
+				areaId: areaData.id,
+				versionId: resolvedVersion.id,
+				spots: editor.spots,
+				imageScale: editor.imageScale,
+			});
+			await publishVersion({
+				areaId: areaData.id,
+				versionId: resolvedVersion.id,
+			});
+			return resolvedVersion.id;
 		},
-		onSuccess: () => {
+		onSuccess: (versionId) => {
 			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
 			void queryClient.invalidateQueries({
-				queryKey: areaKeys.versionSpots(areaId, resolvedVersion?.id ?? ""),
+				queryKey: areaKeys.versionSpots(areaId, versionId),
 			});
+			if (isNewDraft) {
+				setPendingDuplicate(null);
+				setCurrentVersion(null);
+			}
 		},
 	});
 
@@ -109,6 +175,24 @@ export function EditorPage({ areaId }: Props) {
 			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
 		},
 	});
+
+	const handleDuplicate = () => {
+		if (!resolvedVersion || !areaData) return;
+		const versionNumbers = areaData.versions
+			.map((v) => Number.parseInt(v.label.replace(/^v/, ""), 10))
+			.filter((n) => !Number.isNaN(n));
+		const nextVersion =
+			(versionNumbers.length ? Math.max(...versionNumbers) : 0) + 1;
+		const draft: VersionState = {
+			id: `pending-${Date.now()}`,
+			label: `v${nextVersion}`,
+			status: "draft",
+			isActive: false,
+			isCurrent: false,
+		};
+		setPendingDuplicate({ sourceVersionId: resolvedVersion.id, draft });
+		setCurrentVersion(draft);
+	};
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const uploadMutation = useMutation({
@@ -121,7 +205,7 @@ export function EditorPage({ areaId }: Props) {
 	const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		e.target.value = "";
-		if (!file || !resolvedVersion) return;
+		if (!file || !resolvedVersion || isNewDraft) return;
 		uploadMutation.mutate({ areaId, versionId: resolvedVersion.id, file });
 	};
 
@@ -166,9 +250,15 @@ export function EditorPage({ areaId }: Props) {
 					</div>
 					<div className="flex items-center gap-2.5 shrink-0">
 						<VersionSelector
-							versions={areaData.versions}
+							versions={displayedVersions}
 							currentVersion={resolvedVersion}
-							onSelect={setCurrentVersion}
+							onSelect={(v) => {
+								if (v.id !== pendingDuplicate?.draft.id) {
+									setPendingDuplicate(null);
+								}
+								setCurrentVersion(v);
+							}}
+							onDuplicate={handleDuplicate}
 						/>
 						{resolvedVersion.status === "draft" ? (
 							<>
@@ -181,13 +271,7 @@ export function EditorPage({ areaId }: Props) {
 								</Button>
 								<Button
 									size="sm"
-									onClick={() =>
-										publishMutation.mutate({
-											areaId: areaData.id,
-											versionId: resolvedVersion.id,
-											imageScale: editor.imageScale,
-										})
-									}
+									onClick={() => publishMutation.mutate()}
 									disabled={publishMutation.isPending}
 								>
 									{publishMutation.isPending ? "公開中…" : "この規格を公開"}
@@ -263,8 +347,9 @@ export function EditorPage({ areaId }: Props) {
 						onUpdateSpotLabel={editor.updateSpotLabel}
 						onUpdateSpotSize={editor.updateSpotSize}
 						onDeleteSpot={editor.deleteSpot}
-						onUploadClick={() => fileInputRef.current?.click()}
+						onUploadClick={() => !isNewDraft && fileInputRef.current?.click()}
 						onDeleteImageClick={() =>
+							!isNewDraft &&
 							deleteFloorPlanMutation.mutate({
 								areaId,
 								versionId: resolvedVersion.id,
@@ -287,14 +372,7 @@ export function EditorPage({ areaId }: Props) {
 				open={saveDialogOpen}
 				isPending={saveMutation.isPending}
 				status={resolvedVersion.status}
-				onConfirm={() =>
-					saveMutation.mutate({
-						areaId: areaData.id,
-						versionId: resolvedVersion.id,
-						spots: editor.spots,
-						imageScale: editor.imageScale,
-					})
-				}
+				onConfirm={() => saveMutation.mutate()}
 				onCancel={() => setSaveDialogOpen(false)}
 			/>
 		</div>

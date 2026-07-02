@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { SpotState } from "./types";
 
 const DEFAULT_IMAGE_SCALE = 1;
@@ -14,17 +14,31 @@ export function useSpotEditor(
 		initialImageScale ?? DEFAULT_IMAGE_SCALE,
 	);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: versionId はバージョン切り替え時のリセットトリガーとして意図的に追加
-	useEffect(() => {
+	// バージョン切り替え時、または初期データの取得完了時に spots / imageScale をリセットする。
+	// useEffect ではなく「レンダー中にstateを調整する」パターンを使うことで、
+	// versionId をリセットのトリガーとして使いつつ exhaustive-deps の抑制を避けている。
+	// https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+	const [prevSpotsKey, setPrevSpotsKey] = useState([versionId, initialSpots]);
+	if (versionId !== prevSpotsKey[0] || initialSpots !== prevSpotsKey[1]) {
+		setPrevSpotsKey([versionId, initialSpots]);
 		if (initialSpots !== undefined) {
 			setSpots(initialSpots);
 		}
-	}, [versionId, initialSpots]);
+	}
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: versionId はバージョン切り替え時のリセットトリガーとして意図的に追加
-	useEffect(() => {
-		setImageScaleState(initialImageScale ?? DEFAULT_IMAGE_SCALE);
-	}, [versionId, initialImageScale]);
+	const [prevImageScaleKey, setPrevImageScaleKey] = useState([
+		versionId,
+		initialImageScale,
+	]);
+	if (
+		versionId !== prevImageScaleKey[0] ||
+		initialImageScale !== prevImageScaleKey[1]
+	) {
+		setPrevImageScaleKey([versionId, initialImageScale]);
+		if (initialImageScale !== undefined) {
+			setImageScaleState(initialImageScale);
+		}
+	}
 	const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null);
 
 	const selectedSpot = spots.find((s) => s.id === selectedSpotId) ?? null;

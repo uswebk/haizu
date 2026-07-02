@@ -256,6 +256,84 @@ export const areasRoute = new Hono()
 		return c.json({ ok: true });
 	})
 
+	.post(
+		"/:id/versions/:versionId/duplicate",
+		zValidator(
+			"json",
+			z.object({
+				spots: z
+					.array(
+						z.object({
+							label: z.string(),
+							x: z.number(),
+							y: z.number(),
+							size: z.number().int(),
+						}),
+					)
+					.optional(),
+				imageScale: z.number().positive().optional(),
+			}),
+		),
+		async (c) => {
+			const { id, versionId } = c.req.param();
+			const { spots: overrideSpots, imageScale } = c.req.valid("json");
+
+			const source = await db.query.layoutSpecVersions.findFirst({
+				where: eq(layoutSpecVersions.id, versionId),
+			});
+			if (!source) return c.json({ error: "Not found" }, 404);
+
+			const versions = await db
+				.select({ version: layoutSpecVersions.version })
+				.from(layoutSpecVersions)
+				.where(eq(layoutSpecVersions.areaId, id))
+				.orderBy(layoutSpecVersions.version);
+			const nextVersion = (versions[versions.length - 1]?.version ?? 0) + 1;
+
+			const inserted = await db
+				.insert(layoutSpecVersions)
+				.values({
+					areaId: id,
+					version: nextVersion,
+					status: "draft",
+					planImageUrl: source.planImageUrl,
+					planImageName: source.planImageName,
+					planAspectRatio: source.planAspectRatio,
+					planImageScale: imageScale ?? source.planImageScale,
+					planImageOffsetX: source.planImageOffsetX,
+					planImageOffsetY: source.planImageOffsetY,
+				})
+				.returning();
+			const newVersion = inserted[0];
+			if (!newVersion) return c.json({ error: "Insert failed" }, 500);
+
+			const newSpots =
+				overrideSpots ??
+				(
+					await db
+						.select()
+						.from(spots)
+						.where(eq(spots.layoutSpecVersionId, versionId))
+						.orderBy(spots.order)
+				).map((s) => ({ label: s.label, x: s.x, y: s.y, size: s.size }));
+
+			if (newSpots.length > 0) {
+				await db.insert(spots).values(
+					newSpots.map((s, i) => ({
+						layoutSpecVersionId: newVersion.id,
+						label: s.label,
+						x: s.x,
+						y: s.y,
+						size: s.size,
+						order: i,
+					})),
+				);
+			}
+
+			return c.json({ id: newVersion.id, label: `v${newVersion.version}` }, 201);
+		},
+	)
+
 	.post("/:id/versions/:versionId/unpublish", async (c) => {
 		const { versionId } = c.req.param();
 

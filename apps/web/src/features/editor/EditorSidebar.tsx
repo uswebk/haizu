@@ -36,7 +36,7 @@ export function EditorSidebar({
 		<div className="w-60 shrink-0 border-l border-border p-4 overflow-auto">
 			{selectedSpot ? (
 				<>
-					<div className="text-[10.5px] font-bold tracking-[.1em] text-faint mb-2.5">
+					<div className="text-[10.5px] font-bold tracking-widest text-faint mb-2.5">
 						配置スポットの設定
 					</div>
 					<Input
@@ -89,7 +89,7 @@ export function EditorSidebar({
 				</>
 			) : (
 				<>
-					<div className="text-[10.5px] font-bold tracking-[.1em] text-faint mb-2.5">
+					<div className="text-[10.5px] font-bold tracking-widest text-faint mb-2.5">
 						エリアの設定
 					</div>
 					<Input
@@ -98,7 +98,7 @@ export function EditorSidebar({
 						onChange={(e) => onAreaNameChange(e.target.value)}
 					/>
 					<div className="mt-4 p-2.75 border border-border rounded-[9px]">
-						<div className="text-[10.5px] font-bold tracking-[.1em] text-faint mb-2.5">
+						<div className="text-[10.5px] font-bold tracking-widest text-faint mb-2.5">
 							図面
 						</div>
 						{hasFloorPlan ? (
