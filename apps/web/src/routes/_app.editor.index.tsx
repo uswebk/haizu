@@ -63,7 +63,7 @@ function EditorList() {
 							params={{ areaId: area.id }}
 							className="block text-ink"
 						>
-							<div className="min-h-40 bg-surface border border-border rounded-lg p-6 shadow-card cursor-pointer transition-[box-shadow,transform] duration-150 hover:shadow-[0_1px_2px_rgba(16,42,67,.06),0_10px_26px_rgba(16,42,67,.09)] hover:-translate-y-px">
+							<div className="min-h-40 flex flex-col justify-between bg-surface border border-border rounded-lg p-6 shadow-card cursor-pointer transition-[box-shadow,transform] duration-150 hover:shadow-[0_1px_2px_rgba(16,42,67,.06),0_10px_26px_rgba(16,42,67,.09)] hover:-translate-y-px">
 								<div className="flex items-center justify-between gap-2.5">
 									<div className="text-base font-bold min-w-0 truncate">
 										{area.name}
@@ -74,23 +74,26 @@ function EditorList() {
 										<Badge tone="warning">図面なし</Badge>
 									)}
 								</div>
-								<div className="h-px bg-hairline my-3.5" />
-								<div className="flex items-center justify-between">
-									<div className="text-[13px] text-muted">
-										スポット{" "}
-										<b className="text-ink font-bold">{area.spotCount}</b> 箇所
-									</div>
-									<div className="flex items-center gap-1.5">
-										{area.currentVersion && (
-											<span className="text-[11.5px] font-bold text-faint">
-												{area.currentVersion}
-											</span>
-										)}
-										{area.currentStatus === "published" ? (
-											<Badge tone="success">公開中</Badge>
-										) : area.currentStatus === "draft" ? (
-											<Badge tone="draft">下書き</Badge>
-										) : null}
+								<div>
+									<div className="h-px bg-hairline mt-3.5" />
+									<div className="flex items-center justify-between mt-3.5">
+										<div className="text-[13px] text-muted">
+											スポット{" "}
+											<b className="text-ink font-bold">{area.spotCount}</b>{" "}
+											箇所
+										</div>
+										<div className="flex items-center gap-1.5">
+											{area.currentVersion && (
+												<span className="text-[11.5px] font-bold text-faint">
+													{area.currentVersion}
+												</span>
+											)}
+											{area.currentStatus === "published" ? (
+												<Badge tone="success">公開中</Badge>
+											) : area.currentStatus === "draft" ? (
+												<Badge tone="draft">下書き</Badge>
+											) : null}
+										</div>
 									</div>
 								</div>
 							</div>

@@ -1,3 +1,4 @@
+import type { LayoutSpecStatus } from "@haiz/shared";
 import type { AreaData, SpotState } from "#/features/editor/types";
 import { API_BASE } from ".";
 
@@ -7,7 +8,7 @@ export type AreaListItem = {
 	floorPlanName: string | null;
 	spotCount: number;
 	currentVersion: string | null;
-	currentStatus: "draft" | "published" | null;
+	currentStatus: LayoutSpecStatus | null;
 };
 
 async function handleResponse<T>(res: Response): Promise<T> {
