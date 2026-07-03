@@ -1,10 +1,17 @@
 ---
 name: design-implement
-description: Implement a specific screen or component in apps/web by reading its spec from a claude.ai/design (Design System) project via the DesignSync tool. Delegates the actual design fetch and code generation to a subagent so the raw design file content never enters the main conversation context. Use when the user says "このデザインを実装して" / "claude designから◯◯を実装" or references a Claude Design project/component.
+description: Implement a specific component (or a single-component screen) in apps/web by reading its spec from a claude.ai/design **Design System** project (type PROJECT_TYPE_DESIGN_SYSTEM, one file per component) via the DesignSync tool. NOT for multi-screen prototype/mockup files (.dc.html bundling many screens in one file) — use design-mock-implement for those instead. Delegates the actual design fetch and code generation to a subagent so the raw design file content never enters the main conversation context. Use when the user says "このデザインシステムのコンポーネントを実装して" / "claude designのデザインシステムから◯◯を実装" or references a Claude Design **Design System** project/component.
 user-invocable: true
 ---
 
-# design-implement — Claude Design プロジェクトから画面・コンポーネントを実装する
+# design-implement — Claude Design の Design System プロジェクトからコンポーネントを実装する
+
+**対象**: claude.ai/design の **Design System プロジェクト**（`type: PROJECT_TYPE_DESIGN_SYSTEM`）に
+登録されたコンポーネント単位のファイル（`components/**/*.jsx` など）を実装する場合に使う。
+
+**対象外**: `.dc.html` のように1ファイルに複数画面がまとまったプロトタイプ/モックプロジェクト
+（`type: PROJECT_TYPE_PROJECT`）から特定の画面だけを実装したい場合は、代わりに
+`design-mock-implement` スキルを使うこと。
 
 ## なぜサブエージェントに委譲するか
 
