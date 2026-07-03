@@ -115,7 +115,9 @@ export function useSpotEditor(
 				resizeRef.current;
 			const delta =
 				(e.clientX - startClientX + (e.clientY - startClientY)) / 2 / zoom;
-			const newSize = Math.max(24, Math.min(120, startSize + delta));
+			const newSize = Math.round(
+				Math.max(24, Math.min(120, startSize + delta)),
+			);
 			setSpots((prev) =>
 				prev.map((s) => (s.id === spotId ? { ...s, size: newSize } : s)),
 			);

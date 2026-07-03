@@ -175,13 +175,15 @@ export function EditorPage({ areaId }: Props) {
 					isActive: false,
 					isCurrent: false,
 				});
-				void queryClient.invalidateQueries({
-					queryKey: areaKeys.versionSpots(areaId, created.id),
-				});
+				queryClient.setQueryData(
+					areaKeys.versionSpots(areaId, created.id),
+					editor.spots,
+				);
 			} else {
-				void queryClient.invalidateQueries({
-					queryKey: areaKeys.versionSpots(areaId, resolvedVersion?.id ?? ""),
-				});
+				queryClient.setQueryData(
+					areaKeys.versionSpots(areaId, resolvedVersion?.id ?? ""),
+					editor.spots,
+				);
 			}
 			setSaveDialogOpen(false);
 		},
@@ -211,9 +213,12 @@ export function EditorPage({ areaId }: Props) {
 		},
 		onSuccess: (versionId) => {
 			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
-			void queryClient.invalidateQueries({
-				queryKey: areaKeys.versionSpots(areaId, versionId),
-			});
+			if (versionId) {
+				queryClient.setQueryData(
+					areaKeys.versionSpots(areaId, versionId),
+					editor.spots,
+				);
+			}
 			clearPendingImage();
 			if (isNewDraft) {
 				setPendingDuplicate(null);
