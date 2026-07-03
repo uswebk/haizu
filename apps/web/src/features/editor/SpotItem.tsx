@@ -45,13 +45,22 @@ export function SpotItem({
 				boxShadow: isSelected ? "0 0 0 3px rgba(14,165,164,.2)" : "none",
 				touchAction: "none",
 				transition: "box-shadow 0.1s",
-				padding: 0,
+				padding: "0 2px",
 				outline: "none",
 			}}
 			onPointerDown={(e) => onPointerDown(e, spot.id)}
 			onClick={(e) => e.stopPropagation()}
 		>
-			{spot.label}
+			<span
+				style={{
+					maxWidth: "100%",
+					overflow: "hidden",
+					whiteSpace: "nowrap",
+					textOverflow: "ellipsis",
+				}}
+			>
+				{spot.label}
+			</span>
 			{isSelected && (
 				<div
 					style={{
