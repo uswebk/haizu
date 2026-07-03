@@ -284,6 +284,7 @@ function Catalog() {
 					<Table
 						columns={TABLE_COLS}
 						rows={TABLE_ROWS}
+						rowKey={(row) => row.name}
 						style={{ width: 520 }}
 					/>
 				</Section>

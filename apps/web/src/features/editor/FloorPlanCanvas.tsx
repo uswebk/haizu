@@ -96,11 +96,11 @@ export function FloorPlanCanvas({
 						padding: "16px",
 					}}
 				>
-					{/* biome-ignore lint/a11y/noStaticElementInteractions: canvas interaction area */}
-					{/* biome-ignore lint/a11y/useKeyWithClickEvents: canvas interaction area */}
 					<div
 						ref={containerRef}
-						onClick={onCanvasClick}
+						onPointerDown={(e) => {
+							if (e.target === e.currentTarget) onCanvasClick();
+						}}
 						onPointerMove={onPointerMove}
 						onPointerUp={onPointerUp}
 						className="relative shrink-0 rounded-md border border-border overflow-hidden select-none shadow-card"

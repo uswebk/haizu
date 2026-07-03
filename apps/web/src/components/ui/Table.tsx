@@ -11,11 +11,13 @@ export interface TableColumn<Row> {
 interface TableProps<Row> extends HTMLAttributes<HTMLDivElement> {
 	columns?: TableColumn<Row>[];
 	rows?: Row[];
+	rowKey?: (row: Row, index: number) => string | number;
 }
 
 export function Table<Row>({
 	columns = [],
 	rows = [],
+	rowKey,
 	className,
 	style,
 	...rest
@@ -37,8 +39,7 @@ export function Table<Row>({
 			</div>
 			{rows.map((row, ri) => (
 				<div
-					// biome-ignore lint/suspicious/noArrayIndexKey: rows are positional sample data
-					key={ri}
+					key={rowKey ? rowKey(row, ri) : ri}
 					className="grid items-center px-4.5 py-3.25 border-t border-hairline text-[13.5px] gap-3"
 					style={{ gridTemplateColumns: template }}
 				>
