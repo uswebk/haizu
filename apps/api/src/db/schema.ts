@@ -1,5 +1,7 @@
+import { sql } from "drizzle-orm";
 import {
 	boolean,
+	date,
 	integer,
 	pgTable,
 	real,
@@ -126,14 +128,15 @@ export const shifts = pgTable(
 		startTime: text("start_time").notNull(),
 		endTime: text("end_time").notNull(),
 		order: integer("order").notNull().default(0),
+		deletedAt: timestamp("deleted_at", { withTimezone: true }),
 	},
-	// 開始・終了が完全に同じシフトは同一勤務体制内に重複登録できない
 	(t) => [
-		uniqueIndex("shifts_work_pattern_id_start_end_unique").on(
-			t.workPatternId,
-			t.startTime,
-			t.endTime,
-		),
+		uniqueIndex("shifts_work_pattern_id_start_end_unique")
+			.on(t.workPatternId, t.startTime, t.endTime)
+			.where(sql`${t.deletedAt} IS NULL`),
+		uniqueIndex("shifts_work_pattern_id_name_unique")
+			.on(t.workPatternId, t.name)
+			.where(sql`${t.deletedAt} IS NULL`),
 	],
 );
 
@@ -148,3 +151,61 @@ export const spots = pgTable("spots", {
 	size: integer("size").notNull().default(56),
 	order: integer("order").notNull().default(0),
 });
+
+export const assignments = pgTable(
+	"assignments",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		areaId: uuid("area_id")
+			.notNull()
+			.references(() => areas.id, { onDelete: "cascade" }),
+		layoutSpecVersionId: uuid("layout_spec_version_id")
+			.notNull()
+			.references(() => layoutSpecVersions.id),
+		date: date("date").notNull(),
+		// null = シフトなし（終日）。シフトは append-only（物理削除しない）なので参照は壊れず、
+		// 参照先のシフト行（soft-delete 含む）が当時のシフト定義＝履歴を保全する
+		shiftId: uuid("shift_id").references(() => shifts.id, {
+			onDelete: "no action",
+		}),
+		status: text("status", { enum: ["draft", "confirmed"] })
+			.notNull()
+			.default("draft"),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(t) => [
+		uniqueIndex("assignments_area_date_shift_unique")
+			.on(t.areaId, t.date, t.shiftId)
+			.where(sql`${t.shiftId} IS NOT NULL`),
+		uniqueIndex("assignments_area_date_single_unique")
+			.on(t.areaId, t.date)
+			.where(sql`${t.shiftId} IS NULL`),
+	],
+);
+
+export const spotAssignments = pgTable(
+	"spot_assignments",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		assignmentId: uuid("assignment_id")
+			.notNull()
+			.references(() => assignments.id, { onDelete: "cascade" }),
+		spotId: uuid("spot_id")
+			.notNull()
+			.references(() => spots.id, { onDelete: "cascade" }),
+		employeeId: uuid("employee_id")
+			.notNull()
+			.references(() => employees.id, { onDelete: "cascade" }),
+	},
+	(t) => [
+		uniqueIndex("spot_assignments_assignment_id_spot_id_unique").on(
+			t.assignmentId,
+			t.spotId,
+		),
+	],
+);

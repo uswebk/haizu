@@ -1,5 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+
+export type AssignmentSearch = {
+	date?: string;
+	shiftId?: string;
+};
 
 export const Route = createFileRoute("/_app/assignment")({
-	component: () => <div className="p-7 text-muted text-sm">準備中...</div>,
+	validateSearch: (search): AssignmentSearch => ({
+		date: typeof search.date === "string" ? search.date : undefined,
+		shiftId: typeof search.shiftId === "string" ? search.shiftId : undefined,
+	}),
+	component: () => <Outlet />,
 });

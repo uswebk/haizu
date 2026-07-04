@@ -29,6 +29,20 @@
       "when": 1783150609627,
       "tag": "0003_busy_mathemanic",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1783152289688,
+      "tag": "0004_majestic_lake",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1783170422962,
+      "tag": "0005_faulty_rhodey",
+      "breakpoints": true
     }
   ]
 }

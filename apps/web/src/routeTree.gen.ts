@@ -21,9 +21,11 @@ import { Route as AppEmployeesRouteImport } from './routes/_app.employees'
 import { Route as AppEditorRouteImport } from './routes/_app.editor'
 import { Route as AppAssignmentRouteImport } from './routes/_app.assignment'
 import { Route as AppEditorIndexRouteImport } from './routes/_app.editor.index'
+import { Route as AppAssignmentIndexRouteImport } from './routes/_app.assignment.index'
 import { Route as AppSettingsTagsRouteImport } from './routes/_app.settings.tags'
 import { Route as AppSettingsShiftsRouteImport } from './routes/_app.settings.shifts'
 import { Route as AppEditorAreaIdRouteImport } from './routes/_app.editor.$areaId'
+import { Route as AppAssignmentAreaIdRouteImport } from './routes/_app.assignment.$areaId'
 
 const CatalogRoute = CatalogRouteImport.update({
   id: '/catalog',
@@ -84,6 +86,11 @@ const AppEditorIndexRoute = AppEditorIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppEditorRoute,
 } as any)
+const AppAssignmentIndexRoute = AppAssignmentIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppAssignmentRoute,
+} as any)
 const AppSettingsTagsRoute = AppSettingsTagsRouteImport.update({
   id: '/tags',
   path: '/tags',
@@ -99,11 +106,16 @@ const AppEditorAreaIdRoute = AppEditorAreaIdRouteImport.update({
   path: '/$areaId',
   getParentRoute: () => AppEditorRoute,
 } as any)
+const AppAssignmentAreaIdRoute = AppAssignmentAreaIdRouteImport.update({
+  id: '/$areaId',
+  path: '/$areaId',
+  getParentRoute: () => AppAssignmentRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
-  '/assignment': typeof AppAssignmentRoute
+  '/assignment': typeof AppAssignmentRouteWithChildren
   '/editor': typeof AppEditorRouteWithChildren
   '/employees': typeof AppEmployeesRoute
   '/history': typeof AppHistoryRoute
@@ -111,24 +123,27 @@ export interface FileRoutesByFullPath {
   '/members': typeof AppMembersRoute
   '/settings': typeof AppSettingsRouteWithChildren
   '/viewer': typeof AppViewerRoute
+  '/assignment/$areaId': typeof AppAssignmentAreaIdRoute
   '/editor/$areaId': typeof AppEditorAreaIdRoute
   '/settings/shifts': typeof AppSettingsShiftsRoute
   '/settings/tags': typeof AppSettingsTagsRoute
+  '/assignment/': typeof AppAssignmentIndexRoute
   '/editor/': typeof AppEditorIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
-  '/assignment': typeof AppAssignmentRoute
   '/employees': typeof AppEmployeesRoute
   '/history': typeof AppHistoryRoute
   '/home': typeof AppHomeRoute
   '/members': typeof AppMembersRoute
   '/settings': typeof AppSettingsRouteWithChildren
   '/viewer': typeof AppViewerRoute
+  '/assignment/$areaId': typeof AppAssignmentAreaIdRoute
   '/editor/$areaId': typeof AppEditorAreaIdRoute
   '/settings/shifts': typeof AppSettingsShiftsRoute
   '/settings/tags': typeof AppSettingsTagsRoute
+  '/assignment': typeof AppAssignmentIndexRoute
   '/editor': typeof AppEditorIndexRoute
 }
 export interface FileRoutesById {
@@ -136,7 +151,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/catalog': typeof CatalogRoute
-  '/_app/assignment': typeof AppAssignmentRoute
+  '/_app/assignment': typeof AppAssignmentRouteWithChildren
   '/_app/editor': typeof AppEditorRouteWithChildren
   '/_app/employees': typeof AppEmployeesRoute
   '/_app/history': typeof AppHistoryRoute
@@ -144,9 +159,11 @@ export interface FileRoutesById {
   '/_app/members': typeof AppMembersRoute
   '/_app/settings': typeof AppSettingsRouteWithChildren
   '/_app/viewer': typeof AppViewerRoute
+  '/_app/assignment/$areaId': typeof AppAssignmentAreaIdRoute
   '/_app/editor/$areaId': typeof AppEditorAreaIdRoute
   '/_app/settings/shifts': typeof AppSettingsShiftsRoute
   '/_app/settings/tags': typeof AppSettingsTagsRoute
+  '/_app/assignment/': typeof AppAssignmentIndexRoute
   '/_app/editor/': typeof AppEditorIndexRoute
 }
 export interface FileRouteTypes {
@@ -162,24 +179,27 @@ export interface FileRouteTypes {
     | '/members'
     | '/settings'
     | '/viewer'
+    | '/assignment/$areaId'
     | '/editor/$areaId'
     | '/settings/shifts'
     | '/settings/tags'
+    | '/assignment/'
     | '/editor/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/catalog'
-    | '/assignment'
     | '/employees'
     | '/history'
     | '/home'
     | '/members'
     | '/settings'
     | '/viewer'
+    | '/assignment/$areaId'
     | '/editor/$areaId'
     | '/settings/shifts'
     | '/settings/tags'
+    | '/assignment'
     | '/editor'
   id:
     | '__root__'
@@ -194,9 +214,11 @@ export interface FileRouteTypes {
     | '/_app/members'
     | '/_app/settings'
     | '/_app/viewer'
+    | '/_app/assignment/$areaId'
     | '/_app/editor/$areaId'
     | '/_app/settings/shifts'
     | '/_app/settings/tags'
+    | '/_app/assignment/'
     | '/_app/editor/'
   fileRoutesById: FileRoutesById
 }
@@ -292,6 +314,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEditorIndexRouteImport
       parentRoute: typeof AppEditorRoute
     }
+    '/_app/assignment/': {
+      id: '/_app/assignment/'
+      path: '/'
+      fullPath: '/assignment/'
+      preLoaderRoute: typeof AppAssignmentIndexRouteImport
+      parentRoute: typeof AppAssignmentRoute
+    }
     '/_app/settings/tags': {
       id: '/_app/settings/tags'
       path: '/tags'
@@ -313,8 +342,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEditorAreaIdRouteImport
       parentRoute: typeof AppEditorRoute
     }
+    '/_app/assignment/$areaId': {
+      id: '/_app/assignment/$areaId'
+      path: '/$areaId'
+      fullPath: '/assignment/$areaId'
+      preLoaderRoute: typeof AppAssignmentAreaIdRouteImport
+      parentRoute: typeof AppAssignmentRoute
+    }
   }
 }
+
+interface AppAssignmentRouteChildren {
+  AppAssignmentAreaIdRoute: typeof AppAssignmentAreaIdRoute
+  AppAssignmentIndexRoute: typeof AppAssignmentIndexRoute
+}
+
+const AppAssignmentRouteChildren: AppAssignmentRouteChildren = {
+  AppAssignmentAreaIdRoute: AppAssignmentAreaIdRoute,
+  AppAssignmentIndexRoute: AppAssignmentIndexRoute,
+}
+
+const AppAssignmentRouteWithChildren = AppAssignmentRoute._addFileChildren(
+  AppAssignmentRouteChildren,
+)
 
 interface AppEditorRouteChildren {
   AppEditorAreaIdRoute: typeof AppEditorAreaIdRoute
@@ -345,7 +395,7 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
-  AppAssignmentRoute: typeof AppAssignmentRoute
+  AppAssignmentRoute: typeof AppAssignmentRouteWithChildren
   AppEditorRoute: typeof AppEditorRouteWithChildren
   AppEmployeesRoute: typeof AppEmployeesRoute
   AppHistoryRoute: typeof AppHistoryRoute
@@ -356,7 +406,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppAssignmentRoute: AppAssignmentRoute,
+  AppAssignmentRoute: AppAssignmentRouteWithChildren,
   AppEditorRoute: AppEditorRouteWithChildren,
   AppEmployeesRoute: AppEmployeesRoute,
   AppHistoryRoute: AppHistoryRoute,

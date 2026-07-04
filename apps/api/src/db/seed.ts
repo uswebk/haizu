@@ -2,6 +2,8 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import {
 	areas,
+	employees,
+	employeeTags,
 	layoutSpecVersions,
 	shifts,
 	spots,
@@ -64,11 +66,36 @@ const SHIFTS = [
 	{ name: "夜勤", startTime: "22:00", endTime: "07:00" },
 ];
 
+const AVATAR_COLORS = [
+	"#2f8fd6",
+	"#3d9970",
+	"#f0883e",
+	"#8b5cf6",
+	"#26a69a",
+	"#e85d75",
+	"#d4a017",
+	"#ef6c5a",
+];
+
+const EMPLOYEES = [
+	{ lastName: "田中", firstName: "太郎" },
+	{ lastName: "高橋", firstName: "実" },
+	{ lastName: "中村", firstName: "健" },
+	{ lastName: "佐藤", firstName: "花子" },
+	{ lastName: "林", firstName: "美咲" },
+	{ lastName: "渡辺", firstName: "涼" },
+	{ lastName: "斎藤", firstName: "樹" },
+	{ lastName: "鈴木", firstName: "翔太" },
+];
+
 async function seed() {
 	console.log("Seeding...");
 
-	await db.insert(tags).values(TAG_NAMES.map((name) => ({ name })));
-	console.log(`  Created ${TAG_NAMES.length} tags`);
+	const insertedTags = await db
+		.insert(tags)
+		.values(TAG_NAMES.map((name) => ({ name })))
+		.returning();
+	console.log(`  Created ${insertedTags.length} tags`);
 
 	const insertedPatterns = await db
 		.insert(workPatterns)
@@ -86,6 +113,35 @@ async function seed() {
 			})),
 		);
 		console.log(`  Created work pattern with ${SHIFTS.length} shifts`);
+	}
+
+	const insertedEmployees = await db
+		.insert(employees)
+		.values(
+			EMPLOYEES.map((e, i) => ({
+				code: `EMP-${String(i + 1).padStart(3, "0")}`,
+				lastName: e.lastName,
+				firstName: e.firstName,
+				avatarColor: AVATAR_COLORS[i % AVATAR_COLORS.length] ?? "#2f8fd6",
+				isActive: true,
+			})),
+		)
+		.returning();
+	console.log(`  Created ${insertedEmployees.length} employees`);
+
+	// 各従業員に主タグ（＋3人ごとに「リーダー」）を紐付ける
+	const leaderTag = insertedTags.find((t) => t.name === "リーダー");
+	const empTagLinks: { employeeId: string; tagId: string }[] = [];
+	for (const [i, emp] of insertedEmployees.entries()) {
+		const primary = insertedTags[i % insertedTags.length];
+		if (primary) empTagLinks.push({ employeeId: emp.id, tagId: primary.id });
+		if (i % 3 === 0 && leaderTag && leaderTag.id !== primary?.id) {
+			empTagLinks.push({ employeeId: emp.id, tagId: leaderTag.id });
+		}
+	}
+	if (empTagLinks.length > 0) {
+		await db.insert(employeeTags).values(empTagLinks);
+		console.log(`  Linked ${empTagLinks.length} employee tags`);
 	}
 
 	for (const data of MOCK_DATA) {

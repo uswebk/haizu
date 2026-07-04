@@ -12,6 +12,7 @@ import {
 
 type DraftShift = {
 	key: string;
+	id?: string; // サーバ既存シフトのID（新規追加分は undefined）
 	name: string;
 	startTime: string;
 	endTime: string;
@@ -40,19 +41,26 @@ function ShiftSettings() {
 
 	const [mode, setMode] = useState<ShiftMode>("single");
 	const [shifts, setShifts] = useState<DraftShift[]>([]);
+	const [confirmOpen, setConfirmOpen] = useState(false);
+	const [deletedNotice, setDeletedNotice] = useState(false);
+	// 取得＆下書き初期化が完了するまでモード選択を出さない（初期 single のちらつき防止）
+	const [ready, setReady] = useState(false);
 
 	// 取得データから下書きを初期化する
 	useEffect(() => {
 		if (!workPattern) return;
 		setMode(workPattern.mode);
+		setDeletedNotice(false);
 		setShifts(
 			workPattern.shifts.map((s) => ({
 				key: s.id,
+				id: s.id,
 				name: s.name,
 				startTime: s.startTime,
 				endTime: s.endTime,
 			})),
 		);
+		setReady(true);
 	}, [workPattern]);
 
 	const saveMutation = useMutation({
@@ -63,12 +71,14 @@ function ShiftSettings() {
 					mode === "single"
 						? []
 						: shifts.map((s) => ({
+								id: s.id,
 								name: s.name.trim() || "新規シフト",
 								startTime: s.startTime,
 								endTime: s.endTime,
 							})),
 			}),
 		onSuccess: () => {
+			setConfirmOpen(false);
 			void queryClient.invalidateQueries({ queryKey: workPatternKeys.detail });
 		},
 	});
@@ -90,21 +100,28 @@ function ShiftSettings() {
 		);
 
 	const removeShift = (key: string) =>
-		setShifts((prev) =>
-			prev.length > 1 ? prev.filter((s) => s.key !== key) : prev,
-		);
+		setShifts((prev) => {
+			if (prev.length <= 1) return prev;
+			setDeletedNotice(true);
+			return prev.filter((s) => s.key !== key);
+		});
 
-	// 開始・終了が完全に同じシフトは重複登録できない
-	const hasDuplicate = useMemo(() => {
-		if (mode !== "multi") return false;
-		const seen = new Set<string>();
+	// 開始・終了が完全に同じシフト、または同名シフトは重複登録できない
+	const duplicateError = useMemo(() => {
+		if (mode !== "multi") return null;
+		const times = new Set<string>();
+		const names = new Set<string>();
 		for (const s of shifts) {
-			const key = `${s.startTime}-${s.endTime}`;
-			if (seen.has(key)) return true;
-			seen.add(key);
+			const timeKey = `${s.startTime}-${s.endTime}`;
+			if (times.has(timeKey)) return "開始・終了が同じシフトがあります";
+			times.add(timeKey);
+			const name = s.name.trim();
+			if (name && names.has(name)) return "シフト名が重複しています";
+			names.add(name);
 		}
-		return false;
+		return null;
 	}, [mode, shifts]);
+	const hasDuplicate = duplicateError !== null;
 
 	const cardClass = (active: boolean) =>
 		`text-left p-4 rounded-md border cursor-pointer transition-colors duration-150 ${
@@ -112,6 +129,23 @@ function ShiftSettings() {
 				? "border-primary bg-primary-soft"
 				: "border-border bg-surface hover:bg-app-bg"
 		}`;
+
+	if (!ready) {
+		return (
+			<div className="p-7 overflow-auto h-full">
+				<div className="max-w-190">
+					<Link
+						to="/settings"
+						className="text-xs font-semibold text-muted hover:text-ink"
+					>
+						← 設定
+					</Link>
+					<div className="text-[22px] font-bold mt-2">働き方（シフト）設定</div>
+					<div className="text-[13.5px] text-muted mt-4.5">読み込み中…</div>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="p-7 overflow-auto h-full">
@@ -158,6 +192,14 @@ function ShiftSettings() {
 								＋ シフトを追加
 							</Button>
 						</div>
+						{deletedNotice && (
+							<div className="flex items-start gap-2 text-[12px] font-semibold text-warning bg-warning-soft rounded-md px-3 py-2 mb-3 leading-relaxed">
+								<span aria-hidden>⚠</span>
+								<span>
+									削除したシフトで作成中の配置決めの下書きは、保存すると破棄されます。
+								</span>
+							</div>
+						)}
 						<div className="grid grid-cols-[1.6fr_1fr_1fr_auto] gap-2.5 px-1 pb-2 text-[11px] font-bold text-faint tracking-wide">
 							<div>シフト名</div>
 							<div>開始</div>
@@ -210,9 +252,9 @@ function ShiftSettings() {
 				)}
 
 				<div className="flex items-center justify-end gap-3.5 mt-5">
-					{hasDuplicate && (
+					{duplicateError && (
 						<span className="text-xs font-semibold text-danger">
-							開始・終了が同じシフトがあります
+							{duplicateError}
 						</span>
 					)}
 					<Button
@@ -223,13 +265,39 @@ function ShiftSettings() {
 						キャンセル
 					</Button>
 					<Button
-						onClick={() => saveMutation.mutate()}
+						onClick={() => setConfirmOpen(true)}
 						disabled={saveMutation.isPending || hasDuplicate}
 					>
-						{saveMutation.isPending ? "保存中…" : "保存する"}
+						保存する
 					</Button>
 				</div>
 			</div>
+
+			{confirmOpen && (
+				<div className="fixed inset-0 bg-[rgba(16,28,44,.42)] flex items-center justify-center p-6 z-60">
+					<div className="w-115 max-w-full bg-surface rounded-section shadow-[0_24px_60px_rgba(16,42,67,.3)] p-5.5">
+						<div className="text-base font-bold mb-2">シフト設定を保存</div>
+						<div className="text-[13.5px] text-muted leading-relaxed">
+							変更・削除したシフトで作成中の配置決めの下書きは破棄されます。保存してよろしいですか？
+						</div>
+						<div className="flex justify-end gap-2.5 mt-6">
+							<Button
+								variant="secondary"
+								onClick={() => setConfirmOpen(false)}
+								disabled={saveMutation.isPending}
+							>
+								キャンセル
+							</Button>
+							<Button
+								onClick={() => saveMutation.mutate()}
+								disabled={saveMutation.isPending}
+							>
+								{saveMutation.isPending ? "保存中…" : "保存する"}
+							</Button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
