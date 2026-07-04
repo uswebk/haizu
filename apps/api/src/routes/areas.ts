@@ -1,12 +1,31 @@
 import { zValidator } from "@hono/zod-validator";
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { imageSize } from "image-size";
 import { z } from "zod";
 import { db } from "../db/client";
-import { areas, layoutSpecVersions, spots } from "../db/schema";
+import { areas, assignments, layoutSpecVersions, spots } from "../db/schema";
 import { storage } from "../storage";
+
+const LOCKED_MESSAGE =
+	"この規格は配置決めで使用されているため編集できません。新しいバージョンを作成して編集してください。";
+
+async function hasAssignmentsForVersion(versionId: string) {
+	const found = await db.query.assignments.findFirst({
+		where: eq(assignments.layoutSpecVersionId, versionId),
+	});
+	return !!found;
+}
+
+async function versionIdsWithAssignments(versionIds: string[]) {
+	if (versionIds.length === 0) return new Set<string>();
+	const rows = await db
+		.selectDistinct({ versionId: assignments.layoutSpecVersionId })
+		.from(assignments)
+		.where(inArray(assignments.layoutSpecVersionId, versionIds));
+	return new Set(rows.map((r) => r.versionId));
+}
 
 export const areasRoute = new Hono()
 	.get("/", async (c) => {
@@ -68,6 +87,9 @@ export const areasRoute = new Hono()
 				: null;
 		// エディタのデフォルト表示 = 現在の規格 or 最新の下書き
 		const activeVersion = currentVersion ?? versions[versions.length - 1];
+		const lockedVersionIds = await versionIdsWithAssignments(
+			versions.map((v) => v.id),
+		);
 
 		return c.json({
 			id: area.id,
@@ -85,6 +107,8 @@ export const areasRoute = new Hono()
 				status: v.status,
 				isActive: v.id === activeVersion?.id,
 				isCurrent: v.id === currentVersion?.id,
+				// 配置決めで使用済み（スポット編集・図面変更・公開取消不可）
+				hasAssignments: lockedVersionIds.has(v.id),
 			})),
 		});
 	})
@@ -149,6 +173,10 @@ export const areasRoute = new Hono()
 			const { versionId } = c.req.param();
 			const { spots: newSpots, imageScale } = c.req.valid("json");
 
+			if (await hasAssignmentsForVersion(versionId)) {
+				return c.json({ error: LOCKED_MESSAGE }, 409);
+			}
+
 			await db.delete(spots).where(eq(spots.layoutSpecVersionId, versionId));
 
 			if (newSpots.length > 0) {
@@ -181,6 +209,10 @@ export const areasRoute = new Hono()
 		bodyLimit({ maxSize: 15 * 1024 * 1024 }),
 		async (c) => {
 			const { versionId } = c.req.param();
+
+			if (await hasAssignmentsForVersion(versionId)) {
+				return c.json({ error: LOCKED_MESSAGE }, 409);
+			}
 
 			const body = await c.req.parseBody();
 			const file = body.file;
@@ -218,6 +250,10 @@ export const areasRoute = new Hono()
 
 	.delete("/:id/versions/:versionId/floor-plan", async (c) => {
 		const { versionId } = c.req.param();
+
+		if (await hasAssignmentsForVersion(versionId)) {
+			return c.json({ error: LOCKED_MESSAGE }, 409);
+		}
 
 		const version = await db.query.layoutSpecVersions.findFirst({
 			where: eq(layoutSpecVersions.id, versionId),
@@ -337,9 +373,12 @@ export const areasRoute = new Hono()
 	.post("/:id/versions/:versionId/unpublish", async (c) => {
 		const { versionId } = c.req.param();
 
-		// TODO: assignments テーブル実装後、該当バージョンへの参照があれば 409 を返す
-		// const hasAssignments = await db.query.assignments.findFirst({ where: eq(assignments.layoutSpecVersionId, versionId) });
-		// if (hasAssignments) return c.json({ error: "配置決めに使用されたバージョンは取り消せません" }, 409);
+		if (await hasAssignmentsForVersion(versionId)) {
+			return c.json(
+				{ error: "配置決めに使用されたバージョンは取り消せません" },
+				409,
+			);
+		}
 
 		const updated = await db
 			.update(layoutSpecVersions)
@@ -355,10 +394,18 @@ export const areasRoute = new Hono()
 	.delete("/:id", async (c) => {
 		const { id } = c.req.param();
 
-		// TODO: assignments テーブル実装後、エリア内のいずれかのバージョンへの参照があれば 409 を返す
-		// const versionIds = (await db.select({ id: layoutSpecVersions.id }).from(layoutSpecVersions).where(eq(layoutSpecVersions.areaId, id))).map((v) => v.id);
-		// const hasAssignments = await db.query.assignments.findFirst({ where: inArray(assignments.layoutSpecVersionId, versionIds) });
-		// if (hasAssignments) return c.json({ error: "配置決めに使用された規格があるエリアは削除できません" }, 409);
+		const versionIds = (
+			await db
+				.select({ id: layoutSpecVersions.id })
+				.from(layoutSpecVersions)
+				.where(eq(layoutSpecVersions.areaId, id))
+		).map((v) => v.id);
+		if ((await versionIdsWithAssignments(versionIds)).size > 0) {
+			return c.json(
+				{ error: "配置決めに使用された規格があるエリアは削除できません" },
+				409,
+			);
+		}
 
 		const deleted = await db
 			.delete(areas)

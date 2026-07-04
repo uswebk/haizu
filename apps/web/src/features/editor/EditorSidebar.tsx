@@ -8,6 +8,7 @@ type Props = {
 	floorPlanName: string | null;
 	imageScale: number;
 	spotCount: number;
+	readOnly?: boolean;
 	onAreaNameChange: (name: string) => void;
 	onUpdateSpotLabel: (spotId: string, label: string) => void;
 	onUpdateSpotSize: (spotId: string, delta: number) => void;
@@ -25,6 +26,7 @@ export function EditorSidebar({
 	floorPlanName,
 	imageScale,
 	spotCount,
+	readOnly = false,
 	onAreaNameChange,
 	onUpdateSpotLabel,
 	onUpdateSpotSize,
@@ -45,6 +47,7 @@ export function EditorSidebar({
 						label="ラベル"
 						value={selectedSpot.label}
 						onChange={(e) => onUpdateSpotLabel(selectedSpot.id, e.target.value)}
+						disabled={readOnly}
 					/>
 					<div className="mt-4">
 						<div className="block text-xs font-semibold text-muted mb-1.5">
@@ -54,7 +57,8 @@ export function EditorSidebar({
 							<button
 								type="button"
 								onClick={() => onUpdateSpotSize(selectedSpot.id, -8)}
-								className="w-8.5 h-8.5 rounded-sm border border-border flex items-center justify-center text-lg font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface"
+								disabled={readOnly}
+								className="w-8.5 h-8.5 rounded-sm border border-border flex items-center justify-center text-lg font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface disabled:opacity-40 disabled:cursor-not-allowed"
 							>
 								−
 							</button>
@@ -64,7 +68,8 @@ export function EditorSidebar({
 							<button
 								type="button"
 								onClick={() => onUpdateSpotSize(selectedSpot.id, 8)}
-								className="w-8.5 h-8.5 rounded-sm border border-border flex items-center justify-center text-lg font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface"
+								disabled={readOnly}
+								className="w-8.5 h-8.5 rounded-sm border border-border flex items-center justify-center text-lg font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface disabled:opacity-40 disabled:cursor-not-allowed"
 							>
 								＋
 							</button>
@@ -84,7 +89,8 @@ export function EditorSidebar({
 					<button
 						type="button"
 						onClick={() => onDeleteSpot(selectedSpot.id)}
-						className="w-full mt-5 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft"
+						disabled={readOnly}
+						className="w-full mt-5 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft disabled:opacity-40 disabled:cursor-not-allowed"
 					>
 						スポットを削除
 					</button>
@@ -119,7 +125,8 @@ export function EditorSidebar({
 										<button
 											type="button"
 											onClick={() => onImageScaleChange(imageScale - 0.1)}
-											className="w-8.5 h-8.5 rounded-sm border border-border flex items-center justify-center text-lg font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface"
+											disabled={readOnly}
+											className="w-8.5 h-8.5 rounded-sm border border-border flex items-center justify-center text-lg font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface disabled:opacity-40 disabled:cursor-not-allowed"
 										>
 											−
 										</button>
@@ -129,7 +136,8 @@ export function EditorSidebar({
 										<button
 											type="button"
 											onClick={() => onImageScaleChange(imageScale + 0.1)}
-											className="w-8.5 h-8.5 rounded-sm border border-border flex items-center justify-center text-lg font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface"
+											disabled={readOnly}
+											className="w-8.5 h-8.5 rounded-sm border border-border flex items-center justify-center text-lg font-bold text-ink cursor-pointer hover:bg-hairline select-none bg-surface disabled:opacity-40 disabled:cursor-not-allowed"
 										>
 											＋
 										</button>
@@ -138,14 +146,16 @@ export function EditorSidebar({
 								<button
 									type="button"
 									onClick={onUploadClick}
-									className="w-full mt-3 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-border bg-surface text-ink cursor-pointer hover:bg-hairline"
+									disabled={readOnly}
+									className="w-full mt-3 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-border bg-surface text-ink cursor-pointer hover:bg-hairline disabled:opacity-40 disabled:cursor-not-allowed"
 								>
 									画像を変更
 								</button>
 								<button
 									type="button"
 									onClick={onDeleteImageClick}
-									className="w-full mt-2 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft"
+									disabled={readOnly}
+									className="w-full mt-2 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft disabled:opacity-40 disabled:cursor-not-allowed"
 								>
 									図面を削除
 								</button>
@@ -158,7 +168,8 @@ export function EditorSidebar({
 								<button
 									type="button"
 									onClick={onUploadClick}
-									className="w-full mt-3 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border-none bg-primary-soft text-primary cursor-pointer hover:brightness-95"
+									disabled={readOnly}
+									className="w-full mt-3 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border-none bg-primary-soft text-primary cursor-pointer hover:brightness-95 disabled:opacity-40 disabled:cursor-not-allowed"
 								>
 									画像をアップロード
 								</button>

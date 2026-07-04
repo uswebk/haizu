@@ -12,6 +12,7 @@ export type VersionState = {
 	status: "draft" | "published";
 	isActive: boolean;
 	isCurrent: boolean;
+	hasAssignments: boolean;
 };
 
 // 図面の保存前の変更内容。保存/公開されるまではサーバーに反映されない。

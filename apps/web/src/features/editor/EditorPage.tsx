@@ -18,6 +18,7 @@ import {
 } from "#/lib/api/areas";
 import { EditorSidebar } from "./EditorSidebar";
 import { FloorPlanCanvas } from "./FloorPlanCanvas";
+import { PublishDialog } from "./PublishDialog";
 import { SaveDraftDialog } from "./SaveDraftDialog";
 import type { PendingFloorPlan, VersionState } from "./types";
 import { useSpotEditor } from "./useSpotEditor";
@@ -48,6 +49,7 @@ export function EditorPage({ areaId }: Props) {
 	} | null>(null);
 	const [zoom, setZoom] = useState(1);
 	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+	const [publishDialogOpen, setPublishDialogOpen] = useState(false);
 	const [deleteAreaDialogOpen, setDeleteAreaDialogOpen] = useState(false);
 
 	const [pendingImage, setPendingImage] = useState<PendingFloorPlan | null>(
@@ -61,6 +63,11 @@ export function EditorPage({ areaId }: Props) {
 		areaData?.versions[0] ??
 		null;
 	const isNewDraft = resolvedVersion?.id === pendingDuplicate?.draft.id;
+	const latestVersion =
+		areaData?.versions[areaData.versions.length - 1] ?? null;
+	const isLatestVersion =
+		isNewDraft || resolvedVersion?.id === latestVersion?.id;
+	const isLocked = !isNewDraft && (resolvedVersion?.hasAssignments ?? false);
 	const displayedVersions =
 		pendingDuplicate && areaData
 			? [...areaData.versions, pendingDuplicate.draft]
@@ -174,6 +181,7 @@ export function EditorPage({ areaId }: Props) {
 					status: "draft",
 					isActive: false,
 					isCurrent: false,
+					hasAssignments: false,
 				});
 				queryClient.setQueryData(
 					areaKeys.versionSpots(areaId, created.id),
@@ -224,6 +232,7 @@ export function EditorPage({ areaId }: Props) {
 				setPendingDuplicate(null);
 				setCurrentVersion(null);
 			}
+			setPublishDialogOpen(false);
 		},
 	});
 
@@ -247,6 +256,7 @@ export function EditorPage({ areaId }: Props) {
 			status: "draft",
 			isActive: false,
 			isCurrent: false,
+			hasAssignments: false,
 		};
 		setPendingDuplicate({ sourceVersionId: resolvedVersion.id, draft });
 		setCurrentVersion(draft);
@@ -318,10 +328,16 @@ export function EditorPage({ areaId }: Props) {
 						<button
 							type="button"
 							onClick={editor.addSpot}
-							className="font-sans text-[12.5px] font-bold text-ink bg-surface border border-border px-3 py-1.5 rounded-sm cursor-pointer hover:bg-hairline shrink-0"
+							disabled={isLocked}
+							className="font-sans text-[12.5px] font-bold text-ink bg-surface border border-border px-3 py-1.5 rounded-sm cursor-pointer hover:bg-hairline shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
 						>
 							＋ 配置スポット
 						</button>
+						{isLocked && (
+							<span className="text-[11.5px] font-semibold text-warning bg-warning-soft px-2.5 py-1.25 rounded-sm shrink-0">
+								配置決めで使用中のため編集できません
+							</span>
+						)}
 					</div>
 					<div className="flex items-center gap-2.5 shrink-0">
 						<VersionSelector
@@ -350,10 +366,10 @@ export function EditorPage({ areaId }: Props) {
 								</Button>
 								<Button
 									size="sm"
-									onClick={() => publishMutation.mutate()}
+									onClick={() => setPublishDialogOpen(true)}
 									disabled={publishMutation.isPending}
 								>
-									{publishMutation.isPending ? "公開中…" : "この規格を公開"}
+									この規格を公開
 								</Button>
 							</>
 						) : (
@@ -362,6 +378,7 @@ export function EditorPage({ areaId }: Props) {
 									variant="secondary"
 									size="sm"
 									onClick={() => setSaveDialogOpen(true)}
+									disabled={isLocked}
 								>
 									保存
 								</Button>
@@ -377,7 +394,12 @@ export function EditorPage({ areaId }: Props) {
 											versionId: resolvedVersion.id,
 										})
 									}
-									disabled={unpublishMutation.isPending}
+									disabled={unpublishMutation.isPending || isLocked}
+									title={
+										isLocked
+											? "配置決めで使用されているため取り消せません"
+											: undefined
+									}
 								>
 									{unpublishMutation.isPending
 										? "取り消し中…"
@@ -405,8 +427,12 @@ export function EditorPage({ areaId }: Props) {
 						onCanvasClick={() => editor.setSelectedSpotId(null)}
 						onPointerMove={editor.handleContainerPointerMove}
 						onPointerUp={editor.handleContainerPointerUp}
-						onSpotPointerDown={editor.handleSpotPointerDown}
-						onResizePointerDown={editor.handleResizePointerDown}
+						onSpotPointerDown={
+							isLocked ? () => {} : editor.handleSpotPointerDown
+						}
+						onResizePointerDown={
+							isLocked ? () => {} : editor.handleResizePointerDown
+						}
 						onZoomChange={changeZoom}
 						areaName={resolvedName}
 						spotCount={editor.spots.length}
@@ -418,6 +444,7 @@ export function EditorPage({ areaId }: Props) {
 						floorPlanName={displayedFloorPlan.floorPlanName}
 						imageScale={editor.imageScale}
 						spotCount={editor.spots.length}
+						readOnly={isLocked}
 						onAreaNameChange={setAreaName}
 						onUpdateSpotLabel={editor.updateSpotLabel}
 						onUpdateSpotSize={editor.updateSpotSize}
@@ -444,6 +471,15 @@ export function EditorPage({ areaId }: Props) {
 				status={resolvedVersion.status}
 				onConfirm={() => saveMutation.mutate()}
 				onCancel={() => setSaveDialogOpen(false)}
+			/>
+
+			<PublishDialog
+				open={publishDialogOpen}
+				isPending={publishMutation.isPending}
+				versionLabel={resolvedVersion.label}
+				isLatest={isLatestVersion}
+				onConfirm={() => publishMutation.mutate()}
+				onCancel={() => setPublishDialogOpen(false)}
 			/>
 
 			{deleteAreaDialogOpen && (

@@ -266,6 +266,11 @@ function AssignmentDetail() {
 								規格 {activeVersion.label}（使用中）
 							</span>
 						)}
+						{serverAssignment?.status === "confirmed" && (
+							<span className="text-[10.5px] font-bold text-success bg-success/10 px-2.5 py-1 rounded-pill shrink-0">
+								確定済み
+							</span>
+						)}
 					</div>
 					<div className="flex items-center gap-2.5 shrink-0">
 						<ShiftDatePicker
@@ -282,14 +287,18 @@ function AssignmentDetail() {
 							onClick={() => setConfirmAction("draft")}
 							disabled={saveMutation.isPending || !versionId}
 						>
-							下書き保存
+							{serverAssignment?.status === "confirmed"
+								? "下書きに戻す"
+								: "下書き保存"}
 						</Button>
 						<Button
 							size="sm"
 							onClick={() => setConfirmAction("confirmed")}
 							disabled={saveMutation.isPending || !versionId}
 						>
-							確定する
+							{serverAssignment?.status === "confirmed"
+								? "更新する"
+								: "確定する"}
 						</Button>
 					</div>
 				</div>
