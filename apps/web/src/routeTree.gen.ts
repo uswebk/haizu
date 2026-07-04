@@ -21,6 +21,7 @@ import { Route as AppEmployeesRouteImport } from './routes/_app.employees'
 import { Route as AppEditorRouteImport } from './routes/_app.editor'
 import { Route as AppAssignmentRouteImport } from './routes/_app.assignment'
 import { Route as AppEditorIndexRouteImport } from './routes/_app.editor.index'
+import { Route as AppSettingsTagsRouteImport } from './routes/_app.settings.tags'
 import { Route as AppEditorAreaIdRouteImport } from './routes/_app.editor.$areaId'
 
 const CatalogRoute = CatalogRouteImport.update({
@@ -82,6 +83,11 @@ const AppEditorIndexRoute = AppEditorIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppEditorRoute,
 } as any)
+const AppSettingsTagsRoute = AppSettingsTagsRouteImport.update({
+  id: '/tags',
+  path: '/tags',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 const AppEditorAreaIdRoute = AppEditorAreaIdRouteImport.update({
   id: '/$areaId',
   path: '/$areaId',
@@ -97,9 +103,10 @@ export interface FileRoutesByFullPath {
   '/history': typeof AppHistoryRoute
   '/home': typeof AppHomeRoute
   '/members': typeof AppMembersRoute
-  '/settings': typeof AppSettingsRoute
+  '/settings': typeof AppSettingsRouteWithChildren
   '/viewer': typeof AppViewerRoute
   '/editor/$areaId': typeof AppEditorAreaIdRoute
+  '/settings/tags': typeof AppSettingsTagsRoute
   '/editor/': typeof AppEditorIndexRoute
 }
 export interface FileRoutesByTo {
@@ -110,9 +117,10 @@ export interface FileRoutesByTo {
   '/history': typeof AppHistoryRoute
   '/home': typeof AppHomeRoute
   '/members': typeof AppMembersRoute
-  '/settings': typeof AppSettingsRoute
+  '/settings': typeof AppSettingsRouteWithChildren
   '/viewer': typeof AppViewerRoute
   '/editor/$areaId': typeof AppEditorAreaIdRoute
+  '/settings/tags': typeof AppSettingsTagsRoute
   '/editor': typeof AppEditorIndexRoute
 }
 export interface FileRoutesById {
@@ -126,9 +134,10 @@ export interface FileRoutesById {
   '/_app/history': typeof AppHistoryRoute
   '/_app/home': typeof AppHomeRoute
   '/_app/members': typeof AppMembersRoute
-  '/_app/settings': typeof AppSettingsRoute
+  '/_app/settings': typeof AppSettingsRouteWithChildren
   '/_app/viewer': typeof AppViewerRoute
   '/_app/editor/$areaId': typeof AppEditorAreaIdRoute
+  '/_app/settings/tags': typeof AppSettingsTagsRoute
   '/_app/editor/': typeof AppEditorIndexRoute
 }
 export interface FileRouteTypes {
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/viewer'
     | '/editor/$areaId'
+    | '/settings/tags'
     | '/editor/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/viewer'
     | '/editor/$areaId'
+    | '/settings/tags'
     | '/editor'
   id:
     | '__root__'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/_app/settings'
     | '/_app/viewer'
     | '/_app/editor/$areaId'
+    | '/_app/settings/tags'
     | '/_app/editor/'
   fileRoutesById: FileRoutesById
 }
@@ -268,6 +280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEditorIndexRouteImport
       parentRoute: typeof AppEditorRoute
     }
+    '/_app/settings/tags': {
+      id: '/_app/settings/tags'
+      path: '/tags'
+      fullPath: '/settings/tags'
+      preLoaderRoute: typeof AppSettingsTagsRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/_app/editor/$areaId': {
       id: '/_app/editor/$areaId'
       path: '/$areaId'
@@ -292,6 +311,18 @@ const AppEditorRouteWithChildren = AppEditorRoute._addFileChildren(
   AppEditorRouteChildren,
 )
 
+interface AppSettingsRouteChildren {
+  AppSettingsTagsRoute: typeof AppSettingsTagsRoute
+}
+
+const AppSettingsRouteChildren: AppSettingsRouteChildren = {
+  AppSettingsTagsRoute: AppSettingsTagsRoute,
+}
+
+const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
+  AppSettingsRouteChildren,
+)
+
 interface AppRouteChildren {
   AppAssignmentRoute: typeof AppAssignmentRoute
   AppEditorRoute: typeof AppEditorRouteWithChildren
@@ -299,7 +330,7 @@ interface AppRouteChildren {
   AppHistoryRoute: typeof AppHistoryRoute
   AppHomeRoute: typeof AppHomeRoute
   AppMembersRoute: typeof AppMembersRoute
-  AppSettingsRoute: typeof AppSettingsRoute
+  AppSettingsRoute: typeof AppSettingsRouteWithChildren
   AppViewerRoute: typeof AppViewerRoute
 }
 
@@ -310,7 +341,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppHistoryRoute: AppHistoryRoute,
   AppHomeRoute: AppHomeRoute,
   AppMembersRoute: AppMembersRoute,
-  AppSettingsRoute: AppSettingsRoute,
+  AppSettingsRoute: AppSettingsRouteWithChildren,
   AppViewerRoute: AppViewerRoute,
 }
 
