@@ -55,6 +55,7 @@ export function EditorPage({ areaId }: Props) {
 	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 	const [publishDialogOpen, setPublishDialogOpen] = useState(false);
 	const [deleteAreaDialogOpen, setDeleteAreaDialogOpen] = useState(false);
+	const [deleteAreaError, setDeleteAreaError] = useState<string | null>(null);
 
 	const [pendingImage, setPendingImage] = useState<PendingFloorPlan | null>(
 		null,
@@ -76,6 +77,7 @@ export function EditorPage({ areaId }: Props) {
 	const isLatestVersion =
 		isNewDraft || resolvedVersion?.id === latestVersion?.id;
 	const isLocked = !isNewDraft && (resolvedVersion?.hasAssignments ?? false);
+	const canDeleteArea = !areaData?.versions.some((v) => v.hasAssignments);
 
 	const { data: spotsData } = useQuery({
 		queryKey: areaKeys.versionSpots(areaId, resolvedVersion?.id ?? ""),
@@ -305,6 +307,11 @@ export function EditorPage({ areaId }: Props) {
 			void queryClient.invalidateQueries({ queryKey: areaKeys.all });
 			navigate({ to: "/editor" });
 		},
+		onError: (error) => {
+			setDeleteAreaError(
+				error instanceof Error ? error.message : "削除に失敗しました",
+			);
+		},
 	});
 
 	if (!areaData || !resolvedVersion) {
@@ -457,7 +464,11 @@ export function EditorPage({ areaId }: Props) {
 						onUploadClick={() => fileInputRef.current?.click()}
 						onDeleteImageClick={handleDeleteImageClick}
 						onImageScaleChange={editor.setImageScale}
-						onDeleteAreaClick={() => setDeleteAreaDialogOpen(true)}
+						onDeleteAreaClick={() => {
+							setDeleteAreaError(null);
+							setDeleteAreaDialogOpen(true);
+						}}
+						canDeleteArea={canDeleteArea}
 					/>
 				</div>
 			</div>
@@ -495,6 +506,11 @@ export function EditorPage({ areaId }: Props) {
 							「{resolvedName}
 							」を削除します。図面・配置スポットもすべて削除され、元に戻せません。
 						</div>
+						{deleteAreaError && (
+							<div className="text-[12.5px] text-warning bg-warning-soft rounded-md px-3 py-2 mt-3 leading-relaxed">
+								{deleteAreaError}
+							</div>
+						)}
 						<div className="flex justify-end gap-2.5 mt-6">
 							<Button
 								variant="secondary"

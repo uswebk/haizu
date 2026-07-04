@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ShiftDatePicker } from "#/features/assignment/ShiftDatePicker";
 import {
 	getShiftOptions,
@@ -7,7 +7,11 @@ import {
 	todayStr,
 } from "#/features/assignment/shift";
 import { fetchAreas } from "#/lib/api/areas";
-import { assignmentKeys, fetchAssignments } from "#/lib/api/assignments";
+import {
+	assignmentKeys,
+	fetchAssignments,
+	fetchShiftMismatch,
+} from "#/lib/api/assignments";
 import { fetchWorkPattern, workPatternKeys } from "#/lib/api/workPatterns";
 
 export const Route = createFileRoute("/_app/assignment/")({
@@ -41,6 +45,11 @@ function AssignmentList() {
 		assignments.map((a) => [a.areaId, a.spotAssignments.length]),
 	);
 
+	const { data: shiftMismatch = false } = useQuery({
+		queryKey: ["assignments", "shift-mismatch", date],
+		queryFn: () => fetchShiftMismatch(date),
+	});
+
 	const setDate = (d: string) =>
 		navigate({ to: "/assignment", search: (prev) => ({ ...prev, date: d }) });
 	const setShift = (id: string) =>
@@ -68,6 +77,16 @@ function AssignmentList() {
 						onShiftChange={setShift}
 					/>
 				</div>
+
+				{shiftMismatch && (
+					<div className="text-[12.5px] text-muted bg-table-head rounded-md px-3.5 py-2.5 mb-4.5 leading-relaxed">
+						この日には、当時のシフト設定から変更されたデータが含まれています。当時の内容を確認したい場合は
+						<Link to="/history" className="font-bold underline">
+							履歴
+						</Link>
+						をご覧ください。
+					</div>
+				)}
 
 				<div className="grid grid-cols-3 gap-4">
 					{areas.map((area) => {

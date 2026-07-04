@@ -1,14 +1,23 @@
 import { zValidator } from "@hono/zod-validator";
 import { AssignmentInputSchema } from "@haiz/shared";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
-import { assignments, layoutSpecVersions, spotAssignments } from "../db/schema";
+import {
+	assignments,
+	layoutSpecVersions,
+	shifts,
+	spotAssignments,
+} from "../db/schema";
 
 const listQuery = z.object({
 	date: z.string().date(),
 	shiftId: z.string().uuid().optional(),
+});
+
+const dateQuery = z.object({
+	date: z.string().date(),
 });
 
 type AssignmentRow = typeof assignments.$inferSelect;
@@ -49,6 +58,19 @@ function serialize(
 }
 
 export const assignmentsRoute = new Hono()
+	.get("/shift-mismatch", zValidator("query", dateQuery), async (c) => {
+		const { date } = c.req.valid("query");
+
+		const found = await db
+			.select({ id: assignments.id })
+			.from(assignments)
+			.innerJoin(shifts, eq(assignments.shiftId, shifts.id))
+			.where(and(eq(assignments.date, date), isNotNull(shifts.deletedAt)))
+			.limit(1);
+
+		return c.json({ mismatched: found.length > 0 });
+	})
+
 	.get("/", zValidator("query", listQuery), async (c) => {
 		const { date, shiftId } = c.req.valid("query");
 

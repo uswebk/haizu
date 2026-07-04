@@ -32,3 +32,11 @@ export async function saveAssignment(
 	});
 	return handleResponse<Assignment>(res);
 }
+
+export async function fetchShiftMismatch(date: string): Promise<boolean> {
+	const res = await fetch(
+		`${API_BASE}/assignments/shift-mismatch?date=${date}`,
+	);
+	const data = await handleResponse<{ mismatched: boolean }>(res);
+	return data.mismatched;
+}

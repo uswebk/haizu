@@ -17,6 +17,7 @@ type Props = {
 	onDeleteImageClick: () => void;
 	onImageScaleChange: (scale: number) => void;
 	onDeleteAreaClick: () => void;
+	canDeleteArea?: boolean;
 };
 
 export function EditorSidebar({
@@ -35,6 +36,7 @@ export function EditorSidebar({
 	onDeleteImageClick,
 	onImageScaleChange,
 	onDeleteAreaClick,
+	canDeleteArea = true,
 }: Props) {
 	return (
 		<div className="w-60 shrink-0 border-l border-border p-4 overflow-auto">
@@ -186,7 +188,13 @@ export function EditorSidebar({
 					<button
 						type="button"
 						onClick={onDeleteAreaClick}
-						className="w-full mt-5 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft"
+						disabled={!canDeleteArea}
+						title={
+							canDeleteArea
+								? undefined
+								: "配置決めで使用されているため削除できません"
+						}
+						className="w-full mt-5 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft disabled:opacity-40 disabled:cursor-not-allowed"
 					>
 						エリアを削除
 					</button>
