@@ -107,3 +107,4 @@ docker compose up -d
 - `@haiz/shared` のスキーマ変更は `packages/shared/src/schemas/` を編集し、`src/index.ts` からエクスポートする。
 - `{/* Body */}` のような、コードを読めば自明なコメントは書かない・復元しない。コメントはWHY（非自明な制約・理由）がある場合のみ付ける。
 - `biome-ignore` などの ignore コメントで lint を黙らせない。lint 警告は原因を解消する形で実装を修正する（例: a11y 警告なら `div` の `onClick` ではなく実 `button` 要素を使う）。ignore に頼らざるを得ない場合は自己判断せずユーザーに相談する。
+- コードには自明なコメントは書かず、Whyを書くようにする
