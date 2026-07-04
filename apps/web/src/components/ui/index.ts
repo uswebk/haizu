@@ -8,6 +8,7 @@ export { EmptyState } from "./EmptyState";
 export { IconButton } from "./IconButton";
 export { Input } from "./Input";
 export { NavItem } from "./NavItem";
+export { PagerButton } from "./PagerButton";
 export { type Role, RoleBadge } from "./RoleBadge";
 export { Select, type SelectOption } from "./Select";
 export { Table, type TableColumn } from "./Table";
