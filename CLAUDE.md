@@ -80,6 +80,7 @@ docker compose up -d
 - **Drizzle ORM** + PostgreSQL（`apps/api/src/db/`）
 - **Better Auth** で認証
 - DBスキーマは `apps/api/src/db/schema.ts` に追加する
+- **DBスキーマ変更のワークフロー**: `schema.ts` を変更したら `pnpm db:generate` でマイグレーションファイルを生成し、`pnpm db:migrate` で適用する。生成された `src/db/migrations/*.sql` と `meta/` 配下は必ずコミットする。`db:push` はローカルでの一時的な試行のみに使い、確定した変更は必ず `db:generate` でファイル化すること
 
 ### 共有ライブラリ（`packages/shared`）
 
