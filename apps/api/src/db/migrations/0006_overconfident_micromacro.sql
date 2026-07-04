@@ -1,0 +1,1 @@
+ALTER TABLE "layout_spec_versions" ADD COLUMN "effective_date" date;

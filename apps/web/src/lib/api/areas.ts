@@ -23,8 +23,9 @@ export const areaKeys = {
 		["areas", areaId, "versions", versionId, "spots"] as const,
 };
 
-export async function fetchAreas(): Promise<AreaListItem[]> {
-	const res = await fetch(`${API_BASE}/areas`);
+export async function fetchAreas(date?: string): Promise<AreaListItem[]> {
+	const query = date ? `?date=${date}` : "";
+	const res = await fetch(`${API_BASE}/areas${query}`);
 	const data = await handleResponse<{ areas: AreaListItem[] }>(res);
 	return data.areas;
 }
@@ -114,10 +115,15 @@ export async function deleteFloorPlan(params: {
 export async function publishVersion(params: {
 	areaId: string;
 	versionId: string;
+	effectiveDate: string;
 }): Promise<void> {
 	const res = await fetch(
 		`${API_BASE}/areas/${params.areaId}/versions/${params.versionId}/publish`,
-		{ method: "POST" },
+		{
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ effectiveDate: params.effectiveDate }),
+		},
 	);
 	await handleResponse(res);
 }

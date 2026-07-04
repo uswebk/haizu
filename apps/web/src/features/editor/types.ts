@@ -1,3 +1,6 @@
+// 未公開バージョンの effectiveDate プレースホルダー（DBのデフォルト値と合わせる）
+export const UNPUBLISHED_EFFECTIVE_DATE = "1000-01-01";
+
 export type SpotState = {
 	id: string;
 	label: string;
@@ -10,6 +13,7 @@ export type VersionState = {
 	id: string;
 	label: string;
 	status: "draft" | "published";
+	effectiveDate: string; // 未公開時は "1000-01-01"
 	isActive: boolean;
 	isCurrent: boolean;
 	hasAssignments: boolean;

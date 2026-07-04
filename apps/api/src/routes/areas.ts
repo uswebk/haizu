@@ -11,6 +11,10 @@ import { storage } from "../storage";
 const LOCKED_MESSAGE =
 	"この規格は配置決めで使用されているため編集できません。新しいバージョンを作成して編集してください。";
 
+function todayDateStr() {
+	return new Date().toISOString().slice(0, 10);
+}
+
 async function hasAssignmentsForVersion(versionId: string) {
 	const found = await db.query.assignments.findFirst({
 		where: eq(assignments.layoutSpecVersionId, versionId),
@@ -27,43 +31,78 @@ async function versionIdsWithAssignments(versionIds: string[]) {
 	return new Set(rows.map((r) => r.versionId));
 }
 
-export const areasRoute = new Hono()
-	.get("/", async (c) => {
-		// LATERAL JOIN でアクティブバージョン（published優先、次点で最新draft）を特定してスポット数を取得
-		const rows = await db.execute<{
-			id: string;
-			name: string;
-			floorPlanName: string | null;
-			spotCount: number;
-			currentVersion: string | null;
-			currentStatus: "draft" | "published" | null;
-		}>(
-			// todo: 生SQLを使用しなくて良い方法を考える
-			sql`
-			SELECT
-				a.id,
-				a.name,
-				av.plan_image_name AS "floorPlanName",
-				COALESCE((
-					SELECT COUNT(*)::int FROM spots
-					WHERE layout_spec_version_id = av.id
-				), 0) AS "spotCount",
-				'v' || av.version AS "currentVersion",
-				av.status AS "currentStatus"
-			FROM areas a
-			LEFT JOIN LATERAL (
-				SELECT id, plan_image_name, version, status
-				FROM layout_spec_versions
-				WHERE area_id = a.id
-				ORDER BY (status = 'published') DESC, version DESC
-				LIMIT 1
-			) av ON true
-			ORDER BY a.created_at
-		`,
-		);
+type VersionForResolution = {
+	id: string;
+	version: number;
+	status: "draft" | "published";
+	effectiveDate: string;
+};
 
-		return c.json({ areas: rows });
-	})
+// 指定日に配置決めで適用される規格 = 公開済みかつ適用開始日が指定日以前のもののうち、
+// 適用開始日が最も新しいもの（同日ならバージョン番号が大きい方）
+function resolveCurrentVersion<T extends VersionForResolution>(
+	versions: T[],
+	date: string,
+): T | null {
+	const candidates = versions.filter(
+		(v) => v.status === "published" && v.effectiveDate <= date,
+	);
+	candidates.sort((a, b) => {
+		if (a.effectiveDate !== b.effectiveDate) {
+			return b.effectiveDate.localeCompare(a.effectiveDate);
+		}
+		return b.version - a.version;
+	});
+	return candidates[0] ?? null;
+}
+
+export const areasRoute = new Hono()
+	.get(
+		"/",
+		zValidator("query", z.object({ date: z.string().date().optional() })),
+		async (c) => {
+			const { date } = c.req.valid("query");
+			const targetDate = date ?? todayDateStr();
+
+			// LATERAL JOIN でアクティブバージョン（指定日に適用される公開版を優先、次点で最新draft）を特定してスポット数を取得
+			const rows = await db.execute<{
+				id: string;
+				name: string;
+				floorPlanName: string | null;
+				spotCount: number;
+				currentVersion: string | null;
+				currentStatus: "draft" | "published" | null;
+			}>(
+				// todo: 生SQLを使用しなくて良い方法を考える
+				sql`
+				SELECT
+					a.id,
+					a.name,
+					av.plan_image_name AS "floorPlanName",
+					COALESCE((
+						SELECT COUNT(*)::int FROM spots
+						WHERE layout_spec_version_id = av.id
+					), 0) AS "spotCount",
+					'v' || av.version AS "currentVersion",
+					av.status AS "currentStatus"
+				FROM areas a
+				LEFT JOIN LATERAL (
+					SELECT id, plan_image_name, version, status
+					FROM layout_spec_versions
+					WHERE area_id = a.id
+					ORDER BY
+						(status = 'published' AND effective_date <= ${targetDate}::date) DESC,
+						effective_date DESC,
+						version DESC
+					LIMIT 1
+				) av ON true
+				ORDER BY a.created_at
+			`,
+			);
+
+			return c.json({ areas: rows });
+		},
+	)
 
 	.get("/:id", async (c) => {
 		const { id } = c.req.param();
@@ -79,12 +118,8 @@ export const areasRoute = new Hono()
 			.where(eq(layoutSpecVersions.areaId, id))
 			.orderBy(layoutSpecVersions.version);
 
-		const publishedVersions = versions.filter((v) => v.status === "published");
-		// 現在の規格 = published の中でバージョン番号が最大のもの
-		const currentVersion =
-			publishedVersions.length > 0
-				? publishedVersions[publishedVersions.length - 1]
-				: null;
+		// 現在の規格（本日時点） = 公開済みかつ適用開始日が本日以前のうち最新のもの
+		const currentVersion = resolveCurrentVersion(versions, todayDateStr());
 		// エディタのデフォルト表示 = 現在の規格 or 最新の下書き
 		const activeVersion = currentVersion ?? versions[versions.length - 1];
 		const lockedVersionIds = await versionIdsWithAssignments(
@@ -105,6 +140,7 @@ export const areasRoute = new Hono()
 				id: v.id,
 				label: `v${v.version}`,
 				status: v.status,
+				effectiveDate: v.effectiveDate,
 				isActive: v.id === activeVersion?.id,
 				isCurrent: v.id === currentVersion?.id,
 				// 配置決めで使用済み（スポット編集・図面変更・公開取消不可）
@@ -281,18 +317,23 @@ export const areasRoute = new Hono()
 		return c.json({ ok: true });
 	})
 
-	.post("/:id/versions/:versionId/publish", async (c) => {
-		const { id, versionId } = c.req.param();
+	.post(
+		"/:id/versions/:versionId/publish",
+		zValidator("json", z.object({ effectiveDate: z.string().date() })),
+		async (c) => {
+			const { id, versionId } = c.req.param();
+			const { effectiveDate } = c.req.valid("json");
 
-		// 指定バージョンを published にするが、他のバージョンはそのままにする
-		// 公開後、すぐに戻したいケースなどがあり、他のバージョンを下書きに戻すと全バージョンが下書き状態となってしまうことを防ぐため
-		await db
-			.update(layoutSpecVersions)
-			.set({ status: "published", publishedAt: new Date() })
-			.where(eq(layoutSpecVersions.id, versionId));
+			// 指定バージョンを published にするが、他のバージョンはそのままにする
+			// 公開後、すぐに戻したいケースなどがあり、他のバージョンを下書きに戻すと全バージョンが下書き状態となってしまうことを防ぐため
+			await db
+				.update(layoutSpecVersions)
+				.set({ status: "published", publishedAt: new Date(), effectiveDate })
+				.where(eq(layoutSpecVersions.id, versionId));
 
-		return c.json({ ok: true });
-	})
+			return c.json({ ok: true });
+		},
+	)
 
 	.post(
 		"/:id/versions/:versionId/duplicate",

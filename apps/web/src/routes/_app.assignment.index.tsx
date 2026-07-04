@@ -20,8 +20,8 @@ function AssignmentList() {
 	const date = search.date ?? todayStr();
 
 	const { data: areas = [] } = useQuery({
-		queryKey: ["areas"],
-		queryFn: fetchAreas,
+		queryKey: ["areas", date],
+		queryFn: () => fetchAreas(date),
 	});
 	const { data: workPattern } = useQuery({
 		queryKey: workPatternKeys.detail,

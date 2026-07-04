@@ -20,7 +20,11 @@ import { EditorSidebar } from "./EditorSidebar";
 import { FloorPlanCanvas } from "./FloorPlanCanvas";
 import { PublishDialog } from "./PublishDialog";
 import { SaveDraftDialog } from "./SaveDraftDialog";
-import type { PendingFloorPlan, VersionState } from "./types";
+import {
+	type PendingFloorPlan,
+	UNPUBLISHED_EFFECTIVE_DATE,
+	type VersionState,
+} from "./types";
 import { useSpotEditor } from "./useSpotEditor";
 import { VersionSelector } from "./VersionSelector";
 
@@ -40,9 +44,9 @@ export function EditorPage({ areaId }: Props) {
 	});
 
 	const [areaName, setAreaName] = useState<string | null>(null);
-	const [currentVersion, setCurrentVersion] = useState<VersionState | null>(
-		null,
-	);
+	// 選択中バージョンは id のみ保持し、常に areaData（最新の取得結果）から解決する。
+	// VersionState のスナップショットを保持すると再取得後も古い状態のまま表示され続けてしまう。
+	const [currentVersionId, setCurrentVersionId] = useState<string | null>(null);
 	const [pendingDuplicate, setPendingDuplicate] = useState<{
 		sourceVersionId: string;
 		draft: VersionState;
@@ -57,8 +61,12 @@ export function EditorPage({ areaId }: Props) {
 	);
 
 	const resolvedName = areaName ?? areaData?.name ?? "";
+	const displayedVersions =
+		pendingDuplicate && areaData
+			? [...areaData.versions, pendingDuplicate.draft]
+			: (areaData?.versions ?? []);
 	const resolvedVersion =
-		currentVersion ??
+		displayedVersions.find((v) => v.id === currentVersionId) ??
 		areaData?.versions.find((v) => v.isActive) ??
 		areaData?.versions[0] ??
 		null;
@@ -68,10 +76,6 @@ export function EditorPage({ areaId }: Props) {
 	const isLatestVersion =
 		isNewDraft || resolvedVersion?.id === latestVersion?.id;
 	const isLocked = !isNewDraft && (resolvedVersion?.hasAssignments ?? false);
-	const displayedVersions =
-		pendingDuplicate && areaData
-			? [...areaData.versions, pendingDuplicate.draft]
-			: (areaData?.versions ?? []);
 
 	const { data: spotsData } = useQuery({
 		queryKey: areaKeys.versionSpots(areaId, resolvedVersion?.id ?? ""),
@@ -175,14 +179,7 @@ export function EditorPage({ areaId }: Props) {
 			clearPendingImage();
 			if (created) {
 				setPendingDuplicate(null);
-				setCurrentVersion({
-					id: created.id,
-					label: created.label,
-					status: "draft",
-					isActive: false,
-					isCurrent: false,
-					hasAssignments: false,
-				});
+				setCurrentVersionId(created.id);
 				queryClient.setQueryData(
 					areaKeys.versionSpots(areaId, created.id),
 					editor.spots,
@@ -198,12 +195,16 @@ export function EditorPage({ areaId }: Props) {
 	});
 
 	const publishMutation = useMutation({
-		mutationFn: async () => {
+		mutationFn: async (effectiveDate: string) => {
 			if (!resolvedVersion || !areaData) throw new Error("no version");
 			if (isNewDraft) {
 				const created = await materializeDuplicate();
 				await persistPendingImage(created.id);
-				await publishVersion({ areaId: areaData.id, versionId: created.id });
+				await publishVersion({
+					areaId: areaData.id,
+					versionId: created.id,
+					effectiveDate,
+				});
 				return created.id;
 			}
 			await saveAreaDraft({
@@ -216,6 +217,7 @@ export function EditorPage({ areaId }: Props) {
 			await publishVersion({
 				areaId: areaData.id,
 				versionId: resolvedVersion.id,
+				effectiveDate,
 			});
 			return resolvedVersion.id;
 		},
@@ -230,7 +232,9 @@ export function EditorPage({ areaId }: Props) {
 			clearPendingImage();
 			if (isNewDraft) {
 				setPendingDuplicate(null);
-				setCurrentVersion(null);
+			}
+			if (versionId) {
+				setCurrentVersionId(versionId);
 			}
 			setPublishDialogOpen(false);
 		},
@@ -254,12 +258,13 @@ export function EditorPage({ areaId }: Props) {
 			id: `pending-${Date.now()}`,
 			label: `v${nextVersion}`,
 			status: "draft",
+			effectiveDate: UNPUBLISHED_EFFECTIVE_DATE,
 			isActive: false,
 			isCurrent: false,
 			hasAssignments: false,
 		};
 		setPendingDuplicate({ sourceVersionId: resolvedVersion.id, draft });
-		setCurrentVersion(draft);
+		setCurrentVersionId(draft.id);
 	};
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -348,7 +353,7 @@ export function EditorPage({ areaId }: Props) {
 									setPendingDuplicate(null);
 								}
 								clearPendingImage();
-								setCurrentVersion(v);
+								setCurrentVersionId(v.id);
 							}}
 							onDuplicate={() => {
 								clearPendingImage();
@@ -478,7 +483,7 @@ export function EditorPage({ areaId }: Props) {
 				isPending={publishMutation.isPending}
 				versionLabel={resolvedVersion.label}
 				isLatest={isLatestVersion}
-				onConfirm={() => publishMutation.mutate()}
+				onConfirm={(effectiveDate) => publishMutation.mutate(effectiveDate)}
 				onCancel={() => setPublishDialogOpen(false)}
 			/>
 

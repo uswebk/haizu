@@ -6,6 +6,7 @@ import { Avatar } from "#/components/ui/Avatar";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
 import { Select } from "#/components/ui/Select";
+import { resolveVersionForDate } from "#/features/assignment/layoutVersion";
 import { ShiftDatePicker } from "#/features/assignment/ShiftDatePicker";
 import {
 	getShiftOptions,
@@ -52,9 +53,10 @@ function AssignmentDetail() {
 		queryFn: fetchEmployees,
 	});
 
-	// 配置決めは公開済みの規格に対してのみ行う（isActive はエディタ用で下書きにも
-	// フォールバックするため、ここでは isCurrent = 公開版のみを使う）
-	const activeVersion = area?.versions.find((v) => v.isCurrent) ?? null;
+	// 配置決めは対象日に適用される公開済み規格を参照する（適用開始日が対象日以前で最新のもの）
+	const activeVersion = area
+		? resolveVersionForDate(area.versions, date)
+		: null;
 	const versionId = activeVersion?.id ?? null;
 	const isUnpublished = !!area && !activeVersion;
 
@@ -229,9 +231,11 @@ function AssignmentDetail() {
 						<div className="text-sm font-bold">{area?.name ?? ""}</div>
 					</div>
 					<div className="flex-1 flex flex-col items-center justify-center gap-2.5">
-						<div className="text-sm font-bold">規格が未公開です</div>
+						<div className="text-sm font-bold">
+							この日付に適用される規格がありません
+						</div>
 						<div className="text-xs text-faint">
-							配置エディタで規格を公開すると、この画面から配置決めができます
+							配置エディタで規格を公開し、適用開始日をこの日付以前に設定すると、この画面から配置決めができます
 						</div>
 					</div>
 				</div>

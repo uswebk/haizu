@@ -41,6 +41,7 @@ export const LayoutSpecVersionSchema = z.object({
   planImageOffsetY: z.number().default(0), // 図面画像の表示位置オフセット（キャンバス高さに対する%）
   spots: z.array(SpotSchema).max(100),
   publishedAt: z.string().datetime().nullable(),
+  effectiveDate: z.string().date(), // 配置決めがこのバージョンを適用し始める日（未公開時は "1000-01-01"）
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });

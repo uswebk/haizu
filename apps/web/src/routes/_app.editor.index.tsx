@@ -20,7 +20,7 @@ function EditorList() {
 
 	const { data: areas = [] } = useQuery({
 		queryKey: areaKeys.all,
-		queryFn: fetchAreas,
+		queryFn: () => fetchAreas(),
 	});
 
 	const addMutation = useMutation({

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Badge } from "#/components/ui/Badge";
 import { useDismiss } from "#/hooks/useDismiss";
-import type { VersionState } from "./types";
+import { UNPUBLISHED_EFFECTIVE_DATE, type VersionState } from "./types";
 
 type Props = {
 	versions: VersionState[];
@@ -50,7 +50,14 @@ export function VersionSelector({
 							}}
 							className="w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-sm text-[12.5px] font-semibold text-ink hover:bg-hairline cursor-pointer border-none bg-transparent"
 						>
-							<span>{v.label}</span>
+							<span className="flex flex-col items-start">
+								<span>{v.label}</span>
+								{v.effectiveDate !== UNPUBLISHED_EFFECTIVE_DATE && (
+									<span className="text-[10.5px] font-normal text-faint">
+										適用: {v.effectiveDate}
+									</span>
+								)}
+							</span>
 							{v.isCurrent ? (
 								<Badge tone="success">使用中</Badge>
 							) : v.status === "published" ? (

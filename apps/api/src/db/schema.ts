@@ -40,6 +40,9 @@ export const layoutSpecVersions = pgTable(
 		planImageOffsetX: real("plan_image_offset_x").notNull().default(0),
 		planImageOffsetY: real("plan_image_offset_y").notNull().default(0),
 		publishedAt: timestamp("published_at", { withTimezone: true }),
+		// 公開バージョンが配置決めで適用され始める日（配置決めはこの日以降、日付ごとに該当バージョンを解決する）
+		// draft時点では未設定のためデフォルトは十分に過去の日付にしておく
+		effectiveDate: date("effective_date").notNull().default("1000-01-01"),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),
