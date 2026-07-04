@@ -32,7 +32,7 @@ function AppLayout() {
 			<aside className="w-59 shrink-0 bg-surface border-r border-border flex flex-col py-4.5 px-3.5">
 				<div className="flex items-center gap-2.75 px-1.5 pb-4.5">
 					<img
-						src="/haiz-mark.png"
+						src="/logo.svg"
 						alt="haiz"
 						className="w-9.5 h-9.5 rounded-[10px]"
 					/>
