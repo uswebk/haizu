@@ -30,6 +30,8 @@ type Props = {
 	open: boolean;
 	mode: "create" | "edit";
 	initialValue?: EmployeeRow;
+	isPending?: boolean;
+	errorMessage?: string | null;
 	onSubmit: (data: EmployeeFormValues) => void;
 	onCancel: () => void;
 };
@@ -62,6 +64,8 @@ export function EmployeeFormDialog({
 	open,
 	mode,
 	initialValue,
+	isPending = false,
+	errorMessage,
 	onSubmit,
 	onCancel,
 }: Props) {
@@ -224,12 +228,18 @@ export function EmployeeFormDialog({
 					</div>
 				</button>
 
+				{errorMessage && (
+					<div className="text-[12.5px] text-warning bg-warning-soft rounded-md px-3 py-2 mb-4 leading-relaxed">
+						{errorMessage}
+					</div>
+				)}
+
 				<div className="flex justify-end gap-2.5">
-					<Button variant="secondary" onClick={onCancel}>
+					<Button variant="secondary" onClick={onCancel} disabled={isPending}>
 						キャンセル
 					</Button>
-					<Button onClick={handleSave} disabled={!canSave}>
-						保存する
+					<Button onClick={handleSave} disabled={!canSave || isPending}>
+						{isPending ? "保存中…" : "保存する"}
 					</Button>
 				</div>
 			</div>

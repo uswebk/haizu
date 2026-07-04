@@ -7,7 +7,17 @@ export type Tag = {
 };
 
 async function handleResponse<T>(res: Response): Promise<T> {
-	if (!res.ok) throw new Error(`API error: ${res.status}`);
+	if (!res.ok) {
+		const body = await res.json().catch(() => null);
+		const message =
+			body &&
+			typeof body === "object" &&
+			"error" in body &&
+			typeof body.error === "string"
+				? body.error
+				: `API error: ${res.status}`;
+		throw new Error(message);
+	}
 	return res.json() as Promise<T>;
 }
 

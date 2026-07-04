@@ -48,6 +48,8 @@ function EmployeeList() {
 		null,
 	);
 
+	const [saveError, setSaveError] = useState<string | null>(null);
+
 	const saveMutation = useMutation({
 		mutationFn: (data: EmployeeFormValues) =>
 			editingEmployee
@@ -57,21 +59,29 @@ function EmployeeList() {
 			void queryClient.invalidateQueries({ queryKey: employeeKeys.all });
 			closeDialog();
 		},
+		onError: (error) => {
+			setSaveError(
+				error instanceof Error ? error.message : "保存に失敗しました",
+			);
+		},
 	});
 
 	const openCreateDialog = () => {
 		setEditingEmployee(null);
+		setSaveError(null);
 		setDialogMode("create");
 	};
 
 	const openEditDialog = (employee: EmployeeRow) => {
 		setEditingEmployee(employee);
+		setSaveError(null);
 		setDialogMode("edit");
 	};
 
 	const closeDialog = () => {
 		setDialogMode(null);
 		setEditingEmployee(null);
+		setSaveError(null);
 	};
 
 	const filtered = useMemo(() => {
@@ -246,7 +256,12 @@ function EmployeeList() {
 				open={dialogMode !== null}
 				mode={dialogMode ?? "create"}
 				initialValue={editingEmployee ?? undefined}
-				onSubmit={(data) => saveMutation.mutate(data)}
+				isPending={saveMutation.isPending}
+				errorMessage={saveError}
+				onSubmit={(data) => {
+					setSaveError(null);
+					saveMutation.mutate(data);
+				}}
 				onCancel={closeDialog}
 			/>
 		</div>

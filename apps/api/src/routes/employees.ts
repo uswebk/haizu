@@ -51,6 +51,19 @@ async function setEmployeeTags(employeeId: string, tagIds: string[]) {
 	}
 }
 
+const DUPLICATE_CODE_MESSAGE = "この社員番号は既に使用されています";
+
+function isUniqueViolation(error: unknown): boolean {
+	if (typeof error !== "object" || error === null) return false;
+	if ("code" in error && (error as { code?: unknown }).code === "23505") {
+		return true;
+	}
+	// drizzle-orm は driver のエラーを DrizzleQueryError でラップし、
+	// 元のPostgresエラー（code含む）は cause に格納される
+	const cause = (error as { cause?: unknown }).cause;
+	return isUniqueViolation(cause);
+}
+
 export const employeesRoute = new Hono()
 	.get("/", async (c) => {
 		const rows = await db
@@ -64,9 +77,18 @@ export const employeesRoute = new Hono()
 	.post("/", zValidator("json", employeeInput), async (c) => {
 		const { tagIds, ...input } = c.req.valid("json");
 
-		const inserted = await db.insert(employees).values(input).returning();
-		const employee = inserted[0];
-		if (!employee) return c.json({ error: "Insert failed" }, 500);
+		let employee: typeof employees.$inferSelect;
+		try {
+			const inserted = await db.insert(employees).values(input).returning();
+			const row = inserted[0];
+			if (!row) return c.json({ error: "Insert failed" }, 500);
+			employee = row;
+		} catch (error) {
+			if (isUniqueViolation(error)) {
+				return c.json({ error: DUPLICATE_CODE_MESSAGE }, 400);
+			}
+			throw error;
+		}
 
 		await setEmployeeTags(employee.id, tagIds);
 
@@ -78,13 +100,22 @@ export const employeesRoute = new Hono()
 		const { id } = c.req.param();
 		const { tagIds, ...input } = c.req.valid("json");
 
-		const updated = await db
-			.update(employees)
-			.set({ ...input, updatedAt: new Date() })
-			.where(eq(employees.id, id))
-			.returning();
-		const employee = updated[0];
-		if (!employee) return c.json({ error: "Not found" }, 404);
+		let employee: typeof employees.$inferSelect;
+		try {
+			const updated = await db
+				.update(employees)
+				.set({ ...input, updatedAt: new Date() })
+				.where(eq(employees.id, id))
+				.returning();
+			const row = updated[0];
+			if (!row) return c.json({ error: "Not found" }, 404);
+			employee = row;
+		} catch (error) {
+			if (isUniqueViolation(error)) {
+				return c.json({ error: DUPLICATE_CODE_MESSAGE }, 400);
+			}
+			throw error;
+		}
 
 		await setEmployeeTags(employee.id, tagIds);
 
