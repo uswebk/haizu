@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { areas, layoutSpecVersions, spots } from "./schema";
+import { areas, layoutSpecVersions, spots, tags } from "./schema";
 
 const client = postgres(process.env.DATABASE_URL!, { prepare: false });
 const db = drizzle(client);
@@ -49,8 +49,13 @@ const MOCK_DATA = [
 	},
 ];
 
+const TAG_NAMES = ["製造ライン", "リーダー", "検査", "梱包", "物流", "フォークリフト"];
+
 async function seed() {
 	console.log("Seeding...");
+
+	await db.insert(tags).values(TAG_NAMES.map((name) => ({ name })));
+	console.log(`  Created ${TAG_NAMES.length} tags`);
 
 	for (const data of MOCK_DATA) {
 		const insertedAreas = await db

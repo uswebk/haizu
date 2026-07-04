@@ -21,7 +21,7 @@ export type EmployeeInput = {
 	lastName: string;
 	firstName: string;
 	avatarColor: string;
-	tags: string[];
+	tagIds: string[];
 	isActive: boolean;
 };
 

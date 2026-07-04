@@ -61,7 +61,6 @@ export const employees = pgTable(
 		lastName: text("last_name").notNull(),
 		firstName: text("first_name").notNull(),
 		avatarColor: text("avatar_color").notNull(),
-		tags: text("tags").array().notNull().default([]),
 		isActive: boolean("is_active").notNull().default(true),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
@@ -71,6 +70,36 @@ export const employees = pgTable(
 			.defaultNow(),
 	},
 	(t) => [uniqueIndex("employees_code_unique").on(t.code)],
+);
+
+export const tags = pgTable(
+	"tags",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		name: text("name").notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(t) => [uniqueIndex("tags_name_unique").on(t.name)],
+);
+
+export const employeeTags = pgTable(
+	"employee_tags",
+	{
+		employeeId: uuid("employee_id")
+			.notNull()
+			.references(() => employees.id, { onDelete: "cascade" }),
+		tagId: uuid("tag_id")
+			.notNull()
+			.references(() => tags.id, { onDelete: "cascade" }),
+	},
+	(t) => [
+		uniqueIndex("employee_tags_employee_id_tag_id_unique").on(
+			t.employeeId,
+			t.tagId,
+		),
+	],
 );
 
 export const spots = pgTable("spots", {

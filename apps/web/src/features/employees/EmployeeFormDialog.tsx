@@ -1,7 +1,9 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { useDismiss } from "#/hooks/useDismiss";
+import { fetchTags, tagKeys } from "#/lib/api/tags";
 import type { EmployeeRow } from "./types";
 
 const AVATAR_COLORS = [
@@ -15,20 +17,11 @@ const AVATAR_COLORS = [
 	"#ef6c5a",
 ];
 
-const ALL_TAGS = [
-	"製造ライン",
-	"リーダー",
-	"検査",
-	"梱包",
-	"物流",
-	"フォークリフト",
-];
-
 export type EmployeeFormValues = {
 	lastName: string;
 	firstName: string;
 	code: string;
-	tags: string[];
+	tagIds: string[];
 	avatarColor: string;
 	isActive: boolean;
 };
@@ -50,7 +43,7 @@ function draftFromProps(
 			lastName: initialValue.lastName,
 			firstName: initialValue.firstName,
 			code: initialValue.code,
-			tags: [...initialValue.tags],
+			tagIds: initialValue.tags.map((t) => t.id),
 			avatarColor: initialValue.avatarColor,
 			isActive: initialValue.isActive,
 		};
@@ -59,7 +52,7 @@ function draftFromProps(
 		lastName: "",
 		firstName: "",
 		code: "",
-		tags: [],
+		tagIds: [],
 		avatarColor: AVATAR_COLORS[0],
 		isActive: true,
 	};
@@ -75,6 +68,11 @@ export function EmployeeFormDialog({
 	const contentRef = useRef<HTMLDivElement>(null);
 	useDismiss(open, onCancel, contentRef);
 
+	const { data: allTags = [] } = useQuery({
+		queryKey: tagKeys.all,
+		queryFn: fetchTags,
+	});
+
 	const [draft, setDraft] = useState<EmployeeFormValues>(() =>
 		draftFromProps(mode, initialValue),
 	);
@@ -86,12 +84,12 @@ export function EmployeeFormDialog({
 
 	if (!open) return null;
 
-	const toggleTag = (tag: string) => {
+	const toggleTag = (tagId: string) => {
 		setDraft((d) => ({
 			...d,
-			tags: d.tags.includes(tag)
-				? d.tags.filter((t) => t !== tag)
-				: [...d.tags, tag],
+			tagIds: d.tagIds.includes(tagId)
+				? d.tagIds.filter((t) => t !== tagId)
+				: [...d.tagIds, tagId],
 		}));
 	};
 
@@ -161,20 +159,20 @@ export function EmployeeFormDialog({
 					タグ<span className="text-faint font-medium">（複数選択可）</span>
 				</div>
 				<div className="flex flex-wrap gap-2 mb-4.5">
-					{ALL_TAGS.map((tag) => {
-						const on = draft.tags.includes(tag);
+					{allTags.map((tag) => {
+						const on = draft.tagIds.includes(tag.id);
 						return (
 							<button
-								key={tag}
+								key={tag.id}
 								type="button"
-								onClick={() => toggleTag(tag)}
+								onClick={() => toggleTag(tag.id)}
 								className={`text-[12.5px] px-3.25 py-2 rounded-sm border cursor-pointer ${
 									on
 										? "font-bold border-primary text-primary bg-primary-soft"
 										: "font-semibold border-border text-muted bg-surface"
 								}`}
 							>
-								{tag}
+								{tag.name}
 							</button>
 						);
 					})}

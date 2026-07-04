@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { areasRoute } from "./routes/areas";
 import { employeesRoute } from "./routes/employees";
+import { tagsRoute } from "./routes/tags";
 
 const app = new Hono();
 
@@ -13,6 +14,7 @@ app.get("/health", (c) => c.json({ status: "ok" }));
 app.use("/uploads/*", serveStatic({ root: "./" }));
 app.route("/areas", areasRoute);
 app.route("/employees", employeesRoute);
+app.route("/tags", tagsRoute);
 
 serve({ fetch: app.fetch, port: 3001 }, (info) => {
 	console.log(`API server running on http://localhost:${info.port}`);

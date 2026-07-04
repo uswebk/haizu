@@ -81,7 +81,9 @@ function EmployeeList() {
 			if (filter === "inactive" && e.isActive) return false;
 			if (
 				q &&
-				!`${e.lastName}${e.firstName}${e.code}${e.tags.join("")}`.includes(q)
+				!`${e.lastName}${e.firstName}${e.code}${e.tags.map((t) => t.name).join("")}`.includes(
+					q,
+				)
 			) {
 				return false;
 			}
@@ -150,8 +152,8 @@ function EmployeeList() {
 			render: (e) => (
 				<div className="flex flex-wrap gap-1.25">
 					{e.tags.map((t) => (
-						<Badge key={t} tone="primary">
-							{t}
+						<Badge key={t.id} tone="primary">
+							{t.name}
 						</Badge>
 					))}
 				</div>
