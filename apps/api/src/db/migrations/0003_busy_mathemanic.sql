@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "shifts_work_pattern_id_start_end_unique" ON "shifts" USING btree ("work_pattern_id","start_time","end_time");

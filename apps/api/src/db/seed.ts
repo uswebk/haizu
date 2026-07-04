@@ -1,6 +1,13 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { areas, layoutSpecVersions, spots, tags } from "./schema";
+import {
+	areas,
+	layoutSpecVersions,
+	shifts,
+	spots,
+	tags,
+	workPatterns,
+} from "./schema";
 
 const client = postgres(process.env.DATABASE_URL!, { prepare: false });
 const db = drizzle(client);
@@ -51,11 +58,35 @@ const MOCK_DATA = [
 
 const TAG_NAMES = ["製造ライン", "リーダー", "検査", "梱包", "物流", "フォークリフト"];
 
+const SHIFTS = [
+	{ name: "日勤", startTime: "08:00", endTime: "17:00" },
+	{ name: "遅番", startTime: "13:00", endTime: "22:00" },
+	{ name: "夜勤", startTime: "22:00", endTime: "07:00" },
+];
+
 async function seed() {
 	console.log("Seeding...");
 
 	await db.insert(tags).values(TAG_NAMES.map((name) => ({ name })));
 	console.log(`  Created ${TAG_NAMES.length} tags`);
+
+	const insertedPatterns = await db
+		.insert(workPatterns)
+		.values({ mode: "multi" })
+		.returning();
+	const workPattern = insertedPatterns[0];
+	if (workPattern) {
+		await db.insert(shifts).values(
+			SHIFTS.map((s, i) => ({
+				workPatternId: workPattern.id,
+				name: s.name,
+				startTime: s.startTime,
+				endTime: s.endTime,
+				order: i,
+			})),
+		);
+		console.log(`  Created work pattern with ${SHIFTS.length} shifts`);
+	}
 
 	for (const data of MOCK_DATA) {
 		const insertedAreas = await db

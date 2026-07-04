@@ -12,6 +12,11 @@ export const Route = createFileRoute("/_app/settings")({
 
 const SETTING_LINKS = [
 	{
+		to: "/settings/shifts" as const,
+		title: "働き方（シフト）設定",
+		description: "この拠点のシフト区分（名前・時間帯）を管理します。",
+	},
+	{
 		to: "/settings/tags" as const,
 		title: "タグ管理",
 		description: "従業員に付与するタグの追加・編集・削除を行います。",

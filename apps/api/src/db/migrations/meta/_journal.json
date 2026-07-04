@@ -15,6 +15,20 @@
       "when": 1783144677365,
       "tag": "0001_broad_juggernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783149729179,
+      "tag": "0002_brief_rhodey",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1783150609627,
+      "tag": "0003_busy_mathemanic",
+      "breakpoints": true
     }
   ]
 }

@@ -102,6 +102,41 @@ export const employeeTags = pgTable(
 	],
 );
 
+export const workPatterns = pgTable("work_patterns", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	mode: text("mode", { enum: ["single", "multi"] })
+		.notNull()
+		.default("single"),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
+export const shifts = pgTable(
+	"shifts",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		workPatternId: uuid("work_pattern_id")
+			.notNull()
+			.references(() => workPatterns.id, { onDelete: "cascade" }),
+		name: text("name").notNull(),
+		startTime: text("start_time").notNull(),
+		endTime: text("end_time").notNull(),
+		order: integer("order").notNull().default(0),
+	},
+	// 開始・終了が完全に同じシフトは同一勤務体制内に重複登録できない
+	(t) => [
+		uniqueIndex("shifts_work_pattern_id_start_end_unique").on(
+			t.workPatternId,
+			t.startTime,
+			t.endTime,
+		),
+	],
+);
+
 export const spots = pgTable("spots", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	layoutSpecVersionId: uuid("layout_spec_version_id")
