@@ -1,3 +1,4 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Avatar } from "#/components/ui/Avatar";
@@ -10,8 +11,13 @@ import {
 	EmployeeFormDialog,
 	type EmployeeFormValues,
 } from "#/features/employees/EmployeeFormDialog";
-import { MOCK_EMPLOYEES } from "#/features/employees/mock";
 import type { EmployeeRow } from "#/features/employees/types";
+import {
+	createEmployee,
+	employeeKeys,
+	fetchEmployees,
+	updateEmployee,
+} from "#/lib/api/employees";
 
 const CURRENT_SITE = "A工場";
 const PAGE_SIZE = 50;
@@ -29,7 +35,11 @@ export const Route = createFileRoute("/_app/employees")({
 });
 
 function EmployeeList() {
-	const [employees, setEmployees] = useState<EmployeeRow[]>(MOCK_EMPLOYEES);
+	const queryClient = useQueryClient();
+	const { data: employees = [] } = useQuery({
+		queryKey: employeeKeys.all,
+		queryFn: fetchEmployees,
+	});
 	const [search, setSearch] = useState("");
 	const [filter, setFilter] = useState<EmployeeFilter>("all");
 	const [page, setPage] = useState(1);
@@ -38,10 +48,16 @@ function EmployeeList() {
 		null,
 	);
 
-	const siteEmployees = useMemo(
-		() => employees.filter((e) => e.site === CURRENT_SITE),
-		[employees],
-	);
+	const saveMutation = useMutation({
+		mutationFn: (data: EmployeeFormValues) =>
+			editingEmployee
+				? updateEmployee(editingEmployee.id, data)
+				: createEmployee(data),
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: employeeKeys.all });
+			closeDialog();
+		},
+	});
 
 	const openCreateDialog = () => {
 		setEditingEmployee(null);
@@ -58,23 +74,9 @@ function EmployeeList() {
 		setEditingEmployee(null);
 	};
 
-	const handleSubmit = (data: EmployeeFormValues) => {
-		if (dialogMode === "edit" && editingEmployee) {
-			setEmployees((prev) =>
-				prev.map((e) => (e.id === editingEmployee.id ? { ...e, ...data } : e)),
-			);
-		} else {
-			setEmployees((prev) => [
-				...prev,
-				{ ...data, id: `e${Date.now()}`, site: CURRENT_SITE },
-			]);
-		}
-		closeDialog();
-	};
-
 	const filtered = useMemo(() => {
 		const q = search.trim();
-		return siteEmployees.filter((e) => {
+		return employees.filter((e) => {
 			if (filter === "active" && !e.isActive) return false;
 			if (filter === "inactive" && e.isActive) return false;
 			if (
@@ -85,7 +87,7 @@ function EmployeeList() {
 			}
 			return true;
 		});
-	}, [siteEmployees, search, filter]);
+	}, [employees, search, filter]);
 
 	const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 	const currentPage = Math.min(page, pageCount);
@@ -183,7 +185,7 @@ function EmployeeList() {
 					<div>
 						<div className="text-[22px] font-bold">従業員</div>
 						<div className="text-[13.5px] text-muted mt-1.25">
-							{CURRENT_SITE} の従業員 {siteEmployees.length}{" "}
+							{CURRENT_SITE} の従業員 {employees.length}{" "}
 							名。検索・絞り込み、CSV取込ができます。
 						</div>
 					</div>
@@ -242,7 +244,7 @@ function EmployeeList() {
 				open={dialogMode !== null}
 				mode={dialogMode ?? "create"}
 				initialValue={editingEmployee ?? undefined}
-				onSubmit={handleSubmit}
+				onSubmit={(data) => saveMutation.mutate(data)}
 				onCancel={closeDialog}
 			/>
 		</div>

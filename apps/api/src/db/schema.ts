@@ -1,4 +1,5 @@
 import {
+	boolean,
 	integer,
 	pgTable,
 	real,
@@ -50,6 +51,26 @@ export const layoutSpecVersions = pgTable(
 			t.version,
 		),
 	],
+);
+
+export const employees = pgTable(
+	"employees",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		code: text("code").notNull(),
+		lastName: text("last_name").notNull(),
+		firstName: text("first_name").notNull(),
+		avatarColor: text("avatar_color").notNull(),
+		tags: text("tags").array().notNull().default([]),
+		isActive: boolean("is_active").notNull().default(true),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(t) => [uniqueIndex("employees_code_unique").on(t.code)],
 );
 
 export const spots = pgTable("spots", {

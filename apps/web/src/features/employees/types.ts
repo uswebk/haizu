@@ -4,7 +4,6 @@ export type EmployeeRow = {
 	lastName: string;
 	firstName: string;
 	avatarColor: string;
-	site: string;
 	tags: string[];
 	isActive: boolean;
 };
