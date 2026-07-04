@@ -204,7 +204,7 @@ function EmployeeList() {
 							setSearch(e.target.value);
 							setPage(1);
 						}}
-						placeholder="氏名・社員番号・役割で検索"
+						placeholder="氏名・社員番号・タグで検索"
 						className="min-w-55 flex-1"
 					/>
 					<div className="flex items-center gap-1 bg-app-bg border border-border rounded-md p-0.75">
