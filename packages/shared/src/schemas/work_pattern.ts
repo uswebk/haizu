@@ -23,8 +23,9 @@ export const WorkPatternSchema = z.object({
 
 export type WorkPattern = z.infer<typeof WorkPatternSchema>;
 
-// 保存（PUT）入力: id / order はサーバが採番する
+// 保存（PUT）入力: id を送れば既存シフトを保持（未指定は新規）。order はサーバが採番する
 export const ShiftInputSchema = z.object({
+  id: z.string().uuid().optional(),
   name: z.string().min(1),
   startTime: TimeSchema,
   endTime: TimeSchema,
@@ -49,6 +50,18 @@ export const WorkPatternInputSchema = z
       return true;
     },
     { message: "開始・終了が同じシフトは登録できません", path: ["shifts"] },
+  )
+  .refine(
+    (v) => {
+      // シフト名は重複登録できない
+      const seen = new Set<string>();
+      for (const s of v.shifts) {
+        if (seen.has(s.name)) return false;
+        seen.add(s.name);
+      }
+      return true;
+    },
+    { message: "シフト名が重複しています", path: ["shifts"] },
   );
 
 export type WorkPatternInput = z.infer<typeof WorkPatternInputSchema>;
