@@ -177,6 +177,7 @@ export const areasRoute = new Hono()
 				return c.json({ error: LOCKED_MESSAGE }, 409);
 			}
 
+			// todo: トランザクションを張ってatmicを担保する
 			await db.delete(spots).where(eq(spots.layoutSpecVersionId, versionId));
 
 			if (newSpots.length > 0) {
@@ -283,7 +284,8 @@ export const areasRoute = new Hono()
 	.post("/:id/versions/:versionId/publish", async (c) => {
 		const { id, versionId } = c.req.param();
 
-		// 指定バージョンを published に（他のバージョンはそのままにする）
+		// 指定バージョンを published にするが、他のバージョンはそのままにする
+		// 公開後、すぐに戻したいケースなどがあり、他のバージョンを下書きに戻すと全バージョンが下書き状態となってしまうことを防ぐため
 		await db
 			.update(layoutSpecVersions)
 			.set({ status: "published", publishedAt: new Date() })
@@ -314,6 +316,8 @@ export const areasRoute = new Hono()
 			const { id, versionId } = c.req.param();
 			const { spots: overrideSpots, imageScale } = c.req.valid("json");
 
+			// todo: select for updateを使用すべきか検討。
+			// 同時に操作された場合、バージョンが重複してしまう可能性がある。
 			const source = await db.query.layoutSpecVersions.findFirst({
 				where: eq(layoutSpecVersions.id, versionId),
 			});

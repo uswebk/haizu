@@ -14,6 +14,8 @@ const listQuery = z.object({
 type AssignmentRow = typeof assignments.$inferSelect;
 
 // assignmentId ごとにグルーピングした spotAssignments を一括取得する
+// fixme: 配置決めでv1の規格で登録後 -> 配置エリアで新しいv2を公開
+//        配置決めに戻ると、規格はv2になっているが、配置状況は人数が設定されたままになっている。
 async function loadSpotAssignmentsByAssignmentIds(assignmentIds: string[]) {
 	const grouped = new Map<
 		string,

@@ -27,6 +27,8 @@ async function loadShifts(workPatternId: string) {
 
 export const workPatternsRoute = new Hono()
 	.get("/", async (c) => {
+		// fixme: なるべくget or createは使用したくない。getに対して副作用を発生させたくないため
+		//        拠点作成時に、work_patternレコードを作りにいく。もし持ってなければ画面上から作れるようにしておく
 		const workPattern = await getOrCreateWorkPattern();
 		const rows = await loadShifts(workPattern.id);
 
@@ -66,6 +68,9 @@ export const workPatternsRoute = new Hono()
 			const existingById = new Map(existing.map((r) => [r.id, r]));
 			// 名前は現行シフト内で一意。id が古く/欠けていても名前で既存行を照合し、
 			// 未変更行を誤って soft-delete + 再挿入しないようにする
+			// fixme: 例えば夜勤レコードを削除して新たに夜勤レコードを作成した場合、消されないと思ったがそんなことなかった。時間も同じなら消されない？
+			//        この辺り複雑さを増す原因となっているため、シンプルな設計にできないか検討する
+			//        同じ名前であってもレコードが削除された時点で、削除し新しいレコードを追加するなど
 			const existingByName = new Map(existing.map((r) => [r.name, r]));
 
 			const handled = new Set<string>();
