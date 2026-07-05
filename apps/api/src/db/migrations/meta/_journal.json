@@ -57,6 +57,13 @@
       "when": 1783187928168,
       "tag": "0007_ambitious_pretty_boy",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1783233460832,
+      "tag": "0008_jittery_the_liberteens",
+      "breakpoints": true
     }
   ]
 }

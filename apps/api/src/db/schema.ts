@@ -212,3 +212,31 @@ export const spotAssignments = pgTable(
 		),
 	],
 );
+
+// 大画面ビュアーの表示方法をエリアごとに保持する（manual=強制表示 / auto=働き方に合わせて自動表示）
+export const viewerConfigs = pgTable(
+	"viewer_configs",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		areaId: uuid("area_id")
+			.notNull()
+			.references(() => areas.id, { onDelete: "cascade" }),
+		mode: text("mode", { enum: ["manual", "auto"] })
+			.notNull()
+			.default("auto"),
+		// manual: 強制表示する日付・シフト（shiftId null = 終日）
+		displayDate: date("display_date"),
+		shiftId: uuid("shift_id").references(() => shifts.id, {
+			onDelete: "no action",
+		}),
+		// auto: シフト開始の何分前から次シフトの配置に切り替えるか
+		leadMinutes: integer("lead_minutes").notNull().default(0),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(t) => [uniqueIndex("viewer_configs_area_id_unique").on(t.areaId)],
+);

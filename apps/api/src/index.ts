@@ -6,6 +6,7 @@ import { areasRoute } from "./routes/areas";
 import { assignmentsRoute } from "./routes/assignments";
 import { employeesRoute } from "./routes/employees";
 import { tagsRoute } from "./routes/tags";
+import { viewerConfigsRoute } from "./routes/viewerConfigs";
 import { workPatternsRoute } from "./routes/workPatterns";
 
 const app = new Hono();
@@ -19,6 +20,7 @@ app.route("/assignments", assignmentsRoute);
 app.route("/employees", employeesRoute);
 app.route("/tags", tagsRoute);
 app.route("/work-pattern", workPatternsRoute);
+app.route("/viewer-configs", viewerConfigsRoute);
 
 serve({ fetch: app.fetch, port: 3001 }, (info) => {
 	console.log(`API server running on http://localhost:${info.port}`);

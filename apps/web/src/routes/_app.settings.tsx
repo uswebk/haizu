@@ -21,6 +21,11 @@ const SETTING_LINKS = [
 		title: "タグ管理",
 		description: "従業員に付与するタグの追加・編集・削除を行います。",
 	},
+	{
+		to: "/settings/viewer" as const,
+		title: "配置ビュアー設定",
+		description: "エリアごとに、大画面ビュアーの表示方法を設定します。",
+	},
 ];
 
 function SettingsLayout() {

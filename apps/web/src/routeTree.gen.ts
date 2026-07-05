@@ -22,6 +22,7 @@ import { Route as AppEditorRouteImport } from './routes/_app.editor'
 import { Route as AppAssignmentRouteImport } from './routes/_app.assignment'
 import { Route as AppEditorIndexRouteImport } from './routes/_app.editor.index'
 import { Route as AppAssignmentIndexRouteImport } from './routes/_app.assignment.index'
+import { Route as AppSettingsViewerRouteImport } from './routes/_app.settings.viewer'
 import { Route as AppSettingsTagsRouteImport } from './routes/_app.settings.tags'
 import { Route as AppSettingsShiftsRouteImport } from './routes/_app.settings.shifts'
 import { Route as AppEditorAreaIdRouteImport } from './routes/_app.editor.$areaId'
@@ -91,6 +92,11 @@ const AppAssignmentIndexRoute = AppAssignmentIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppAssignmentRoute,
 } as any)
+const AppSettingsViewerRoute = AppSettingsViewerRouteImport.update({
+  id: '/viewer',
+  path: '/viewer',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 const AppSettingsTagsRoute = AppSettingsTagsRouteImport.update({
   id: '/tags',
   path: '/tags',
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/editor/$areaId': typeof AppEditorAreaIdRoute
   '/settings/shifts': typeof AppSettingsShiftsRoute
   '/settings/tags': typeof AppSettingsTagsRoute
+  '/settings/viewer': typeof AppSettingsViewerRoute
   '/assignment/': typeof AppAssignmentIndexRoute
   '/editor/': typeof AppEditorIndexRoute
 }
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/editor/$areaId': typeof AppEditorAreaIdRoute
   '/settings/shifts': typeof AppSettingsShiftsRoute
   '/settings/tags': typeof AppSettingsTagsRoute
+  '/settings/viewer': typeof AppSettingsViewerRoute
   '/assignment': typeof AppAssignmentIndexRoute
   '/editor': typeof AppEditorIndexRoute
 }
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   '/_app/editor/$areaId': typeof AppEditorAreaIdRoute
   '/_app/settings/shifts': typeof AppSettingsShiftsRoute
   '/_app/settings/tags': typeof AppSettingsTagsRoute
+  '/_app/settings/viewer': typeof AppSettingsViewerRoute
   '/_app/assignment/': typeof AppAssignmentIndexRoute
   '/_app/editor/': typeof AppEditorIndexRoute
 }
@@ -183,6 +192,7 @@ export interface FileRouteTypes {
     | '/editor/$areaId'
     | '/settings/shifts'
     | '/settings/tags'
+    | '/settings/viewer'
     | '/assignment/'
     | '/editor/'
   fileRoutesByTo: FileRoutesByTo
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/editor/$areaId'
     | '/settings/shifts'
     | '/settings/tags'
+    | '/settings/viewer'
     | '/assignment'
     | '/editor'
   id:
@@ -218,6 +229,7 @@ export interface FileRouteTypes {
     | '/_app/editor/$areaId'
     | '/_app/settings/shifts'
     | '/_app/settings/tags'
+    | '/_app/settings/viewer'
     | '/_app/assignment/'
     | '/_app/editor/'
   fileRoutesById: FileRoutesById
@@ -321,6 +333,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssignmentIndexRouteImport
       parentRoute: typeof AppAssignmentRoute
     }
+    '/_app/settings/viewer': {
+      id: '/_app/settings/viewer'
+      path: '/viewer'
+      fullPath: '/settings/viewer'
+      preLoaderRoute: typeof AppSettingsViewerRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/_app/settings/tags': {
       id: '/_app/settings/tags'
       path: '/tags'
@@ -383,11 +402,13 @@ const AppEditorRouteWithChildren = AppEditorRoute._addFileChildren(
 interface AppSettingsRouteChildren {
   AppSettingsShiftsRoute: typeof AppSettingsShiftsRoute
   AppSettingsTagsRoute: typeof AppSettingsTagsRoute
+  AppSettingsViewerRoute: typeof AppSettingsViewerRoute
 }
 
 const AppSettingsRouteChildren: AppSettingsRouteChildren = {
   AppSettingsShiftsRoute: AppSettingsShiftsRoute,
   AppSettingsTagsRoute: AppSettingsTagsRoute,
+  AppSettingsViewerRoute: AppSettingsViewerRoute,
 }
 
 const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(

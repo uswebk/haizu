@@ -5,3 +5,4 @@ export * from "./schemas/work_pattern";
 export * from "./schemas/employee";
 export * from "./schemas/layout_spec";
 export * from "./schemas/assignment";
+export * from "./schemas/viewer";
