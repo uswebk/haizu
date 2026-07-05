@@ -20,7 +20,7 @@ type Draft = {
 	mode: ViewerMode;
 	displayDate: string;
 	shiftId: string | null;
-	leadMinutes: number;
+	leadMinutes: string; // 入力中は文字列で保持し、保存時に数値化する
 };
 
 function defaultConfig(areaId: string): ViewerConfig {
@@ -65,7 +65,7 @@ function ViewerSettings() {
 			mode: cfg.mode,
 			displayDate: cfg.displayDate ?? todayStr(),
 			shiftId: cfg.shiftId ?? shiftOptions[0]?.id ?? null,
-			leadMinutes: cfg.leadMinutes,
+			leadMinutes: String(cfg.leadMinutes),
 		});
 		setSelectedAreaId(areaId);
 	};
@@ -82,7 +82,7 @@ function ViewerSettings() {
 				mode: draft.mode,
 				displayDate: draft.mode === "manual" ? draft.displayDate : null,
 				shiftId: draft.mode === "manual" ? draft.shiftId : null,
-				leadMinutes: draft.mode === "auto" ? draft.leadMinutes : 0,
+				leadMinutes: draft.mode === "auto" ? clampLead(draft.leadMinutes) : 0,
 			});
 		},
 		onSuccess: () => {
@@ -195,9 +195,12 @@ function ViewerSettings() {
 									max={240}
 									value={draft.leadMinutes}
 									onChange={(e) =>
+										setDraft({ ...draft, leadMinutes: e.target.value })
+									}
+									onBlur={() =>
 										setDraft({
 											...draft,
-											leadMinutes: clampLead(e.target.value),
+											leadMinutes: String(clampLead(draft.leadMinutes)),
 										})
 									}
 									className="w-27.5 font-sans text-sm font-bold text-ink border border-border rounded-md px-3 py-2.5 bg-surface outline-none"
