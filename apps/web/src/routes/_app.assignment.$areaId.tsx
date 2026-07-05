@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Avatar } from "#/components/ui/Avatar";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
-import { Select } from "#/components/ui/Select";
 import { resolveVersionForDate } from "#/features/assignment/layoutVersion";
 import { ShiftDatePicker } from "#/features/assignment/ShiftDatePicker";
 import {
@@ -13,6 +12,7 @@ import {
 	resolveEffectiveShift,
 } from "#/features/assignment/shift";
 import type { EmployeeRow } from "#/features/employees/types";
+import { useDismiss } from "#/hooks/useDismiss";
 import { API_BASE } from "#/lib/api";
 import { fetchArea, fetchVersionSpots } from "#/lib/api/areas";
 import {
@@ -83,12 +83,20 @@ function AssignmentDetail() {
 	const [assign, setAssign] = useState<Record<string, string>>({});
 	const [selectedSpot, setSelectedSpot] = useState<string | null>(null);
 	const [poolSearch, setPoolSearch] = useState("");
-	const [tagFilter, setTagFilter] = useState("");
+	const [tagFilter, setTagFilter] = useState<Set<string>>(new Set());
+	const [tagMenuOpen, setTagMenuOpen] = useState(false);
+	const [tagSearch, setTagSearch] = useState("");
 	const [zoom, setZoom] = useState(1);
 	const [confirmAction, setConfirmAction] = useState<AssignmentStatus | null>(
 		null,
 	);
 	const dragId = useRef<string | null>(null);
+	const tagMenuRef = useRef<HTMLDivElement>(null);
+	const closeTagMenu = () => {
+		setTagMenuOpen(false);
+		setTagSearch("");
+	};
+	useDismiss(tagMenuOpen, closeTagMenu, tagMenuRef);
 
 	const changeZoom = (delta: number) =>
 		setZoom((z) =>
@@ -120,16 +128,25 @@ function AssignmentDetail() {
 		for (const e of employees) {
 			for (const t of e.tags) m.set(t.id, t.name);
 		}
-		return [
-			{ value: "", label: "すべてのタグ" },
-			...[...m].map(([value, label]) => ({ value, label })),
-		];
+		return [...m].map(([id, name]) => ({ id, name }));
 	}, [employees]);
+	const filteredTagOptions = tagOptions.filter((t) =>
+		t.name.includes(tagSearch.trim()),
+	);
+
+	const toggleTag = (tagId: string) =>
+		setTagFilter((prev) => {
+			const next = new Set(prev);
+			if (next.has(tagId)) next.delete(tagId);
+			else next.add(tagId);
+			return next;
+		});
 
 	const assignedIds = new Set(Object.values(assign));
 	const pool = employees.filter((e) => {
 		if (assignedIds.has(e.id)) return false;
-		if (tagFilter && !e.tags.some((t) => t.id === tagFilter)) return false;
+		if (tagFilter.size > 0 && !e.tags.some((t) => tagFilter.has(t.id)))
+			return false;
 		const q = poolSearch.trim();
 		if (!q) return true;
 		return `${e.lastName}${e.firstName}${e.code}`.includes(q);
@@ -339,13 +356,81 @@ function AssignmentDetail() {
 							placeholder="名前で検索"
 							className="w-full font-sans text-xs px-2.75 py-2 rounded-sm border border-border bg-surface outline-none"
 						/>
-						{tagOptions.length > 1 && (
-							<Select
-								value={tagFilter}
-								onChange={(e) => setTagFilter(e.target.value)}
-								options={tagOptions}
-								className="mt-2 text-xs py-2"
-							/>
+						{tagOptions.length > 0 && (
+							<div className="relative mt-2" ref={tagMenuRef}>
+								<button
+									type="button"
+									onClick={() => setTagMenuOpen((v) => !v)}
+									className="w-full flex items-center justify-between gap-1.5 border border-border rounded-sm px-2.75 py-2 bg-surface text-xs font-bold text-ink cursor-pointer hover:bg-hairline"
+								>
+									<span>
+										タグで絞り込み
+										{tagFilter.size > 0 && (
+											<span className="text-primary-hover ml-1">
+												（{tagFilter.size}）
+											</span>
+										)}
+									</span>
+									<span className="text-faint text-[10px]">▾</span>
+								</button>
+								{tagMenuOpen && (
+									<div className="absolute top-9.5 left-0 right-0 bg-surface border border-border rounded-[9px] shadow-float p-1.5 z-30">
+										<input
+											value={tagSearch}
+											onChange={(e) => setTagSearch(e.target.value)}
+											placeholder="タグ名で検索"
+											className="w-full font-sans text-xs px-2.25 py-1.75 rounded-sm border border-border bg-surface outline-none mb-1.25"
+										/>
+										<div className="max-h-48 overflow-auto flex flex-col gap-0.5">
+											{filteredTagOptions.length === 0 ? (
+												<div className="text-[11.5px] text-faint text-center py-2.5">
+													該当するタグがありません
+												</div>
+											) : (
+												filteredTagOptions.map((t) => {
+													const active = tagFilter.has(t.id);
+													return (
+														<button
+															key={t.id}
+															type="button"
+															onClick={() => toggleTag(t.id)}
+															className="w-full flex items-center gap-2 px-2.25 py-1.75 rounded-sm text-[12.5px] font-semibold text-ink hover:bg-hairline cursor-pointer border-none bg-transparent"
+														>
+															<span
+																className={`w-3.5 h-3.5 rounded-[4px] border flex items-center justify-center shrink-0 text-[10px] ${
+																	active
+																		? "bg-primary border-primary text-white"
+																		: "border-border"
+																}`}
+															>
+																{active && "✓"}
+															</span>
+															{t.name}
+														</button>
+													);
+												})
+											)}
+										</div>
+									</div>
+								)}
+							</div>
+						)}
+						{tagFilter.size > 0 && (
+							<div className="flex flex-wrap gap-1 mt-1.5">
+								{[...tagFilter].map((id) => {
+									const name = tagOptions.find((t) => t.id === id)?.name ?? "";
+									return (
+										<button
+											key={id}
+											type="button"
+											onClick={() => toggleTag(id)}
+											className="text-[10.5px] font-bold text-primary-hover bg-primary-soft px-2 py-0.75 rounded-pill cursor-pointer border-none"
+										>
+											{name} ×
+										</button>
+									);
+								})}
+							</div>
 						)}
 						<div className="flex flex-col gap-1.75 mt-2.75 overflow-auto">
 							{pool.map((e) => (
