@@ -1,7 +1,7 @@
 import type { ShiftMode } from "@haiz/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { OptionCard } from "#/components/ui/OptionCard";
@@ -107,6 +107,21 @@ function ShiftSettings() {
 			return prev.filter((s) => s.key !== key);
 		});
 
+	const dragKey = useRef<string | null>(null);
+	const [dragOverKey, setDragOverKey] = useState<string | null>(null);
+
+	const reorderShift = (draggedKey: string, targetKey: string) =>
+		setShifts((prev) => {
+			if (draggedKey === targetKey) return prev;
+			const from = prev.findIndex((s) => s.key === draggedKey);
+			const to = prev.findIndex((s) => s.key === targetKey);
+			if (from < 0 || to < 0) return prev;
+			const next = [...prev];
+			const [moved] = next.splice(from, 1);
+			next.splice(to, 0, moved);
+			return next;
+		});
+
 	// 開始・終了が完全に同じシフト、または同名シフトは重複登録できない
 	const duplicateError = useMemo(() => {
 		if (mode !== "multi") return null;
@@ -186,7 +201,8 @@ function ShiftSettings() {
 								</span>
 							</div>
 						)}
-						<div className="grid grid-cols-[1.6fr_1fr_1fr_auto] gap-2.5 px-1 pb-2 text-[11px] font-bold text-faint tracking-wide">
+						<div className="grid grid-cols-[auto_1.6fr_1fr_1fr_auto] gap-2.5 px-1 pb-2 text-[11px] font-bold text-faint tracking-wide">
+							<div />
 							<div>シフト名</div>
 							<div>開始</div>
 							<div>終了</div>
@@ -194,10 +210,42 @@ function ShiftSettings() {
 						</div>
 						<div className="flex flex-col gap-2.25">
 							{shifts.map((sh) => (
-								<div
+								<fieldset
 									key={sh.key}
-									className="grid grid-cols-[1.6fr_1fr_1fr_auto] gap-2.5 items-center"
+									aria-label={`シフト ${sh.name || "新規シフト"}`}
+									draggable={false}
+									onDragOver={(e) => {
+										e.preventDefault();
+										if (dragOverKey !== sh.key) setDragOverKey(sh.key);
+									}}
+									onDragLeave={() =>
+										setDragOverKey((k) => (k === sh.key ? null : k))
+									}
+									onDrop={(e) => {
+										e.preventDefault();
+										if (dragKey.current) reorderShift(dragKey.current, sh.key);
+										dragKey.current = null;
+										setDragOverKey(null);
+									}}
+									className={`grid grid-cols-[auto_1.6fr_1fr_1fr_auto] gap-2.5 items-center rounded-sm border-none p-0 m-0 ${
+										dragOverKey === sh.key ? "bg-primary-soft/40" : ""
+									}`}
 								>
+									<button
+										type="button"
+										draggable
+										onDragStart={() => {
+											dragKey.current = sh.key;
+										}}
+										onDragEnd={() => {
+											dragKey.current = null;
+											setDragOverKey(null);
+										}}
+										title="ドラッグで並び替え"
+										className="w-8.5 h-8.5 flex items-center justify-center rounded-sm bg-app-bg text-faint text-base cursor-grab active:cursor-grabbing hover:bg-hairline"
+									>
+										⠿
+									</button>
 									<Input
 										value={sh.name}
 										onChange={(e) =>
@@ -227,7 +275,7 @@ function ShiftSettings() {
 									>
 										×
 									</button>
-								</div>
+								</fieldset>
 							))}
 						</div>
 					</div>
