@@ -13,7 +13,9 @@ import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppViewerRouteImport } from './routes/_app.viewer'
+import { Route as AppSitesRouteImport } from './routes/_app.sites'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppOrganizationSettingsRouteImport } from './routes/_app.organization-settings'
 import { Route as AppMembersRouteImport } from './routes/_app.members'
 import { Route as AppHomeRouteImport } from './routes/_app.home'
 import { Route as AppHistoryRouteImport } from './routes/_app.history'
@@ -47,9 +49,19 @@ const AppViewerRoute = AppViewerRouteImport.update({
   path: '/viewer',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSitesRoute = AppSitesRouteImport.update({
+  id: '/sites',
+  path: '/sites',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOrganizationSettingsRoute = AppOrganizationSettingsRouteImport.update({
+  id: '/organization-settings',
+  path: '/organization-settings',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMembersRoute = AppMembersRouteImport.update({
@@ -127,7 +139,9 @@ export interface FileRoutesByFullPath {
   '/history': typeof AppHistoryRoute
   '/home': typeof AppHomeRoute
   '/members': typeof AppMembersRoute
+  '/organization-settings': typeof AppOrganizationSettingsRoute
   '/settings': typeof AppSettingsRouteWithChildren
+  '/sites': typeof AppSitesRoute
   '/viewer': typeof AppViewerRoute
   '/assignment/$areaId': typeof AppAssignmentAreaIdRoute
   '/editor/$areaId': typeof AppEditorAreaIdRoute
@@ -144,7 +158,9 @@ export interface FileRoutesByTo {
   '/history': typeof AppHistoryRoute
   '/home': typeof AppHomeRoute
   '/members': typeof AppMembersRoute
+  '/organization-settings': typeof AppOrganizationSettingsRoute
   '/settings': typeof AppSettingsRouteWithChildren
+  '/sites': typeof AppSitesRoute
   '/viewer': typeof AppViewerRoute
   '/assignment/$areaId': typeof AppAssignmentAreaIdRoute
   '/editor/$areaId': typeof AppEditorAreaIdRoute
@@ -165,7 +181,9 @@ export interface FileRoutesById {
   '/_app/history': typeof AppHistoryRoute
   '/_app/home': typeof AppHomeRoute
   '/_app/members': typeof AppMembersRoute
+  '/_app/organization-settings': typeof AppOrganizationSettingsRoute
   '/_app/settings': typeof AppSettingsRouteWithChildren
+  '/_app/sites': typeof AppSitesRoute
   '/_app/viewer': typeof AppViewerRoute
   '/_app/assignment/$areaId': typeof AppAssignmentAreaIdRoute
   '/_app/editor/$areaId': typeof AppEditorAreaIdRoute
@@ -186,7 +204,9 @@ export interface FileRouteTypes {
     | '/history'
     | '/home'
     | '/members'
+    | '/organization-settings'
     | '/settings'
+    | '/sites'
     | '/viewer'
     | '/assignment/$areaId'
     | '/editor/$areaId'
@@ -203,7 +223,9 @@ export interface FileRouteTypes {
     | '/history'
     | '/home'
     | '/members'
+    | '/organization-settings'
     | '/settings'
+    | '/sites'
     | '/viewer'
     | '/assignment/$areaId'
     | '/editor/$areaId'
@@ -223,7 +245,9 @@ export interface FileRouteTypes {
     | '/_app/history'
     | '/_app/home'
     | '/_app/members'
+    | '/_app/organization-settings'
     | '/_app/settings'
+    | '/_app/sites'
     | '/_app/viewer'
     | '/_app/assignment/$areaId'
     | '/_app/editor/$areaId'
@@ -270,11 +294,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppViewerRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/sites': {
+      id: '/_app/sites'
+      path: '/sites'
+      fullPath: '/sites'
+      preLoaderRoute: typeof AppSitesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/settings': {
       id: '/_app/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/organization-settings': {
+      id: '/_app/organization-settings'
+      path: '/organization-settings'
+      fullPath: '/organization-settings'
+      preLoaderRoute: typeof AppOrganizationSettingsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/members': {
@@ -422,7 +460,9 @@ interface AppRouteChildren {
   AppHistoryRoute: typeof AppHistoryRoute
   AppHomeRoute: typeof AppHomeRoute
   AppMembersRoute: typeof AppMembersRoute
+  AppOrganizationSettingsRoute: typeof AppOrganizationSettingsRoute
   AppSettingsRoute: typeof AppSettingsRouteWithChildren
+  AppSitesRoute: typeof AppSitesRoute
   AppViewerRoute: typeof AppViewerRoute
 }
 
@@ -433,7 +473,9 @@ const AppRouteChildren: AppRouteChildren = {
   AppHistoryRoute: AppHistoryRoute,
   AppHomeRoute: AppHomeRoute,
   AppMembersRoute: AppMembersRoute,
+  AppOrganizationSettingsRoute: AppOrganizationSettingsRoute,
   AppSettingsRoute: AppSettingsRouteWithChildren,
+  AppSitesRoute: AppSitesRoute,
   AppViewerRoute: AppViewerRoute,
 }
 

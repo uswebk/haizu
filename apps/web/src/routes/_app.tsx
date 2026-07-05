@@ -13,12 +13,14 @@ const MAIN_NAV = [
 	{ label: "配置決め", to: "/assignment" as const },
 	{ label: "配置履歴", to: "/history" as const },
 	{ label: "ビュアー", to: "/viewer" as const },
+	{ label: "従業員", to: "/employees" as const },
+	{ label: "設定", to: "/settings" as const },
 ];
 
 const ADMIN_NAV = [
-	{ label: "従業員", to: "/employees" as const },
+	{ label: "拠点管理", to: "/sites" as const },
 	{ label: "メンバー", to: "/members" as const },
-	{ label: "設定", to: "/settings" as const },
+	{ label: "事業所設定", to: "/organization-settings" as const },
 ];
 
 function AppLayout() {
@@ -45,7 +47,7 @@ function AppLayout() {
 				</div>
 
 				<div className="font-mono text-[10.5px] tracking-[.12em] text-faint px-3 pb-2">
-					メイン
+					A工場管理
 				</div>
 				{MAIN_NAV.map((item) => (
 					<Link
@@ -61,7 +63,7 @@ function AppLayout() {
 				))}
 
 				<div className="font-mono text-[10.5px] tracking-[.12em] text-faint px-3 pb-2 pt-4.5">
-					管理
+					事業所管理
 				</div>
 				{ADMIN_NAV.map((item) => (
 					<Link key={item.to} to={item.to} className="block">
