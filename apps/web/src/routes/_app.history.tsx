@@ -13,7 +13,7 @@ import {
 	historyKeys,
 } from "#/lib/api/assignments";
 import { fetchEmployees } from "#/lib/api/employees";
-import { formatDateLabel } from "#/lib/datetime";
+import { formatDateLabel, yesterdayStr } from "#/lib/datetime";
 
 type HistorySearch = {
 	date?: string;
@@ -68,7 +68,8 @@ function History() {
 function HistoryList() {
 	const search = Route.useSearch();
 	const navigate = useNavigate();
-	const filterDate = search.date ?? null;
+	// 日付は必須。未指定時は前日をデフォルトにする（全件検索を防ぐため）
+	const filterDate = search.date ?? yesterdayStr();
 	const page = search.page ?? 1;
 	const empById = useEmployeeMap();
 
@@ -76,7 +77,7 @@ function HistoryList() {
 		queryKey: historyKeys.list(filterDate, page),
 		queryFn: () =>
 			fetchAssignmentHistory({
-				date: filterDate ?? undefined,
+				date: filterDate,
 				limit: PAGE_SIZE,
 				offset: (page - 1) * PAGE_SIZE,
 			}),
@@ -91,11 +92,6 @@ function HistoryList() {
 		navigate({
 			to: "/history",
 			search: (prev) => ({ ...prev, date, page: undefined }),
-		});
-	const clearDate = () =>
-		navigate({
-			to: "/history",
-			search: (prev) => ({ ...prev, date: undefined, page: undefined }),
 		});
 	const setPage = (next: number) =>
 		navigate({ to: "/history", search: (prev) => ({ ...prev, page: next }) });
@@ -113,19 +109,12 @@ function HistoryList() {
 					<div className="flex items-center gap-2">
 						<input
 							type="date"
-							value={filterDate ?? ""}
-							onChange={(e) => setDate(e.target.value)}
+							value={filterDate}
+							onChange={(e) => {
+								if (e.target.value) setDate(e.target.value);
+							}}
 							className="font-sans text-[13px] font-bold text-ink border border-border rounded-md px-3.25 py-2.25 bg-surface outline-none"
 						/>
-						{filterDate && (
-							<button
-								type="button"
-								onClick={clearDate}
-								className="font-sans text-[12.5px] font-bold text-muted border border-border rounded-md px-3.25 py-2.25 bg-surface cursor-pointer hover:bg-hairline"
-							>
-								クリア
-							</button>
-						)}
 					</div>
 				</div>
 
@@ -135,7 +124,7 @@ function HistoryList() {
 							該当する記録がありません
 						</div>
 						<div className="text-[12.5px] text-faint mt-1.5">
-							日付を変えるか、フィルタをクリアしてください。
+							日付を変えて確認してください。
 						</div>
 					</div>
 				) : (

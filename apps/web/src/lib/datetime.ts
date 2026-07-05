@@ -13,6 +13,13 @@ export function todayStr(): string {
 	return toDateStr(new Date());
 }
 
+// 前日の "YYYY-MM-DD"
+export function yesterdayStr(): string {
+	const d = new Date();
+	d.setDate(d.getDate() - 1);
+	return toDateStr(d);
+}
+
 // "YYYY-MM-DD" → "YYYY/M/D（曜）"
 export function formatDateLabel(date: string): string {
 	const d = new Date(`${date}T00:00:00`);

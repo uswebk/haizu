@@ -56,20 +56,20 @@ export type HistoryEntry = {
 export type HistoryPage = { entries: HistoryEntry[]; total: number };
 
 export const historyKeys = {
-	list: (date: string | null, page: number) =>
-		["assignments", "history", date ?? "all", page] as const,
+	list: (date: string, page: number) =>
+		["assignments", "history", date, page] as const,
 };
 
 export async function fetchAssignmentHistory(params: {
-	date?: string;
+	date: string;
 	limit: number;
 	offset: number;
 }): Promise<HistoryPage> {
 	const q = new URLSearchParams({
+		date: params.date,
 		limit: String(params.limit),
 		offset: String(params.offset),
 	});
-	if (params.date) q.set("date", params.date);
 	const res = await fetch(`${API_BASE}/assignments/history?${q.toString()}`);
 	return handleResponse<HistoryPage>(res);
 }

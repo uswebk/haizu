@@ -31,7 +31,7 @@ const dateQuery = z.object({
 });
 
 const historyQuery = z.object({
-	date: z.string().date().optional(),
+	date: z.string().date(),
 	limit: z.coerce.number().int().min(1).max(100).optional(),
 	offset: z.coerce.number().int().min(0).optional(),
 });
@@ -123,9 +123,10 @@ export const assignmentsRoute = new Hono()
 	.get("/history", zValidator("query", historyQuery), async (c) => {
 		const { date, limit = 50, offset = 0 } = c.req.valid("query");
 
-		const where = date
-			? and(eq(assignments.status, "confirmed"), eq(assignments.date, date))
-			: eq(assignments.status, "confirmed");
+		const where = and(
+			eq(assignments.status, "confirmed"),
+			eq(assignments.date, date),
+		);
 
 		const [{ total } = { total: 0 }] = await db
 			.select({ total: count() })
