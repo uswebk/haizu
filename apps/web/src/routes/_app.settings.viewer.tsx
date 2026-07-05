@@ -16,11 +16,14 @@ export const Route = createFileRoute("/_app/settings/viewer")({
 	component: ViewerSettings,
 });
 
+type LeadDir = "before" | "after";
+
 type Draft = {
 	mode: ViewerMode;
 	displayDate: string;
 	shiftId: string | null;
-	leadMinutes: string; // 入力中は文字列で保持し、保存時に数値化する
+	leadMinutes: string; // 大きさ（0–240）。入力中は文字列で保持し、保存時に数値化する
+	leadDir: LeadDir; // before=分前 / after=分後
 };
 
 function defaultConfig(areaId: string): ViewerConfig {
@@ -59,13 +62,32 @@ function ViewerSettings() {
 			? (shiftOptions.find((s) => s.id === shiftId)?.name ?? "不明なシフト")
 			: "終日";
 
+	const saveMutation = useMutation({
+		mutationFn: () => {
+			if (!selectedAreaId || !draft) throw new Error("no draft");
+			const mag = clampLead(draft.leadMinutes);
+			const signed = draft.leadDir === "before" ? mag : -mag;
+			return saveViewerConfig(selectedAreaId, {
+				mode: draft.mode,
+				displayDate: draft.mode === "manual" ? draft.displayDate : null,
+				shiftId: draft.mode === "manual" ? draft.shiftId : null,
+				leadMinutes: draft.mode === "auto" ? signed : 0,
+			});
+		},
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: viewerConfigKeys.all });
+		},
+	});
+
 	const openArea = (areaId: string) => {
+		saveMutation.reset();
 		const cfg = configByArea.get(areaId) ?? defaultConfig(areaId);
 		setDraft({
 			mode: cfg.mode,
 			displayDate: cfg.displayDate ?? todayStr(),
 			shiftId: cfg.shiftId ?? shiftOptions[0]?.id ?? null,
-			leadMinutes: String(cfg.leadMinutes),
+			leadMinutes: String(Math.abs(cfg.leadMinutes)),
+			leadDir: cfg.leadMinutes < 0 ? "after" : "before",
 		});
 		setSelectedAreaId(areaId);
 	};
@@ -74,22 +96,6 @@ function ViewerSettings() {
 		setSelectedAreaId(null);
 		setDraft(null);
 	};
-
-	const saveMutation = useMutation({
-		mutationFn: () => {
-			if (!selectedAreaId || !draft) throw new Error("no draft");
-			return saveViewerConfig(selectedAreaId, {
-				mode: draft.mode,
-				displayDate: draft.mode === "manual" ? draft.displayDate : null,
-				shiftId: draft.mode === "manual" ? draft.shiftId : null,
-				leadMinutes: draft.mode === "auto" ? clampLead(draft.leadMinutes) : 0,
-			});
-		},
-		onSuccess: () => {
-			void queryClient.invalidateQueries({ queryKey: viewerConfigKeys.all });
-			closeArea();
-		},
-	});
 
 	const selectedArea = areas.find((a) => a.id === selectedAreaId);
 
@@ -186,7 +192,7 @@ function ViewerSettings() {
 								働き方（シフト）設定の時間帯に基づいて切り替わります。
 							</div>
 							<div className="block text-xs font-semibold text-muted mb-2">
-								シフト開始の何分前から表示するか
+								シフト開始の何分前／何分後から表示するか
 							</div>
 							<div className="flex items-center gap-2.5">
 								<input
@@ -206,23 +212,48 @@ function ViewerSettings() {
 									className="w-27.5 font-sans text-sm font-bold text-ink border border-border rounded-md px-3 py-2.5 bg-surface outline-none"
 								/>
 								<span className="text-[13.5px] font-semibold text-muted">
-									分前から表示
+									分
+								</span>
+								<div className="flex items-center gap-1 border border-border rounded-md p-0.75 bg-app-bg">
+									{(["before", "after"] as const).map((dir) => (
+										<button
+											key={dir}
+											type="button"
+											onClick={() => setDraft({ ...draft, leadDir: dir })}
+											className={`text-[12.5px] px-3.25 py-1.5 rounded-sm cursor-pointer ${
+												draft.leadDir === dir
+													? "font-bold text-primary bg-primary-soft"
+													: "font-semibold text-muted"
+											}`}
+										>
+											{dir === "before" ? "前" : "後"}
+										</button>
+									))}
+								</div>
+								<span className="text-[13.5px] font-semibold text-muted">
+									から表示
 								</span>
 							</div>
 							<div className="text-[11.5px] text-faint mt-2.5">
-								例：30
-								と設定すると、シフト開始30分前になると次のシフトの配置に切り替わります。
+								例：30分前 →
+								シフト開始30分前に次のシフトの配置へ切り替え。30分後 →
+								シフト開始30分後に切り替わります。
 							</div>
 						</div>
 					)}
 
-					<div className="flex justify-end gap-2.5 mt-5">
+					<div className="flex items-center justify-end gap-2.5 mt-5">
+						{saveMutation.isSuccess && !saveMutation.isPending && (
+							<span className="text-[12.5px] font-bold text-success mr-auto">
+								保存しました
+							</span>
+						)}
 						<Button
 							variant="secondary"
 							onClick={closeArea}
 							disabled={saveMutation.isPending}
 						>
-							キャンセル
+							一覧へ戻る
 						</Button>
 						<Button
 							onClick={() => saveMutation.mutate()}
@@ -256,7 +287,7 @@ function ViewerSettings() {
 						const isManual = cfg.mode === "manual";
 						const detail = isManual
 							? `${cfg.displayDate ?? "-"} ・ ${shiftLabel(cfg.shiftId)}`
-							: `${cfg.leadMinutes}分前から自動表示`;
+							: `${Math.abs(cfg.leadMinutes)}分${cfg.leadMinutes < 0 ? "後" : "前"}から自動表示`;
 						return (
 							<button
 								key={area.id}
