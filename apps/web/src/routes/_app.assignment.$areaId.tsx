@@ -68,6 +68,9 @@ function AssignmentDetail() {
 
 	const shiftOptions = getShiftOptions(workPattern);
 	const effective = resolveEffectiveShift(workPattern, search.shiftId);
+	const effectiveShift = workPattern?.shifts.find(
+		(s) => s.id === effective.shiftId,
+	);
 
 	const { data: assignments = [] } = useQuery({
 		queryKey: assignmentKeys.byDateShift(date, effective.shiftId),
@@ -619,6 +622,12 @@ function AssignmentDetail() {
 											{activeVersion ? `規格 ${activeVersion.label} ` : ""}
 											のスポット数
 										</div>
+										{effectiveShift && (
+											<div className="text-[11.5px] font-semibold text-primary-hover mt-1">
+												{effective.label}（{effectiveShift.startTime}–
+												{effectiveShift.endTime}）
+											</div>
+										)}
 									</div>
 								</div>
 								<div className="text-[11.5px] text-muted leading-relaxed border border-border rounded-lg p-3 bg-table-head">
