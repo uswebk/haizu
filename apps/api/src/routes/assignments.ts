@@ -1,10 +1,20 @@
 import { zValidator } from "@hono/zod-validator";
 import { AssignmentInputSchema } from "@haiz/shared";
-import { and, eq, inArray, isNotNull, isNull } from "drizzle-orm";
+import {
+	and,
+	asc,
+	count,
+	desc,
+	eq,
+	inArray,
+	isNotNull,
+	isNull,
+} from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
 import {
+	areas,
 	assignments,
 	layoutSpecVersions,
 	shifts,
@@ -18,6 +28,12 @@ const listQuery = z.object({
 
 const dateQuery = z.object({
 	date: z.string().date(),
+});
+
+const historyQuery = z.object({
+	date: z.string().date().optional(),
+	limit: z.coerce.number().int().min(1).max(100).optional(),
+	offset: z.coerce.number().int().min(0).optional(),
 });
 
 type AssignmentRow = typeof assignments.$inferSelect;
@@ -69,6 +85,58 @@ export const assignmentsRoute = new Hono()
 			.limit(1);
 
 		return c.json({ mismatched: found.length > 0 });
+	})
+
+	.get("/history", zValidator("query", historyQuery), async (c) => {
+		const { date, limit = 50, offset = 0 } = c.req.valid("query");
+
+		const where = date
+			? and(eq(assignments.status, "confirmed"), eq(assignments.date, date))
+			: eq(assignments.status, "confirmed");
+
+		const [{ total } = { total: 0 }] = await db
+			.select({ total: count() })
+			.from(assignments)
+			.where(where);
+
+		// shifts は left join（soft-delete 済みでも name は保持されるため当時のシフト名を表示できる）
+		const rows = await db
+			.select({
+				id: assignments.id,
+				areaId: assignments.areaId,
+				areaName: areas.name,
+				date: assignments.date,
+				shiftId: assignments.shiftId,
+				shiftName: shifts.name,
+				shiftOrder: shifts.order,
+				layoutSpecVersionId: assignments.layoutSpecVersionId,
+			})
+			.from(assignments)
+			.innerJoin(areas, eq(assignments.areaId, areas.id))
+			.leftJoin(shifts, eq(assignments.shiftId, shifts.id))
+			.where(where)
+			.orderBy(desc(assignments.date), asc(shifts.order), asc(areas.name))
+			.limit(limit)
+			.offset(offset);
+
+		const membersByAssignment = await loadSpotAssignmentsByAssignmentIds(
+			rows.map((r) => r.id),
+		);
+
+		const entries = rows.map((r) => ({
+			id: r.id,
+			areaId: r.areaId,
+			areaName: r.areaName,
+			date: r.date,
+			shiftId: r.shiftId,
+			shiftName: r.shiftName,
+			layoutSpecVersionId: r.layoutSpecVersionId,
+			employeeIds: (membersByAssignment.get(r.id) ?? []).map(
+				(m) => m.employeeId,
+			),
+		}));
+
+		return c.json({ entries, total });
 	})
 
 	.get("/", zValidator("query", listQuery), async (c) => {

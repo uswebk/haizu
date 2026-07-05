@@ -40,3 +40,36 @@ export async function fetchShiftMismatch(date: string): Promise<boolean> {
 	const data = await handleResponse<{ mismatched: boolean }>(res);
 	return data.mismatched;
 }
+
+// 確定済み配置の履歴1件（一覧テーブル1行分）
+export type HistoryEntry = {
+	id: string;
+	areaId: string;
+	areaName: string;
+	date: string;
+	shiftId: string | null;
+	shiftName: string | null;
+	layoutSpecVersionId: string;
+	employeeIds: string[];
+};
+
+export type HistoryPage = { entries: HistoryEntry[]; total: number };
+
+export const historyKeys = {
+	list: (date: string | null, page: number) =>
+		["assignments", "history", date ?? "all", page] as const,
+};
+
+export async function fetchAssignmentHistory(params: {
+	date?: string;
+	limit: number;
+	offset: number;
+}): Promise<HistoryPage> {
+	const q = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+	});
+	if (params.date) q.set("date", params.date);
+	const res = await fetch(`${API_BASE}/assignments/history?${q.toString()}`);
+	return handleResponse<HistoryPage>(res);
+}
