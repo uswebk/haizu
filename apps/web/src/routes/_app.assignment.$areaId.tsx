@@ -135,10 +135,18 @@ function AssignmentDetail() {
 	const assignToSpot = (spotId: string, empId: string) => {
 		setAssign((prev) => {
 			const next = { ...prev };
+			let oldSpotId: string | null = null;
 			for (const [sid, eid] of Object.entries(next)) {
-				if (eid === empId) delete next[sid];
+				if (eid === empId) {
+					oldSpotId = sid;
+					delete next[sid];
+				}
 			}
+			const bumpedEmpId = next[spotId];
 			next[spotId] = empId;
+			if (bumpedEmpId && bumpedEmpId !== empId && oldSpotId) {
+				next[oldSpotId] = bumpedEmpId;
+			}
 			return next;
 		});
 	};
