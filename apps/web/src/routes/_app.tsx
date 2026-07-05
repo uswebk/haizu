@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { NavItem } from "#/components/ui/NavItem";
+import { useSite } from "#/contexts/site-context";
 import { useDismiss } from "#/hooks/useDismiss";
 
 export const Route = createFileRoute("/_app")({
@@ -24,6 +25,7 @@ const ADMIN_NAV = [
 ];
 
 function AppLayout() {
+	const { currentSite } = useSite();
 	const [userMenuOpen, setUserMenuOpen] = useState(false);
 	const userMenuRef = useRef<HTMLDivElement>(null);
 	useDismiss(userMenuOpen, () => setUserMenuOpen(false), userMenuRef);
@@ -47,7 +49,7 @@ function AppLayout() {
 				</div>
 
 				<div className="font-mono text-[10.5px] tracking-[.12em] text-faint px-3 pb-2">
-					A工場管理
+					{currentSite.name}管理
 				</div>
 				{MAIN_NAV.map((item) => (
 					<Link
@@ -90,13 +92,14 @@ function AppLayout() {
 				<header className="h-15.5 shrink-0 bg-surface border-b border-border flex items-center justify-between px-6 gap-4">
 					<div className="flex items-center gap-2.25 border border-border rounded-[10px] px-3 py-1.75 bg-surface">
 						<div className="w-2 h-2 rounded-[2px] bg-primary" />
-						<span className="text-[13.5px] font-bold">A工場</span>
-						<button
-							type="button"
+						<span className="text-[13.5px] font-bold">{currentSite.name}</span>
+						<Link
+							to="/select-site"
+							title="拠点を切り替え"
 							className="text-[11.5px] font-bold text-primary bg-primary-soft px-2.25 py-1 rounded-[7px] cursor-pointer border-none"
 						>
 							切り替え
-						</button>
+						</Link>
 					</div>
 					<div className="flex items-center gap-3.5">
 						<span className="text-[13px] text-muted font-medium">

@@ -11,8 +11,42 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 
+export const organizations = pgTable("organizations", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	name: text("name").notNull(),
+	email: text("email"),
+	isActive: boolean("is_active").notNull().default(true),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
+export const sites = pgTable("sites", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	organizationId: uuid("organization_id")
+		.notNull()
+		.references(() => organizations.id, { onDelete: "cascade" }),
+	name: text("name").notNull(),
+	description: text("description").notNull().default(""),
+	iconBg: text("icon_bg").notNull(),
+	iconColor: text("icon_color").notNull(),
+	isActive: boolean("is_active").notNull().default(true),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
 export const areas = pgTable("areas", {
 	id: uuid("id").primaryKey().defaultRandom(),
+	siteId: uuid("site_id")
+		.notNull()
+		.references(() => sites.id, { onDelete: "cascade" }),
 	name: text("name").notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true })
 		.notNull()
@@ -62,6 +96,9 @@ export const employees = pgTable(
 	"employees",
 	{
 		id: uuid("id").primaryKey().defaultRandom(),
+		siteId: uuid("site_id")
+			.notNull()
+			.references(() => sites.id, { onDelete: "cascade" }),
 		code: text("code").notNull(),
 		lastName: text("last_name").notNull(),
 		firstName: text("first_name").notNull(),
@@ -74,19 +111,24 @@ export const employees = pgTable(
 			.notNull()
 			.defaultNow(),
 	},
-	(t) => [uniqueIndex("employees_code_unique").on(t.code)],
+	// 従業員コードは拠点内で一意
+	(t) => [uniqueIndex("employees_site_id_code_unique").on(t.siteId, t.code)],
 );
 
 export const tags = pgTable(
 	"tags",
 	{
 		id: uuid("id").primaryKey().defaultRandom(),
+		siteId: uuid("site_id")
+			.notNull()
+			.references(() => sites.id, { onDelete: "cascade" }),
 		name: text("name").notNull(),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),
 	},
-	(t) => [uniqueIndex("tags_name_unique").on(t.name)],
+	// タグ名は拠点内で一意
+	(t) => [uniqueIndex("tags_site_id_name_unique").on(t.siteId, t.name)],
 );
 
 export const employeeTags = pgTable(
@@ -107,18 +149,26 @@ export const employeeTags = pgTable(
 	],
 );
 
-export const workPatterns = pgTable("work_patterns", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	mode: text("mode", { enum: ["single", "multi"] })
-		.notNull()
-		.default("single"),
-	createdAt: timestamp("created_at", { withTimezone: true })
-		.notNull()
-		.defaultNow(),
-	updatedAt: timestamp("updated_at", { withTimezone: true })
-		.notNull()
-		.defaultNow(),
-});
+export const workPatterns = pgTable(
+	"work_patterns",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		siteId: uuid("site_id")
+			.notNull()
+			.references(() => sites.id, { onDelete: "cascade" }),
+		mode: text("mode", { enum: ["single", "multi"] })
+			.notNull()
+			.default("single"),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	// 拠点ごとに1レコード
+	(t) => [uniqueIndex("work_patterns_site_id_unique").on(t.siteId)],
+);
 
 export const shifts = pgTable(
 	"shifts",

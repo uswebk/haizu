@@ -1,5 +1,5 @@
 import type { Assignment, AssignmentInput } from "@haiz/shared";
-import { API_BASE } from ".";
+import { API_BASE, apiFetch } from ".";
 
 async function handleResponse<T>(res: Response): Promise<T> {
 	if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -17,7 +17,7 @@ export async function fetchAssignments(params: {
 }): Promise<Assignment[]> {
 	const query = new URLSearchParams({ date: params.date });
 	if (params.shiftId) query.set("shiftId", params.shiftId);
-	const res = await fetch(`${API_BASE}/assignments?${query.toString()}`);
+	const res = await apiFetch(`${API_BASE}/assignments?${query.toString()}`);
 	const data = await handleResponse<{ assignments: Assignment[] }>(res);
 	return data.assignments;
 }
@@ -25,7 +25,7 @@ export async function fetchAssignments(params: {
 export async function saveAssignment(
 	input: AssignmentInput,
 ): Promise<Assignment> {
-	const res = await fetch(`${API_BASE}/assignments`, {
+	const res = await apiFetch(`${API_BASE}/assignments`, {
 		method: "PUT",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(input),
@@ -34,7 +34,7 @@ export async function saveAssignment(
 }
 
 export async function fetchShiftMismatch(date: string): Promise<boolean> {
-	const res = await fetch(
+	const res = await apiFetch(
 		`${API_BASE}/assignments/shift-mismatch?date=${date}`,
 	);
 	const data = await handleResponse<{ mismatched: boolean }>(res);
@@ -70,7 +70,7 @@ export async function fetchAssignmentHistory(params: {
 		limit: String(params.limit),
 		offset: String(params.offset),
 	});
-	const res = await fetch(`${API_BASE}/assignments/history?${q.toString()}`);
+	const res = await apiFetch(`${API_BASE}/assignments/history?${q.toString()}`);
 	return handleResponse<HistoryPage>(res);
 }
 
@@ -90,7 +90,7 @@ export async function fetchShiftsUsed(
 ): Promise<UsedShift[]> {
 	const q = new URLSearchParams({ areaId });
 	if (date) q.set("date", date);
-	const res = await fetch(
+	const res = await apiFetch(
 		`${API_BASE}/assignments/shifts-used?${q.toString()}`,
 	);
 	const data = await handleResponse<{ shifts: UsedShift[] }>(res);

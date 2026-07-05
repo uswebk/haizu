@@ -64,6 +64,13 @@
       "when": 1783233460832,
       "tag": "0008_jittery_the_liberteens",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1783274552385,
+      "tag": "0009_outstanding_kingpin",
+      "breakpoints": true
     }
   ]
 }

@@ -5,6 +5,7 @@ import { cors } from "hono/cors";
 import { areasRoute } from "./routes/areas";
 import { assignmentsRoute } from "./routes/assignments";
 import { employeesRoute } from "./routes/employees";
+import { sitesRoute } from "./routes/sites";
 import { tagsRoute } from "./routes/tags";
 import { viewerConfigsRoute } from "./routes/viewerConfigs";
 import { workPatternsRoute } from "./routes/workPatterns";
@@ -15,6 +16,9 @@ app.use("*", cors({ origin: "http://localhost:3000" }));
 
 app.get("/health", (c) => c.json({ status: "ok" }));
 app.use("/uploads/*", serveStatic({ root: "./" }));
+
+// 拠点スコープ配下のリソースは各ルート内で siteScope middleware を適用している
+app.route("/sites", sitesRoute);
 app.route("/areas", areasRoute);
 app.route("/assignments", assignmentsRoute);
 app.route("/employees", employeesRoute);

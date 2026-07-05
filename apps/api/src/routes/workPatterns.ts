@@ -4,12 +4,16 @@ import { and, eq, inArray, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db/client";
 import { shifts, workPatterns } from "../db/schema";
+import { siteScope } from "../middleware/site-scope";
+import type { AppEnv } from "../types";
 
-async function getOrCreateWorkPattern() {
-	const existing = await db.query.workPatterns.findFirst();
+async function getOrCreateWorkPattern(siteId: string) {
+	const existing = await db.query.workPatterns.findFirst({
+		where: eq(workPatterns.siteId, siteId),
+	});
 	if (existing) return existing;
 
-	const inserted = await db.insert(workPatterns).values({}).returning();
+	const inserted = await db.insert(workPatterns).values({ siteId }).returning();
 	const created = inserted[0];
 	if (!created) throw new Error("Failed to create work pattern");
 	return created;
@@ -25,11 +29,12 @@ async function loadShifts(workPatternId: string) {
 		.orderBy(shifts.order);
 }
 
-export const workPatternsRoute = new Hono()
+export const workPatternsRoute = new Hono<AppEnv>()
+	.use("*", siteScope)
 	.get("/", async (c) => {
 		// fixme: なるべくget or createは使用したくない。getに対して副作用を発生させたくないため
 		//        拠点作成時に、work_patternレコードを作りにいく。もし持ってなければ画面上から作れるようにしておく
-		const workPattern = await getOrCreateWorkPattern();
+		const workPattern = await getOrCreateWorkPattern(c.get("siteId"));
 		const rows = await loadShifts(workPattern.id);
 
 		return c.json({
@@ -46,7 +51,7 @@ export const workPatternsRoute = new Hono()
 
 	.put("/", zValidator("json", WorkPatternInputSchema), async (c) => {
 		const { mode, shifts: newShifts } = c.req.valid("json");
-		const workPattern = await getOrCreateWorkPattern();
+		const workPattern = await getOrCreateWorkPattern(c.get("siteId"));
 
 		const rows = mode === "single" ? [] : newShifts;
 

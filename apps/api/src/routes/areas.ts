@@ -1,12 +1,26 @@
 import { zValidator } from "@hono/zod-validator";
-import { eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
+import { createMiddleware } from "hono/factory";
 import { imageSize } from "image-size";
 import { z } from "zod";
 import { db } from "../db/client";
 import { areas, assignments, layoutSpecVersions, spots } from "../db/schema";
+import { siteScope } from "../middleware/site-scope";
 import { storage } from "../storage";
+import type { AppEnv } from "../types";
+
+// /:id 配下のサブルートで、対象エリアが現在拠点に属するかを検証する
+const areaGuard = createMiddleware<AppEnv>(async (c, next) => {
+	const id = c.req.param("id");
+	if (!id) return c.json({ error: "Not found" }, 404);
+	const area = await db.query.areas.findFirst({ where: eq(areas.id, id) });
+	if (!area || area.siteId !== c.get("siteId")) {
+		return c.json({ error: "Not found" }, 404);
+	}
+	await next();
+});
 
 const LOCKED_MESSAGE =
 	"この規格は配置決めで使用されているため編集できません。新しいバージョンを作成して編集してください。";
@@ -56,13 +70,16 @@ function resolveCurrentVersion<T extends VersionForResolution>(
 	return candidates[0] ?? null;
 }
 
-export const areasRoute = new Hono()
+export const areasRoute = new Hono<AppEnv>()
+	.use("*", siteScope)
+	.use("/:id/*", areaGuard)
 	.get(
 		"/",
 		zValidator("query", z.object({ date: z.string().date().optional() })),
 		async (c) => {
 			const { date } = c.req.valid("query");
 			const targetDate = date ?? todayDateStr();
+			const siteId = c.get("siteId");
 
 			// LATERAL JOIN でアクティブバージョン（指定日に適用される公開版を優先、次点で最新draft）を特定してスポット数を取得
 			const rows = await db.execute<{
@@ -96,6 +113,7 @@ export const areasRoute = new Hono()
 						version DESC
 					LIMIT 1
 				) av ON true
+				WHERE a.site_id = ${siteId}
 				ORDER BY a.created_at
 			`,
 			);
@@ -108,7 +126,7 @@ export const areasRoute = new Hono()
 		const { id } = c.req.param();
 
 		const area = await db.query.areas.findFirst({
-			where: eq(areas.id, id),
+			where: and(eq(areas.id, id), eq(areas.siteId, c.get("siteId"))),
 		});
 		if (!area) return c.json({ error: "Not found" }, 404);
 
@@ -179,7 +197,10 @@ export const areasRoute = new Hono()
 		async (c) => {
 			const { name } = c.req.valid("json");
 
-			const inserted = await db.insert(areas).values({ name }).returning();
+			const inserted = await db
+				.insert(areas)
+				.values({ name, siteId: c.get("siteId") })
+				.returning();
 			const area = inserted[0];
 			if (!area) return c.json({ error: "Insert failed" }, 500);
 			await db.insert(layoutSpecVersions).values({
@@ -458,7 +479,7 @@ export const areasRoute = new Hono()
 
 		const deleted = await db
 			.delete(areas)
-			.where(eq(areas.id, id))
+			.where(and(eq(areas.id, id), eq(areas.siteId, c.get("siteId"))))
 			.returning({ id: areas.id });
 
 		if (!deleted[0]) return c.json({ error: "Not found" }, 404);

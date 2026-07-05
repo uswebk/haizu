@@ -1,6 +1,6 @@
 import type { LayoutSpecStatus } from "@haiz/shared";
 import type { AreaData, SpotState } from "#/features/editor/types";
-import { API_BASE } from ".";
+import { API_BASE, apiFetch } from ".";
 
 export type AreaListItem = {
 	id: string;
@@ -35,13 +35,13 @@ export const areaKeys = {
 
 export async function fetchAreas(date?: string): Promise<AreaListItem[]> {
 	const query = date ? `?date=${date}` : "";
-	const res = await fetch(`${API_BASE}/areas${query}`);
+	const res = await apiFetch(`${API_BASE}/areas${query}`);
 	const data = await handleResponse<{ areas: AreaListItem[] }>(res);
 	return data.areas;
 }
 
 export async function fetchArea(id: string): Promise<AreaData> {
-	const res = await fetch(`${API_BASE}/areas/${id}`);
+	const res = await apiFetch(`${API_BASE}/areas/${id}`);
 	return handleResponse<AreaData>(res);
 }
 
@@ -49,7 +49,7 @@ export async function fetchVersionSpots(
 	areaId: string,
 	versionId: string,
 ): Promise<SpotState[]> {
-	const res = await fetch(
+	const res = await apiFetch(
 		`${API_BASE}/areas/${areaId}/versions/${versionId}/spots`,
 	);
 	const data = await handleResponse<{ spots: SpotState[] }>(res);
@@ -59,7 +59,7 @@ export async function fetchVersionSpots(
 export async function createArea(
 	name: string,
 ): Promise<{ id: string; name: string }> {
-	const res = await fetch(`${API_BASE}/areas`, {
+	const res = await apiFetch(`${API_BASE}/areas`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ name }),
@@ -68,7 +68,7 @@ export async function createArea(
 }
 
 export async function deleteArea(id: string): Promise<void> {
-	const res = await fetch(`${API_BASE}/areas/${id}`, { method: "DELETE" });
+	const res = await apiFetch(`${API_BASE}/areas/${id}`, { method: "DELETE" });
 	await handleResponse(res);
 }
 
@@ -85,11 +85,14 @@ export async function saveAreaDraft({
 	spots,
 	imageScale,
 }: SaveDraftParams): Promise<void> {
-	const res = await fetch(`${API_BASE}/areas/${areaId}/versions/${versionId}`, {
-		method: "PUT",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ spots, imageScale }),
-	});
+	const res = await apiFetch(
+		`${API_BASE}/areas/${areaId}/versions/${versionId}`,
+		{
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ spots, imageScale }),
+		},
+	);
 	await handleResponse(res);
 }
 
@@ -104,7 +107,7 @@ export async function uploadFloorPlan({
 }): Promise<{ url: string; name: string; aspectRatio: number | null }> {
 	const formData = new FormData();
 	formData.append("file", file);
-	const res = await fetch(
+	const res = await apiFetch(
 		`${API_BASE}/areas/${areaId}/versions/${versionId}/floor-plan`,
 		{ method: "POST", body: formData },
 	);
@@ -115,7 +118,7 @@ export async function deleteFloorPlan(params: {
 	areaId: string;
 	versionId: string;
 }): Promise<void> {
-	const res = await fetch(
+	const res = await apiFetch(
 		`${API_BASE}/areas/${params.areaId}/versions/${params.versionId}/floor-plan`,
 		{ method: "DELETE" },
 	);
@@ -127,7 +130,7 @@ export async function publishVersion(params: {
 	versionId: string;
 	effectiveDate: string;
 }): Promise<void> {
-	const res = await fetch(
+	const res = await apiFetch(
 		`${API_BASE}/areas/${params.areaId}/versions/${params.versionId}/publish`,
 		{
 			method: "POST",
@@ -144,7 +147,7 @@ export async function duplicateVersion(params: {
 	spots: { label: string; x: number; y: number; size: number }[];
 	imageScale?: number;
 }): Promise<{ id: string; label: string }> {
-	const res = await fetch(
+	const res = await apiFetch(
 		`${API_BASE}/areas/${params.areaId}/versions/${params.versionId}/duplicate`,
 		{
 			method: "POST",
@@ -162,7 +165,7 @@ export async function unpublishVersion(params: {
 	areaId: string;
 	versionId: string;
 }): Promise<void> {
-	const res = await fetch(
+	const res = await apiFetch(
 		`${API_BASE}/areas/${params.areaId}/versions/${params.versionId}/unpublish`,
 		{ method: "POST" },
 	);

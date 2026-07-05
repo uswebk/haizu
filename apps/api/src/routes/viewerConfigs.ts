@@ -1,10 +1,12 @@
 import { zValidator } from "@hono/zod-validator";
 import { ViewerConfigInputSchema } from "@haiz/shared";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
-import { shifts, viewerConfigs } from "../db/schema";
+import { areas, shifts, viewerConfigs } from "../db/schema";
+import { siteScope } from "../middleware/site-scope";
+import type { AppEnv } from "../types";
 
 const paramSchema = z.object({ areaId: z.string().uuid() });
 
@@ -27,9 +29,11 @@ function serialize(row: typeof viewerConfigs.$inferSelect, shift: ShiftInfo) {
 	};
 }
 
-export const viewerConfigsRoute = new Hono()
+export const viewerConfigsRoute = new Hono<AppEnv>()
+	.use("*", siteScope)
 	.get("/", async (c) => {
 		// shifts は left join（ソフト削除済みでも name/時刻は保持されるため表示に使える）
+		// エリア経由で現在拠点に絞り込む
 		const rows = await db
 			.select({
 				config: viewerConfigs,
@@ -38,7 +42,9 @@ export const viewerConfigsRoute = new Hono()
 				shiftEndTime: shifts.endTime,
 			})
 			.from(viewerConfigs)
-			.leftJoin(shifts, eq(viewerConfigs.shiftId, shifts.id));
+			.innerJoin(areas, eq(viewerConfigs.areaId, areas.id))
+			.leftJoin(shifts, eq(viewerConfigs.shiftId, shifts.id))
+			.where(eq(areas.siteId, c.get("siteId")));
 		return c.json({
 			configs: rows.map((r) =>
 				serialize(r.config, {
@@ -57,6 +63,12 @@ export const viewerConfigsRoute = new Hono()
 		async (c) => {
 			const { areaId } = c.req.valid("param");
 			const input = c.req.valid("json");
+
+			// 対象エリアが現在拠点に属することを検証する
+			const area = await db.query.areas.findFirst({
+				where: and(eq(areas.id, areaId), eq(areas.siteId, c.get("siteId"))),
+			});
+			if (!area) return c.json({ error: "Not found" }, 404);
 
 			const existing = await db.query.viewerConfigs.findFirst({
 				where: eq(viewerConfigs.areaId, areaId),

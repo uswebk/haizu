@@ -1,9 +1,11 @@
 import { zValidator } from "@hono/zod-validator";
-import { count, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
 import { employeeTags, tags } from "../db/schema";
+import { siteScope } from "../middleware/site-scope";
+import type { AppEnv } from "../types";
 
 const tagInput = z.object({ name: z.string().min(1).max(20) });
 
@@ -20,7 +22,8 @@ function isUniqueViolation(error: unknown): boolean {
 	return isUniqueViolation(cause);
 }
 
-export const tagsRoute = new Hono()
+export const tagsRoute = new Hono<AppEnv>()
+	.use("*", siteScope)
 	.get("/", async (c) => {
 		const rows = await db
 			.select({
@@ -31,6 +34,7 @@ export const tagsRoute = new Hono()
 			})
 			.from(tags)
 			.leftJoin(employeeTags, eq(employeeTags.tagId, tags.id))
+			.where(eq(tags.siteId, c.get("siteId")))
 			.groupBy(tags.id)
 			.orderBy(tags.createdAt);
 
@@ -41,7 +45,10 @@ export const tagsRoute = new Hono()
 		const { name } = c.req.valid("json");
 
 		try {
-			const inserted = await db.insert(tags).values({ name }).returning();
+			const inserted = await db
+				.insert(tags)
+				.values({ name, siteId: c.get("siteId") })
+				.returning();
 			const tag = inserted[0];
 			if (!tag) return c.json({ error: "Insert failed" }, 500);
 
@@ -62,7 +69,7 @@ export const tagsRoute = new Hono()
 			const updated = await db
 				.update(tags)
 				.set({ name })
-				.where(eq(tags.id, id))
+				.where(and(eq(tags.id, id), eq(tags.siteId, c.get("siteId"))))
 				.returning();
 			const tag = updated[0];
 			if (!tag) return c.json({ error: "Not found" }, 404);
@@ -79,7 +86,10 @@ export const tagsRoute = new Hono()
 	.delete("/:id", async (c) => {
 		const { id } = c.req.param();
 
-		const deleted = await db.delete(tags).where(eq(tags.id, id)).returning();
+		const deleted = await db
+			.delete(tags)
+			.where(and(eq(tags.id, id), eq(tags.siteId, c.get("siteId"))))
+			.returning();
 		if (!deleted[0]) return c.json({ error: "Not found" }, 404);
 
 		return c.body(null, 204);
