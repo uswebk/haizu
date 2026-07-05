@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SelectSiteRouteImport } from './routes/select-site'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
@@ -30,6 +31,11 @@ import { Route as AppSettingsShiftsRouteImport } from './routes/_app.settings.sh
 import { Route as AppEditorAreaIdRouteImport } from './routes/_app.editor.$areaId'
 import { Route as AppAssignmentAreaIdRouteImport } from './routes/_app.assignment.$areaId'
 
+const SelectSiteRoute = SelectSiteRouteImport.update({
+  id: '/select-site',
+  path: '/select-site',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CatalogRoute = CatalogRouteImport.update({
   id: '/catalog',
   path: '/catalog',
@@ -133,6 +139,7 @@ const AppAssignmentAreaIdRoute = AppAssignmentAreaIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/select-site': typeof SelectSiteRoute
   '/assignment': typeof AppAssignmentRouteWithChildren
   '/editor': typeof AppEditorRouteWithChildren
   '/employees': typeof AppEmployeesRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/select-site': typeof SelectSiteRoute
   '/employees': typeof AppEmployeesRoute
   '/history': typeof AppHistoryRoute
   '/home': typeof AppHomeRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/catalog': typeof CatalogRoute
+  '/select-site': typeof SelectSiteRoute
   '/_app/assignment': typeof AppAssignmentRouteWithChildren
   '/_app/editor': typeof AppEditorRouteWithChildren
   '/_app/employees': typeof AppEmployeesRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/catalog'
+    | '/select-site'
     | '/assignment'
     | '/editor'
     | '/employees'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/catalog'
+    | '/select-site'
     | '/employees'
     | '/history'
     | '/home'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/catalog'
+    | '/select-site'
     | '/_app/assignment'
     | '/_app/editor'
     | '/_app/employees'
@@ -262,10 +274,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   CatalogRoute: typeof CatalogRoute
+  SelectSiteRoute: typeof SelectSiteRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/select-site': {
+      id: '/select-site'
+      path: '/select-site'
+      fullPath: '/select-site'
+      preLoaderRoute: typeof SelectSiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/catalog': {
       id: '/catalog'
       path: '/catalog'
@@ -485,6 +505,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   CatalogRoute: CatalogRoute,
+  SelectSiteRoute: SelectSiteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,5 +1,5 @@
 import type { EmployeeRow } from "#/features/employees/types";
-import { API_BASE } from ".";
+import { API_BASE, apiFetch } from ".";
 
 async function handleResponse<T>(res: Response): Promise<T> {
 	if (!res.ok) {
@@ -21,7 +21,7 @@ export const employeeKeys = {
 };
 
 export async function fetchEmployees(): Promise<EmployeeRow[]> {
-	const res = await fetch(`${API_BASE}/employees`);
+	const res = await apiFetch(`${API_BASE}/employees`);
 	const data = await handleResponse<{ employees: EmployeeRow[] }>(res);
 	return data.employees;
 }
@@ -38,7 +38,7 @@ export type EmployeeInput = {
 export async function createEmployee(
 	input: EmployeeInput,
 ): Promise<EmployeeRow> {
-	const res = await fetch(`${API_BASE}/employees`, {
+	const res = await apiFetch(`${API_BASE}/employees`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(input),
@@ -50,7 +50,7 @@ export async function updateEmployee(
 	id: string,
 	input: EmployeeInput,
 ): Promise<EmployeeRow> {
-	const res = await fetch(`${API_BASE}/employees/${id}`, {
+	const res = await apiFetch(`${API_BASE}/employees/${id}`, {
 		method: "PUT",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(input),

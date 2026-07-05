@@ -5,7 +5,9 @@ import {
 	employees,
 	employeeTags,
 	layoutSpecVersions,
+	organizations,
 	shifts,
+	sites,
 	spots,
 	tags,
 	workPatterns,
@@ -13,6 +15,12 @@ import {
 
 const client = postgres(process.env.DATABASE_URL!, { prepare: false });
 const db = drizzle(client);
+
+const SITES = [
+	{ name: "A工場", description: "製造ライン", iconBg: "#dcf2f0", iconColor: "#0ea5a4" },
+	{ name: "B倉庫", description: "物流センター", iconBg: "#e3eefe", iconColor: "#2f6df0" },
+	{ name: "C工事現場", description: "建設現場", iconBg: "#fbecd8", iconColor: "#e07b1a" },
+];
 
 const MOCK_DATA = [
 	{
@@ -91,15 +99,33 @@ const EMPLOYEES = [
 async function seed() {
 	console.log("Seeding...");
 
+	const insertedOrgs = await db
+		.insert(organizations)
+		.values({ name: "株式会社haiz", email: "admin@haiz.co.jp" })
+		.returning();
+	const organization = insertedOrgs[0];
+	if (!organization) throw new Error("Failed to create organization");
+
+	const insertedSites = await db
+		.insert(sites)
+		.values(SITES.map((s) => ({ ...s, organizationId: organization.id })))
+		.returning();
+	const siteA = insertedSites[0];
+	if (!siteA) throw new Error("Failed to create sites");
+	console.log(`  Created org + ${insertedSites.length} sites`);
+
+	// 既存の従業員・タグ・エリア・働き方はすべて先頭拠点(A工場)に紐付ける
+	const siteId = siteA.id;
+
 	const insertedTags = await db
 		.insert(tags)
-		.values(TAG_NAMES.map((name) => ({ name })))
+		.values(TAG_NAMES.map((name) => ({ name, siteId })))
 		.returning();
 	console.log(`  Created ${insertedTags.length} tags`);
 
 	const insertedPatterns = await db
 		.insert(workPatterns)
-		.values({ mode: "multi" })
+		.values({ mode: "multi", siteId })
 		.returning();
 	const workPattern = insertedPatterns[0];
 	if (workPattern) {
@@ -119,6 +145,7 @@ async function seed() {
 		.insert(employees)
 		.values(
 			EMPLOYEES.map((e, i) => ({
+				siteId,
 				code: `EMP-${String(i + 1).padStart(3, "0")}`,
 				lastName: e.lastName,
 				firstName: e.firstName,
@@ -147,7 +174,7 @@ async function seed() {
 	for (const data of MOCK_DATA) {
 		const insertedAreas = await db
 			.insert(areas)
-			.values({ name: data.name })
+			.values({ name: data.name, siteId })
 			.returning();
 		const area = insertedAreas[0];
 		if (!area) continue;

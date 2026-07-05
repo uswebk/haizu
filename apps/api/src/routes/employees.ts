@@ -1,9 +1,11 @@
 import { zValidator } from "@hono/zod-validator";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
 import { employeeTags, employees, tags } from "../db/schema";
+import { siteScope } from "../middleware/site-scope";
+import type { AppEnv } from "../types";
 
 const employeeInput = z.object({
 	code: z.string().min(1),
@@ -64,11 +66,13 @@ function isUniqueViolation(error: unknown): boolean {
 	return isUniqueViolation(cause);
 }
 
-export const employeesRoute = new Hono()
+export const employeesRoute = new Hono<AppEnv>()
+	.use("*", siteScope)
 	.get("/", async (c) => {
 		const rows = await db
 			.select()
 			.from(employees)
+			.where(eq(employees.siteId, c.get("siteId")))
 			.orderBy(employees.createdAt);
 
 		return c.json({ employees: await attachTags(rows) });
@@ -79,7 +83,10 @@ export const employeesRoute = new Hono()
 
 		let employee: typeof employees.$inferSelect;
 		try {
-			const inserted = await db.insert(employees).values(input).returning();
+			const inserted = await db
+				.insert(employees)
+				.values({ ...input, siteId: c.get("siteId") })
+				.returning();
 			const row = inserted[0];
 			if (!row) return c.json({ error: "Insert failed" }, 500);
 			employee = row;
@@ -105,7 +112,7 @@ export const employeesRoute = new Hono()
 			const updated = await db
 				.update(employees)
 				.set({ ...input, updatedAt: new Date() })
-				.where(eq(employees.id, id))
+				.where(and(eq(employees.id, id), eq(employees.siteId, c.get("siteId"))))
 				.returning();
 			const row = updated[0];
 			if (!row) return c.json({ error: "Not found" }, 404);

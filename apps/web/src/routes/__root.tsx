@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
+import { SiteProvider } from "#/contexts/site-context";
 import appCss from "../styles.css?url";
 
 const queryClient = new QueryClient();
@@ -15,7 +16,9 @@ const queryClient = new QueryClient();
 export const Route = createRootRoute({
 	component: () => (
 		<QueryClientProvider client={queryClient}>
-			<Outlet />
+			<SiteProvider>
+				<Outlet />
+			</SiteProvider>
 		</QueryClientProvider>
 	),
 	head: () => ({

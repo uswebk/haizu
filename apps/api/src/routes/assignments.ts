@@ -20,6 +20,17 @@ import {
 	shifts,
 	spotAssignments,
 } from "../db/schema";
+import { siteScope } from "../middleware/site-scope";
+import type { AppEnv } from "../types";
+
+// 現在拠点に属するエリアIDの一覧。配置は area 経由で拠点にスコープされる。
+async function siteAreaIds(siteId: string): Promise<string[]> {
+	const rows = await db
+		.select({ id: areas.id })
+		.from(areas)
+		.where(eq(areas.siteId, siteId));
+	return rows.map((r) => r.id);
+}
 
 const listQuery = z.object({
 	date: z.string().date(),
@@ -78,15 +89,23 @@ function serialize(
 	};
 }
 
-export const assignmentsRoute = new Hono()
+export const assignmentsRoute = new Hono<AppEnv>()
+	.use("*", siteScope)
 	.get("/shift-mismatch", zValidator("query", dateQuery), async (c) => {
 		const { date } = c.req.valid("query");
+		const areaIds = await siteAreaIds(c.get("siteId"));
 
 		const found = await db
 			.select({ id: assignments.id })
 			.from(assignments)
 			.innerJoin(shifts, eq(assignments.shiftId, shifts.id))
-			.where(and(eq(assignments.date, date), isNotNull(shifts.deletedAt)))
+			.where(
+				and(
+					inArray(assignments.areaId, areaIds),
+					eq(assignments.date, date),
+					isNotNull(shifts.deletedAt),
+				),
+			)
 			.limit(1);
 
 		return c.json({ mismatched: found.length > 0 });
@@ -96,6 +115,9 @@ export const assignmentsRoute = new Hono()
 	// 配置ビュアー設定の強制表示で「その日に実際確定していたシフト」を選び直せるようにするため。
 	.get("/shifts-used", zValidator("query", shiftsUsedQuery), async (c) => {
 		const { areaId, date } = c.req.valid("query");
+
+		const areaIds = await siteAreaIds(c.get("siteId"));
+		if (!areaIds.includes(areaId)) return c.json({ shifts: [] });
 
 		const rows = await db
 			.selectDistinct({
@@ -122,8 +144,10 @@ export const assignmentsRoute = new Hono()
 
 	.get("/history", zValidator("query", historyQuery), async (c) => {
 		const { date, limit = 50, offset = 0 } = c.req.valid("query");
+		const areaIds = await siteAreaIds(c.get("siteId"));
 
 		const where = and(
+			inArray(assignments.areaId, areaIds),
 			eq(assignments.status, "confirmed"),
 			eq(assignments.date, date),
 		);
@@ -175,12 +199,14 @@ export const assignmentsRoute = new Hono()
 
 	.get("/", zValidator("query", listQuery), async (c) => {
 		const { date, shiftId } = c.req.valid("query");
+		const areaIds = await siteAreaIds(c.get("siteId"));
 
 		const rows = await db
 			.select()
 			.from(assignments)
 			.where(
 				and(
+					inArray(assignments.areaId, areaIds),
 					eq(assignments.date, date),
 					shiftId
 						? eq(assignments.shiftId, shiftId)
@@ -202,6 +228,12 @@ export const assignmentsRoute = new Hono()
 
 	.put("/", zValidator("json", AssignmentInputSchema), async (c) => {
 		const input = c.req.valid("json");
+
+		// 対象エリアが現在拠点に属することを検証する
+		const area = await db.query.areas.findFirst({
+			where: and(eq(areas.id, input.areaId), eq(areas.siteId, c.get("siteId"))),
+		});
+		if (!area) return c.json({ error: "Not found" }, 404);
 
 		// 配置決めは公開済みの規格に対してのみ行える（下書き規格は現場に未反映のため対象外）
 		const version = await db.query.layoutSpecVersions.findFirst({
