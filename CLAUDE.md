@@ -6,6 +6,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **haiz** は工場・倉庫などの現場における人員配置管理SaaSです。フロアマップ上で従業員の配置を管理・割り当て・閲覧するWebアプリケーションです。
 
+## ドメイン知識の索引
+
+このプロジェクトのドメイン知識は `docs/domain/` 配下に分割して置いてある。
+関連する作業をする際は、該当ファイルを読んでから着手すること。
+
+- `docs/domain/organization.md` — 組織（会社・事業所）の概念。全データの最上位エンティティ。組織・拠点まわりの実装時に参照
+- `docs/domain/site.md` — 拠点の概念と働き方の設定。拠点関連の実装時に参照
+- `docs/domain/employee.md` — 従業員の属性（名前・従業員コードなど）。従業員管理まわりの実装時に参照
+- `docs/domain/work_pattern.md` — 勤務体制（1〜3交代制などのシフト定義）。勤務体制・シフト設定の実装時に参照
+- `docs/domain/layout_spec.md` — 配置(規格)エディタの用語（配置エリア・スポットなど）。フロアマップ編集機能の実装時に参照
+- `docs/domain/assignment.md` — 配置決め（シフトへの従業員割り当て）のロジックと用語。配置割り当て機能の実装時に参照
+- `docs/domain/layout_viewer.md` — 配置Viewer（表示専用ビュアー）の仕様。ビュアー機能の実装時に参照
+- `docs/domain/auth.md` — 認証（サインアップ・ログイン）の用語とフロー。認証まわりの実装時に参照
+- `docs/domain/member_permission.md` — メンバー・権限モデル（従業員とは異なる管理者ユーザーの概念）。認可まわりの実装時に参照
+
 ## Monorepo Structure
 
 pnpm + Turborepo 構成：
