@@ -141,11 +141,18 @@ function ViewerAreaCard({
 				<div className="font-bold text-base whitespace-nowrap overflow-hidden text-ellipsis">
 					{area.name}
 				</div>
-				{area.currentVersion && (
-					<span className="text-[10.5px] font-bold text-primary-hover bg-primary-soft px-2.25 py-0.75 rounded-pill shrink-0">
-						{area.currentVersion}
-					</span>
-				)}
+				<div className="flex items-center gap-1.5 shrink-0">
+					{config.mode === "manual" && (
+						<span className="text-[10.5px] font-bold text-warning bg-warning-soft px-2.25 py-0.75 rounded-pill">
+							強制表示中
+						</span>
+					)}
+					{area.currentVersion && (
+						<span className="text-[10.5px] font-bold text-primary-hover bg-primary-soft px-2.25 py-0.75 rounded-pill">
+							{area.currentVersion}
+						</span>
+					)}
+				</div>
 			</div>
 			<div className="flex items-center justify-between mt-4 mb-1.75">
 				<div className="text-xs text-muted">配置状況</div>
@@ -310,6 +317,11 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 					</div>
 					{display && (
 						<div className="flex items-center gap-2 shrink-0">
+							{config.mode === "manual" && (
+								<span className="text-[13px] font-bold text-warning bg-warning-soft px-3 py-1.5 rounded-pill">
+									強制表示中
+								</span>
+							)}
 							{showTargetDate && date && (
 								<span className="text-[13px] font-bold text-ink border border-border px-3 py-1.5 rounded-pill">
 									表示日 {formatDateLabel(date)}
