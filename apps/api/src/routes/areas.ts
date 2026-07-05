@@ -141,6 +141,10 @@ export const areasRoute = new Hono()
 				label: `v${v.version}`,
 				status: v.status,
 				effectiveDate: v.effectiveDate,
+				planImageUrl: v.planImageUrl,
+				planImageName: v.planImageName,
+				planAspectRatio: v.planAspectRatio ?? undefined,
+				planImageScale: v.planImageScale ?? 1,
 				isActive: v.id === activeVersion?.id,
 				isCurrent: v.id === currentVersion?.id,
 				// 配置決めで使用済み（スポット編集・図面変更・公開取消不可）

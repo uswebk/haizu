@@ -14,6 +14,10 @@ export type VersionState = {
 	label: string;
 	status: "draft" | "published";
 	effectiveDate: string; // 未公開時は "1000-01-01"
+	planImageUrl: string | null;
+	planImageName: string | null;
+	planAspectRatio?: number;
+	planImageScale: number;
 	isActive: boolean;
 	isCurrent: boolean;
 	hasAssignments: boolean;

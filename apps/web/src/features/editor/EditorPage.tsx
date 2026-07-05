@@ -86,12 +86,12 @@ export function EditorPage({ areaId }: Props) {
 	});
 
 	const savedFloorPlan = {
-		hasFloorPlan: areaData?.hasFloorPlan ?? false,
-		floorPlanName: areaData?.floorPlanName ?? null,
-		imageUrl: areaData?.planImageUrl
-			? `${API_BASE}${areaData.planImageUrl}`
+		hasFloorPlan: !!resolvedVersion?.planImageName,
+		floorPlanName: resolvedVersion?.planImageName ?? null,
+		imageUrl: resolvedVersion?.planImageUrl
+			? `${API_BASE}${resolvedVersion.planImageUrl}`
 			: null,
-		aspectRatio: areaData?.planAspectRatio ?? 4 / 3,
+		aspectRatio: resolvedVersion?.planAspectRatio ?? 4 / 3,
 	};
 	const displayedFloorPlan =
 		pendingImage?.action === "delete"
@@ -125,7 +125,7 @@ export function EditorPage({ areaId }: Props) {
 		spotsData,
 		resolvedVersion?.id,
 		zoom,
-		isNewDraft ? undefined : areaData?.planImageScale,
+		isNewDraft ? undefined : resolvedVersion?.planImageScale,
 	);
 
 	const persistPendingImage = async (versionId: string) => {
@@ -261,6 +261,10 @@ export function EditorPage({ areaId }: Props) {
 			label: `v${nextVersion}`,
 			status: "draft",
 			effectiveDate: UNPUBLISHED_EFFECTIVE_DATE,
+			planImageUrl: resolvedVersion.planImageUrl,
+			planImageName: resolvedVersion.planImageName,
+			planAspectRatio: resolvedVersion.planAspectRatio,
+			planImageScale: resolvedVersion.planImageScale,
 			isActive: false,
 			isCurrent: false,
 			hasAssignments: false,
