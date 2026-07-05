@@ -132,6 +132,7 @@ function TagSettings() {
 							value={newTagName}
 							onChange={(e) => setNewTagName(e.target.value)}
 							placeholder="新しいタグ名"
+							maxLength={20}
 							className="flex-1"
 							onKeyDown={(e) => {
 								if (e.key === "Enter") submitNewTag();
@@ -169,6 +170,7 @@ function TagSettings() {
 													value={editingName}
 													onChange={(e) => setEditingName(e.target.value)}
 													className="flex-1"
+													maxLength={20}
 													autoFocus
 													onKeyDown={(e) => {
 														if (e.key === "Enter") submitEdit();

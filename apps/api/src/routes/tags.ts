@@ -5,7 +5,7 @@ import { z } from "zod";
 import { db } from "../db/client";
 import { employeeTags, tags } from "../db/schema";
 
-const tagInput = z.object({ name: z.string().min(1) });
+const tagInput = z.object({ name: z.string().min(1).max(20) });
 
 const DUPLICATE_NAME_MESSAGE = "このタグ名は既に使用されています";
 
