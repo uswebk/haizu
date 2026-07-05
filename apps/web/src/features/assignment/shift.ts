@@ -2,13 +2,6 @@ import type { WorkPattern } from "@haiz/shared";
 
 export type ShiftOption = { id: string; name: string };
 
-export function todayStr(): string {
-	const d = new Date();
-	const m = String(d.getMonth() + 1).padStart(2, "0");
-	const day = String(d.getDate()).padStart(2, "0");
-	return `${d.getFullYear()}-${m}-${day}`;
-}
-
 export function getShiftOptions(wp: WorkPattern | undefined): ShiftOption[] {
 	if (!wp || wp.mode === "single") return [];
 	return wp.shifts.map((s) => ({ id: s.id, name: s.name }));
@@ -26,11 +19,4 @@ export function resolveEffectiveShift(
 	return selected
 		? { shiftId: selected.id, label: selected.name }
 		: { shiftId: null, label: "終日" };
-}
-
-const JP_WEEK = ["日", "月", "火", "水", "木", "金", "土"];
-
-export function formatDateLabel(date: string): string {
-	const d = new Date(`${date}T00:00:00`);
-	return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}（${JP_WEEK[d.getDay()]}）`;
 }

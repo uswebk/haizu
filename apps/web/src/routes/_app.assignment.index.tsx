@@ -4,7 +4,6 @@ import { ShiftDatePicker } from "#/features/assignment/ShiftDatePicker";
 import {
 	getShiftOptions,
 	resolveEffectiveShift,
-	todayStr,
 } from "#/features/assignment/shift";
 import { fetchAreas } from "#/lib/api/areas";
 import {
@@ -13,6 +12,7 @@ import {
 	fetchShiftMismatch,
 } from "#/lib/api/assignments";
 import { fetchWorkPattern, workPatternKeys } from "#/lib/api/workPatterns";
+import { todayStr } from "#/lib/datetime";
 
 export const Route = createFileRoute("/_app/assignment/")({
 	component: AssignmentList,

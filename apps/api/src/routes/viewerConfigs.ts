@@ -4,24 +4,50 @@ import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
-import { viewerConfigs } from "../db/schema";
+import { shifts, viewerConfigs } from "../db/schema";
 
 const paramSchema = z.object({ areaId: z.string().uuid() });
 
-function serialize(row: typeof viewerConfigs.$inferSelect) {
+type ShiftInfo = {
+	name: string | null;
+	startTime: string | null;
+	endTime: string | null;
+};
+
+function serialize(row: typeof viewerConfigs.$inferSelect, shift: ShiftInfo) {
 	return {
 		areaId: row.areaId,
 		mode: row.mode,
 		displayDate: row.displayDate,
 		shiftId: row.shiftId,
+		shiftName: shift.name,
+		shiftStartTime: shift.startTime,
+		shiftEndTime: shift.endTime,
 		leadMinutes: row.leadMinutes,
 	};
 }
 
 export const viewerConfigsRoute = new Hono()
 	.get("/", async (c) => {
-		const rows = await db.select().from(viewerConfigs);
-		return c.json({ configs: rows.map(serialize) });
+		// shifts は left join（ソフト削除済みでも name/時刻は保持されるため表示に使える）
+		const rows = await db
+			.select({
+				config: viewerConfigs,
+				shiftName: shifts.name,
+				shiftStartTime: shifts.startTime,
+				shiftEndTime: shifts.endTime,
+			})
+			.from(viewerConfigs)
+			.leftJoin(shifts, eq(viewerConfigs.shiftId, shifts.id));
+		return c.json({
+			configs: rows.map((r) =>
+				serialize(r.config, {
+					name: r.shiftName,
+					startTime: r.shiftStartTime,
+					endTime: r.shiftEndTime,
+				}),
+			),
+		});
 	})
 
 	.put(
@@ -49,6 +75,18 @@ export const viewerConfigsRoute = new Hono()
 
 			const row = saved[0];
 			if (!row) return c.json({ error: "Save failed" }, 500);
-			return c.json(serialize(row));
+
+			const shift = row.shiftId
+				? await db.query.shifts.findFirst({
+						where: eq(shifts.id, row.shiftId),
+					})
+				: null;
+			return c.json(
+				serialize(row, {
+					name: shift?.name ?? null,
+					startTime: shift?.startTime ?? null,
+					endTime: shift?.endTime ?? null,
+				}),
+			);
 		},
 	);

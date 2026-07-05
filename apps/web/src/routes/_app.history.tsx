@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { Avatar } from "#/components/ui/Avatar";
 import { PagerButton } from "#/components/ui/PagerButton";
 import { PlacementViewCanvas } from "#/features/assignment/PlacementViewCanvas";
-import { formatDateLabel } from "#/features/assignment/shift";
 import type { EmployeeRow } from "#/features/employees/types";
 import { areaKeys, fetchArea, fetchVersionSpots } from "#/lib/api/areas";
 import {
@@ -14,6 +13,7 @@ import {
 	historyKeys,
 } from "#/lib/api/assignments";
 import { fetchEmployees } from "#/lib/api/employees";
+import { formatDateLabel } from "#/lib/datetime";
 
 type HistorySearch = {
 	date?: string;

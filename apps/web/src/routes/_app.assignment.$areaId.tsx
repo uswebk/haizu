@@ -11,7 +11,6 @@ import { ShiftDatePicker } from "#/features/assignment/ShiftDatePicker";
 import {
 	getShiftOptions,
 	resolveEffectiveShift,
-	todayStr,
 } from "#/features/assignment/shift";
 import type { EmployeeRow } from "#/features/employees/types";
 import { API_BASE } from "#/lib/api";
@@ -23,6 +22,7 @@ import {
 } from "#/lib/api/assignments";
 import { fetchEmployees } from "#/lib/api/employees";
 import { fetchWorkPattern, workPatternKeys } from "#/lib/api/workPatterns";
+import { todayStr } from "#/lib/datetime";
 
 // エディタと同じ基準幅。規格のアスペクト比で高さを決め、スクロール領域に置く
 const BASE_WIDTH = 760;

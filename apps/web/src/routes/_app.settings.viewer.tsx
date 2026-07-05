@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "#/components/ui/Button";
-import { getShiftOptions, todayStr } from "#/features/assignment/shift";
+import { getShiftOptions } from "#/features/assignment/shift";
 import { areaKeys, fetchAreas } from "#/lib/api/areas";
 import {
 	fetchViewerConfigs,
@@ -11,6 +11,7 @@ import {
 	viewerConfigKeys,
 } from "#/lib/api/viewer";
 import { fetchWorkPattern, workPatternKeys } from "#/lib/api/workPatterns";
+import { todayStr } from "#/lib/datetime";
 
 export const Route = createFileRoute("/_app/settings/viewer")({
 	component: ViewerSettings,
@@ -32,6 +33,9 @@ function defaultConfig(areaId: string): ViewerConfig {
 		mode: "auto",
 		displayDate: null,
 		shiftId: null,
+		shiftName: null,
+		shiftStartTime: null,
+		shiftEndTime: null,
 		leadMinutes: 0,
 	};
 }
@@ -285,8 +289,11 @@ function ViewerSettings() {
 					{areas.map((area) => {
 						const cfg = configByArea.get(area.id) ?? defaultConfig(area.id);
 						const isManual = cfg.mode === "manual";
+						const manualShift = cfg.shiftId
+							? (cfg.shiftName ?? shiftLabel(cfg.shiftId))
+							: "終日";
 						const detail = isManual
-							? `${cfg.displayDate ?? "-"} ・ ${shiftLabel(cfg.shiftId)}`
+							? `${cfg.displayDate ?? "-"} ・ ${manualShift}`
 							: `${Math.abs(cfg.leadMinutes)}分${cfg.leadMinutes < 0 ? "後" : "前"}から自動表示`;
 						return (
 							<button
