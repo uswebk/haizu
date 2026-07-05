@@ -36,6 +36,11 @@ const historyQuery = z.object({
 	offset: z.coerce.number().int().min(0).optional(),
 });
 
+const shiftsUsedQuery = z.object({
+	areaId: z.string().uuid(),
+	date: z.string().date().optional(),
+});
+
 type AssignmentRow = typeof assignments.$inferSelect;
 
 // assignmentId ごとにグルーピングした spotAssignments を一括取得する
@@ -85,6 +90,34 @@ export const assignmentsRoute = new Hono()
 			.limit(1);
 
 		return c.json({ mismatched: found.length > 0 });
+	})
+
+	// 指定エリア（・指定日）で確定済み配置に紐づいたことのあるシフト一覧（削除済みシフトも含む）。
+	// 配置ビュアー設定の強制表示で「その日に実際確定していたシフト」を選び直せるようにするため。
+	.get("/shifts-used", zValidator("query", shiftsUsedQuery), async (c) => {
+		const { areaId, date } = c.req.valid("query");
+
+		const rows = await db
+			.selectDistinct({
+				id: shifts.id,
+				name: shifts.name,
+				startTime: shifts.startTime,
+				endTime: shifts.endTime,
+				order: shifts.order,
+				deleted: isNotNull(shifts.deletedAt),
+			})
+			.from(assignments)
+			.innerJoin(shifts, eq(assignments.shiftId, shifts.id))
+			.where(
+				and(
+					eq(assignments.areaId, areaId),
+					eq(assignments.status, "confirmed"),
+					date ? eq(assignments.date, date) : undefined,
+				),
+			)
+			.orderBy(asc(shifts.order));
+
+		return c.json({ shifts: rows });
 	})
 
 	.get("/history", zValidator("query", historyQuery), async (c) => {

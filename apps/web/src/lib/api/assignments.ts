@@ -73,3 +73,26 @@ export async function fetchAssignmentHistory(params: {
 	const res = await fetch(`${API_BASE}/assignments/history?${q.toString()}`);
 	return handleResponse<HistoryPage>(res);
 }
+
+// エリアで確定済み配置に紐づいたことのあるシフト（削除済み含む）
+export type UsedShift = {
+	id: string;
+	name: string;
+	startTime: string;
+	endTime: string;
+	order: number;
+	deleted: boolean;
+};
+
+export async function fetchShiftsUsed(
+	areaId: string,
+	date?: string,
+): Promise<UsedShift[]> {
+	const q = new URLSearchParams({ areaId });
+	if (date) q.set("date", date);
+	const res = await fetch(
+		`${API_BASE}/assignments/shifts-used?${q.toString()}`,
+	);
+	const data = await handleResponse<{ shifts: UsedShift[] }>(res);
+	return data.shifts;
+}

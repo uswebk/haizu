@@ -3,14 +3,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "#/components/ui/Button";
-import { getShiftOptions } from "#/features/assignment/shift";
+import { OptionCard } from "#/components/ui/OptionCard";
 import { areaKeys, fetchAreas } from "#/lib/api/areas";
+import { fetchShiftsUsed } from "#/lib/api/assignments";
 import {
 	fetchViewerConfigs,
 	saveViewerConfig,
 	viewerConfigKeys,
 } from "#/lib/api/viewer";
-import { fetchWorkPattern, workPatternKeys } from "#/lib/api/workPatterns";
 import { todayStr } from "#/lib/datetime";
 
 export const Route = createFileRoute("/_app/settings/viewer")({
@@ -53,17 +53,20 @@ function ViewerSettings() {
 		queryKey: viewerConfigKeys.all,
 		queryFn: fetchViewerConfigs,
 	});
-	const { data: workPattern } = useQuery({
-		queryKey: workPatternKeys.detail,
-		queryFn: fetchWorkPattern,
-	});
 
 	const configByArea = new Map(configs.map((c) => [c.areaId, c]));
-	const shiftOptions = getShiftOptions(workPattern);
+
+	// 選択中エリア・表示日で確定実績のあるシフトのみを選択肢にする（終日は常に選べる）
+	const displayDate = draft?.mode === "manual" ? draft.displayDate : undefined;
+	const { data: shiftChips = [] } = useQuery({
+		queryKey: ["assignments", "shifts-used", selectedAreaId, displayDate],
+		queryFn: () => fetchShiftsUsed(selectedAreaId as string, displayDate),
+		enabled: !!selectedAreaId && !!displayDate,
+	});
 
 	const shiftLabel = (shiftId: string | null) =>
 		shiftId
-			? (shiftOptions.find((s) => s.id === shiftId)?.name ?? "不明なシフト")
+			? (shiftChips.find((s) => s.id === shiftId)?.name ?? "不明なシフト")
 			: "終日";
 
 	const saveMutation = useMutation({
@@ -89,7 +92,7 @@ function ViewerSettings() {
 		setDraft({
 			mode: cfg.mode,
 			displayDate: cfg.displayDate ?? todayStr(),
-			shiftId: cfg.shiftId ?? shiftOptions[0]?.id ?? null,
+			shiftId: cfg.shiftId,
 			leadMinutes: String(Math.abs(cfg.leadMinutes)),
 			leadDir: cfg.leadMinutes < 0 ? "after" : "before",
 		});
@@ -122,13 +125,13 @@ function ViewerSettings() {
 					</div>
 
 					<div className="grid grid-cols-2 gap-3.5 mt-5">
-						<ModeCard
+						<OptionCard
 							title="強制表示"
 							description="指定した日付・シフトを常に表示します。"
 							selected={draft.mode === "manual"}
 							onClick={() => setDraft({ ...draft, mode: "manual" })}
 						/>
-						<ModeCard
+						<OptionCard
 							title="働き方に合わせて自動表示"
 							description="現在時刻に応じて今日のシフトを自動表示します。"
 							selected={draft.mode === "auto"}
@@ -157,31 +160,52 @@ function ViewerSettings() {
 									<div className="block text-xs font-semibold text-muted mb-2">
 										シフト
 									</div>
-									{shiftOptions.length === 0 ? (
-										<span className="inline-block text-[12.5px] font-bold text-primary-hover bg-primary-soft px-3.25 py-2 rounded-pill">
+									<div className="flex flex-wrap gap-2">
+										<button
+											type="button"
+											onClick={() => setDraft({ ...draft, shiftId: null })}
+											className={`px-3.25 py-2 rounded-pill border cursor-pointer text-[12.5px] ${
+												draft.shiftId === null
+													? "font-bold border-primary text-primary bg-primary-soft"
+													: "font-semibold border-border text-muted bg-surface"
+											}`}
+										>
 											終日
-										</span>
-									) : (
-										<div className="flex flex-wrap gap-2">
-											{shiftOptions.map((s) => {
-												const on = draft.shiftId === s.id;
-												return (
-													<button
-														key={s.id}
-														type="button"
-														onClick={() =>
-															setDraft({ ...draft, shiftId: s.id })
-														}
-														className={`text-[12.5px] px-3.25 py-2 rounded-pill border cursor-pointer ${
-															on
-																? "font-bold border-primary text-primary bg-primary-soft"
+										</button>
+										{shiftChips.map((s) => {
+											const on = draft.shiftId === s.id;
+											return (
+												<button
+													key={s.id}
+													type="button"
+													onClick={() => setDraft({ ...draft, shiftId: s.id })}
+													title={s.deleted ? "過去のシフト" : undefined}
+													className={`flex flex-col items-start px-3.25 py-1.75 rounded-md border cursor-pointer ${
+														on
+															? "font-bold border-primary text-primary bg-primary-soft"
+															: s.deleted
+																? "font-semibold border-dashed border-border text-faint bg-surface"
 																: "font-semibold border-border text-muted bg-surface"
-														}`}
-													>
+													}`}
+												>
+													<span className="text-[12.5px] flex items-center gap-1.25">
 														{s.name}
-													</button>
-												);
-											})}
+														{s.deleted && (
+															<span className="text-[10px] font-bold text-faint bg-table-head px-1.5 py-0.5 rounded-[6px]">
+																過去
+															</span>
+														)}
+													</span>
+													<span className="text-[10.5px] tabular-nums opacity-80">
+														{s.startTime}–{s.endTime}
+													</span>
+												</button>
+											);
+										})}
+									</div>
+									{shiftChips.length === 0 && (
+										<div className="text-[11px] text-faint mt-1.5">
+											この日に確定済みの配置がまだありません
 										</div>
 									)}
 								</div>
@@ -326,35 +350,6 @@ function ViewerSettings() {
 				</div>
 			</div>
 		</div>
-	);
-}
-
-function ModeCard({
-	title,
-	description,
-	selected,
-	onClick,
-}: {
-	title: string;
-	description: string;
-	selected: boolean;
-	onClick: () => void;
-}) {
-	return (
-		<button
-			type="button"
-			onClick={onClick}
-			className={`text-left rounded-lg border p-4.5 cursor-pointer transition-colors duration-150 ${
-				selected
-					? "border-primary bg-primary-soft/40"
-					: "border-border bg-surface hover:bg-app-bg"
-			}`}
-		>
-			<div className="text-sm font-bold">{title}</div>
-			<div className="text-xs text-muted mt-1.25 leading-relaxed">
-				{description}
-			</div>
-		</button>
 	);
 }
 

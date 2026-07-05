@@ -4,6 +4,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
+import { OptionCard } from "#/components/ui/OptionCard";
 import {
 	fetchWorkPattern,
 	saveWorkPattern,
@@ -123,13 +124,6 @@ function ShiftSettings() {
 	}, [mode, shifts]);
 	const hasDuplicate = duplicateError !== null;
 
-	const cardClass = (active: boolean) =>
-		`text-left p-4 rounded-md border cursor-pointer transition-colors duration-150 ${
-			active
-				? "border-primary bg-primary-soft"
-				: "border-border bg-surface hover:bg-app-bg"
-		}`;
-
 	if (!ready) {
 		return (
 			<div className="p-7 overflow-auto h-full">
@@ -162,26 +156,18 @@ function ShiftSettings() {
 				</div>
 
 				<div className="grid grid-cols-2 gap-3.5 mt-4.5">
-					<button
-						type="button"
+					<OptionCard
+						title="シフトなし"
+						description="1日1シフト。時間帯の区分はありません。"
+						selected={mode === "single"}
 						onClick={() => setMode("single")}
-						className={cardClass(mode === "single")}
-					>
-						<div className="text-sm font-bold">シフトなし</div>
-						<div className="text-xs text-muted mt-1.25 leading-relaxed">
-							1日1シフト。時間帯の区分はありません。
-						</div>
-					</button>
-					<button
-						type="button"
+					/>
+					<OptionCard
+						title="シフトあり"
+						description="日勤・遅番・夜勤など、名前と時間で区分します。"
+						selected={mode === "multi"}
 						onClick={selectMulti}
-						className={cardClass(mode === "multi")}
-					>
-						<div className="text-sm font-bold">シフトあり</div>
-						<div className="text-xs text-muted mt-1.25 leading-relaxed">
-							日勤・遅番・夜勤など、名前と時間で区分します。
-						</div>
-					</button>
+					/>
 				</div>
 
 				{mode === "multi" ? (
