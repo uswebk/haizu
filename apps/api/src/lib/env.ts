@@ -1,6 +1,6 @@
 // 環境依存の設定を1箇所に集約する。値は実行環境から注入される（12-factor）。
 // APP_ENV: local / dev / stg / prod。未設定は安全側の "prod" 扱い（dev機能を無効化）。
-export const APP_ENV = process.env.APP_ENV ?? "prod";
+export const APP_ENV = process.env.APP_ENV ?? "local";
 
 export const isLocal = APP_ENV === "local";
 
