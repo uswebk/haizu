@@ -11,6 +11,7 @@ import { NavItem } from "#/components/ui/NavItem";
 import { useSite } from "#/contexts/site-context";
 import { useDismiss } from "#/hooks/useDismiss";
 import { authClient } from "#/lib/auth-client";
+import { formatDateLabel, todayStr } from "#/lib/datetime";
 import { ROLE_LABEL } from "#/lib/roles";
 
 export const Route = createFileRoute("/_app")({
@@ -50,6 +51,8 @@ function AppLayout() {
 	const userEmail = user?.email ?? "";
 	const roleLabel = user ? ROLE_LABEL[user.role] : "";
 	const initial = userName.charAt(0) || "?";
+
+	const todayLabel = formatDateLabel(todayStr());
 
 	const [userMenuOpen, setUserMenuOpen] = useState(false);
 	const userMenuRef = useRef<HTMLDivElement>(null);
@@ -133,7 +136,7 @@ function AppLayout() {
 					</div>
 					<div className="flex items-center gap-3.5">
 						<span className="text-[13px] text-muted font-medium">
-							2026/6/30（月）
+							{todayLabel}
 						</span>
 						<span className="text-[11.5px] font-bold text-ink bg-hairline px-2.75 py-1.25 rounded-pill leading-none">
 							{roleLabel}
