@@ -57,6 +57,9 @@ importers:
       typescript:
         specifier: ^5
         version: 5.9.3
+      vitest:
+        specifier: ^4.1.5
+        version: 4.1.9(@types/node@24.13.2)(jsdom@28.1.0(@noble/hashes@2.2.0))(vite@8.1.0(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
 
   apps/web:
     dependencies:
@@ -4132,7 +4135,6 @@ snapshots:
       magic-string: 0.30.21
     optionalDependencies:
       vite: 8.1.0(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)
-    optional: true
 
   '@vitest/pretty-format@4.1.9':
     dependencies:
@@ -4949,7 +4951,6 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.7.0
       tsx: 4.22.4
-    optional: true
 
   vitefu@1.1.3(vite@8.1.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)):
     optionalDependencies:
@@ -5015,7 +5016,6 @@ snapshots:
       jsdom: 28.1.0(@noble/hashes@2.2.0)
     transitivePeerDependencies:
       - msw
-    optional: true
 
   w3c-xmlserializer@5.0.0:
     dependencies:

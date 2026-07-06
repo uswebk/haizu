@@ -1,6 +1,7 @@
 import { createMiddleware } from "hono/factory";
 import { auth } from "../lib/auth";
 import type { AppEnv } from "../types";
+import { evaluateSessionAccess } from "./session-access";
 
 // Better Auth のセッションを検証し、ユーザー・組織をコンテキストへ設定する。
 export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
@@ -16,13 +17,9 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
 		isActive: boolean;
 		emailVerified: boolean;
 	};
-	// 無効化されたユーザーはアクセス不可
-	if (!user.isActive) {
-		return c.json({ error: "このアカウントは無効です" }, 403);
-	}
-	// メールアドレス未確認のユーザーはデータAPIにアクセス不可（OTP確認を強制）
-	if (!user.emailVerified) {
-		return c.json({ error: "メールアドレスの確認が必要です" }, 403);
+	const access = evaluateSessionAccess(user);
+	if (!access.ok) {
+		return c.json({ error: access.message }, access.status);
 	}
 
 	c.set("user", { id: user.id, organizationId: user.organizationId, role: user.role });

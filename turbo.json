@@ -10,7 +10,10 @@
         "persistent": true
       },
       "typecheck": {
-        "dependsOn": ["^build"]                                                  
+        "dependsOn": ["^build"]
+      },
+      "test": {
+        "dependsOn": ["^build"]
       },
       "db:generate": {
         "cache": false
