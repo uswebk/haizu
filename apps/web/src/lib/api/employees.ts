@@ -57,3 +57,14 @@ export async function updateEmployee(
 	});
 	return handleResponse(res);
 }
+
+export async function importEmployees(
+	rows: EmployeeInput[],
+): Promise<{ created: number }> {
+	const res = await apiFetch(`${API_BASE}/employees/import`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ employees: rows }),
+	});
+	return handleResponse(res);
+}

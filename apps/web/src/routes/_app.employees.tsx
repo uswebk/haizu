@@ -1,23 +1,31 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Avatar } from "#/components/ui/Avatar";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { PagerButton } from "#/components/ui/PagerButton";
 import { Table, type TableColumn } from "#/components/ui/Table";
+import { employeesToCsv, parseEmployeesCsv } from "#/features/employees/csv";
 import {
 	EmployeeFormDialog,
 	type EmployeeFormValues,
 } from "#/features/employees/EmployeeFormDialog";
+import { ImportPreviewDialog } from "#/features/employees/ImportPreviewDialog";
+import {
+	type ImportPreview,
+	validateImport,
+} from "#/features/employees/importValidation";
 import type { EmployeeRow } from "#/features/employees/types";
 import {
 	createEmployee,
 	employeeKeys,
 	fetchEmployees,
+	importEmployees,
 	updateEmployee,
 } from "#/lib/api/employees";
+import { fetchTags, tagKeys } from "#/lib/api/tags";
 
 const CURRENT_SITE = "A工場";
 const PAGE_SIZE = 50;
@@ -65,6 +73,67 @@ function EmployeeList() {
 			);
 		},
 	});
+
+	const { data: tags = [] } = useQuery({
+		queryKey: tagKeys.all,
+		queryFn: fetchTags,
+	});
+
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [importPreview, setImportPreview] = useState<ImportPreview | null>(
+		null,
+	);
+	const [importFileName, setImportFileName] = useState("");
+	const [importError, setImportError] = useState<string | null>(null);
+
+	const importMutation = useMutation({
+		mutationFn: () => {
+			const inputs = (importPreview?.rows ?? [])
+				.map((r) => r.input)
+				.filter((v): v is NonNullable<typeof v> => v !== null);
+			return importEmployees(inputs);
+		},
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: employeeKeys.all });
+			void queryClient.invalidateQueries({ queryKey: tagKeys.all });
+			closeImport();
+		},
+		onError: (error) => {
+			setImportError(
+				error instanceof Error ? error.message : "取込に失敗しました",
+			);
+		},
+	});
+
+	const handleExport = () => {
+		const csv = employeesToCsv(employees);
+		const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+		const url = URL.createObjectURL(blob);
+		const anchor = document.createElement("a");
+		const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+		anchor.href = url;
+		anchor.download = `haiz_employees_${stamp}.csv`;
+		anchor.click();
+		URL.revokeObjectURL(url);
+	};
+
+	const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		// 同じファイルを続けて選べるように input をリセット
+		e.target.value = "";
+		if (!file) return;
+		const text = await file.text();
+		const parsed = parseEmployeesCsv(text);
+		setImportError(null);
+		setImportFileName(file.name);
+		setImportPreview(validateImport(parsed, employees, tags));
+	};
+
+	const closeImport = () => {
+		setImportPreview(null);
+		setImportFileName("");
+		setImportError(null);
+	};
 
 	const openCreateDialog = () => {
 		setEditingEmployee(null);
@@ -202,7 +271,22 @@ function EmployeeList() {
 						</div>
 					</div>
 					<div className="flex items-center gap-2">
-						<Button variant="secondary">CSV取込</Button>
+						<input
+							ref={fileInputRef}
+							type="file"
+							accept=".csv,text/csv"
+							className="hidden"
+							onChange={handleFileSelected}
+						/>
+						<Button variant="secondary" onClick={handleExport}>
+							CSVエクスポート
+						</Button>
+						<Button
+							variant="secondary"
+							onClick={() => fileInputRef.current?.click()}
+						>
+							CSV取込
+						</Button>
 						<Button onClick={openCreateDialog}>＋ 従業員を追加</Button>
 					</div>
 				</div>
@@ -263,6 +347,19 @@ function EmployeeList() {
 					saveMutation.mutate(data);
 				}}
 				onCancel={closeDialog}
+			/>
+
+			<ImportPreviewDialog
+				open={importPreview !== null}
+				preview={importPreview}
+				fileName={importFileName}
+				isPending={importMutation.isPending}
+				errorMessage={importError}
+				onConfirm={() => {
+					setImportError(null);
+					importMutation.mutate();
+				}}
+				onCancel={closeImport}
 			/>
 		</div>
 	);

@@ -4,18 +4,8 @@ import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { useDismiss } from "#/hooks/useDismiss";
 import { fetchTags, tagKeys } from "#/lib/api/tags";
+import { AVATAR_COLORS } from "./palette";
 import type { EmployeeRow } from "./types";
-
-const AVATAR_COLORS = [
-	"#2f8fd6",
-	"#3d9970",
-	"#f0883e",
-	"#8b5cf6",
-	"#26a69a",
-	"#e85d75",
-	"#d4a017",
-	"#ef6c5a",
-];
 
 export type EmployeeFormValues = {
 	lastName: string;

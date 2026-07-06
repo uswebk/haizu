@@ -105,6 +105,61 @@ export const employeesRoute = new Hono<AppEnv>()
 		return c.json(result, 201);
 	})
 
+	.post(
+		"/import",
+		zValidator(
+			"json",
+			z.object({ employees: z.array(employeeInput).min(1) }),
+		),
+		async (c) => {
+			const siteId = c.get("siteId");
+			const { employees: incoming } = c.req.valid("json");
+
+			// 参照される全タグが当該拠点に属することを検証（他拠点タグ混入防止）
+			const referencedTagIds = [
+				...new Set(incoming.flatMap((e) => e.tagIds)),
+			];
+			if (referencedTagIds.length > 0) {
+				const siteTags = await db
+					.select({ id: tags.id })
+					.from(tags)
+					.where(
+						and(eq(tags.siteId, siteId), inArray(tags.id, referencedTagIds)),
+					);
+				const validTagIds = new Set(siteTags.map((t) => t.id));
+				const invalid = referencedTagIds.filter((id) => !validTagIds.has(id));
+				if (invalid.length > 0) {
+					return c.json({ error: "この拠点に存在しないタグが含まれています" }, 400);
+				}
+			}
+
+			try {
+				await db.transaction(async (tx) => {
+					for (const { tagIds, ...input } of incoming) {
+						const inserted = await tx
+							.insert(employees)
+							.values({ ...input, siteId })
+							.returning();
+						const row = inserted[0];
+						if (!row) throw new Error("Insert failed");
+						if (tagIds.length > 0) {
+							await tx
+								.insert(employeeTags)
+								.values(tagIds.map((tagId) => ({ employeeId: row.id, tagId })));
+						}
+					}
+				});
+			} catch (error) {
+				if (isUniqueViolation(error)) {
+					return c.json({ error: DUPLICATE_CODE_MESSAGE }, 400);
+				}
+				throw error;
+			}
+
+			return c.json({ created: incoming.length }, 201);
+		},
+	)
+
 	.put("/:id", zValidator("json", employeeInput), async (c) => {
 		const { id } = c.req.param();
 		const { tagIds, ...input } = c.req.valid("json");
