@@ -1,3 +1,4 @@
+import type { Role } from "@haiz/shared";
 import {
 	createFileRoute,
 	Link,
@@ -10,13 +11,7 @@ import { NavItem } from "#/components/ui/NavItem";
 import { useSite } from "#/contexts/site-context";
 import { useDismiss } from "#/hooks/useDismiss";
 import { authClient } from "#/lib/auth-client";
-
-const ROLE_LABEL: Record<string, string> = {
-	admin: "管理者",
-	site_admin: "拠点管理者",
-	general: "一般",
-	viewer: "その他",
-};
+import { ROLE_LABEL } from "#/lib/roles";
 
 export const Route = createFileRoute("/_app")({
 	beforeLoad: async () => {
@@ -49,11 +44,11 @@ function AppLayout() {
 	const navigate = useNavigate();
 	const { data: session } = authClient.useSession();
 	const user = session?.user as
-		| { name: string; email: string; role: string }
+		| { name: string; email: string; role: Role }
 		| undefined;
 	const userName = user?.name ?? "";
 	const userEmail = user?.email ?? "";
-	const roleLabel = ROLE_LABEL[user?.role ?? ""] ?? "";
+	const roleLabel = user ? ROLE_LABEL[user.role] : "";
 	const initial = userName.charAt(0) || "?";
 
 	const [userMenuOpen, setUserMenuOpen] = useState(false);

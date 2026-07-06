@@ -1,10 +1,18 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import type { Role } from "@haiz/shared";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useSite } from "#/contexts/site-context";
 import { SiteEditDialog } from "#/features/sites/SiteEditDialog";
 import { SiteIcon } from "#/features/sites/SiteIcon";
+import { authClient } from "#/lib/auth-client";
+import { ROLE_LABEL } from "#/lib/roles";
 
 export const Route = createFileRoute("/select-site")({
+	beforeLoad: async () => {
+		const { data } = await authClient.getSession();
+		if (!data) throw redirect({ to: "/login" });
+		if (!data.user.emailVerified) throw redirect({ to: "/verify-otp" });
+	},
 	component: SelectSitePage,
 });
 
@@ -12,6 +20,11 @@ function SelectSitePage() {
 	const navigate = useNavigate();
 	const { activeSites, canAddSite, switchSite, addSite } = useSite();
 	const [addOpen, setAddOpen] = useState(false);
+	const { data: session } = authClient.useSession();
+	const user = session?.user as { name: string; role: Role } | undefined;
+	const userName = user?.name ?? "";
+	const roleLabel = user ? ROLE_LABEL[user.role] : "";
+	const initial = userName.charAt(0) || "?";
 
 	const select = (id: string) => {
 		switchSite(id);
@@ -19,7 +32,7 @@ function SelectSitePage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-[#f0f5fb] to-app-bg flex flex-col items-center justify-center p-10">
+		<div className="min-h-screen bg-linear-to-b from-[#f0f5fb] to-app-bg flex flex-col items-center justify-center p-10">
 			<div className="flex items-center gap-2.75 pb-4.5">
 				<img
 					src="/logo.svg"
@@ -84,10 +97,10 @@ function SelectSitePage() {
 
 			<div className="flex items-center gap-2.5 mt-9">
 				<div className="w-7.5 h-7.5 rounded-full bg-ink text-white flex items-center justify-center font-bold text-xs">
-					管
+					{initial}
 				</div>
 				<span className="text-[12.5px] text-faint">
-					管理 太郎 ・ システム管理者
+					{userName} ・ {roleLabel}
 				</span>
 			</div>
 

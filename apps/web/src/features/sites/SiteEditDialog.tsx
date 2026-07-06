@@ -64,9 +64,6 @@ export function SiteEditDialog({
 							onChange={(e) => setName(e.target.value)}
 							placeholder="例：D工場"
 							autoFocus
-							onKeyDown={(e) => {
-								if (e.key === "Enter") submit();
-							}}
 						/>
 					</div>
 
