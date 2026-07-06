@@ -8,18 +8,6 @@ import { requireAuth } from "../middleware/auth";
 import { siteScope } from "../middleware/site-scope";
 import type { AppEnv } from "../types";
 
-async function getOrCreateWorkPattern(siteId: string) {
-	const existing = await db.query.workPatterns.findFirst({
-		where: eq(workPatterns.siteId, siteId),
-	});
-	if (existing) return existing;
-
-	const inserted = await db.insert(workPatterns).values({ siteId }).returning();
-	const created = inserted[0];
-	if (!created) throw new Error("Failed to create work pattern");
-	return created;
-}
-
 async function loadShifts(workPatternId: string) {
 	return db
 		.select()
@@ -34,9 +22,10 @@ export const workPatternsRoute = new Hono<AppEnv>()
 	.use("*", requireAuth)
 	.use("*", siteScope)
 	.get("/", async (c) => {
-		// fixme: なるべくget or createは使用したくない。getに対して副作用を発生させたくないため
-		//        拠点作成時に、work_patternレコードを作りにいく。もし持ってなければ画面上から作れるようにしておく
-		const workPattern = await getOrCreateWorkPattern(c.get("siteId"));
+		const workPattern = await db.query.workPatterns.findFirst({
+			where: eq(workPatterns.siteId, c.get("siteId")),
+		});
+		if (!workPattern) return c.json({ error: "Not found" }, 404);
 		const rows = await loadShifts(workPattern.id);
 
 		return c.json({
@@ -53,7 +42,10 @@ export const workPatternsRoute = new Hono<AppEnv>()
 
 	.put("/", zValidator("json", WorkPatternInputSchema), async (c) => {
 		const { mode, shifts: newShifts } = c.req.valid("json");
-		const workPattern = await getOrCreateWorkPattern(c.get("siteId"));
+		const workPattern = await db.query.workPatterns.findFirst({
+			where: eq(workPatterns.siteId, c.get("siteId")),
+		});
+		if (!workPattern) return c.json({ error: "Not found" }, 404);
 
 		const rows = mode === "single" ? [] : newShifts;
 

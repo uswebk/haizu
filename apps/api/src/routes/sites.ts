@@ -3,7 +3,7 @@ import { SiteInputSchema } from "@haiz/shared";
 import { and, count, eq, ne } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db/client";
-import { employees, sites } from "../db/schema";
+import { employees, sites, workPatterns } from "../db/schema";
 import { requireAuth } from "../middleware/auth";
 import type { AppEnv } from "../types";
 
@@ -62,19 +62,25 @@ export const sitesRoute = new Hono<AppEnv>()
 			bg: "#dcf2f0",
 			color: "#0ea5a4",
 		};
-		const inserted = await db
-			.insert(sites)
-			.values({
-				organizationId,
-				name,
-				description,
-				iconBg: icon.bg,
-				iconColor: icon.color,
-				isActive,
-			})
-			.returning();
-		const site = inserted[0];
-		if (!site) return c.json({ error: "Insert failed" }, 500);
+		const site = await db.transaction(async (tx) => {
+			const inserted = await tx
+				.insert(sites)
+				.values({
+					organizationId,
+					name,
+					description,
+					iconBg: icon.bg,
+					iconColor: icon.color,
+					isActive,
+				})
+				.returning();
+			const row = inserted[0];
+			if (!row) throw new Error("Insert failed");
+
+			// 拠点は勤務体制を1件持つ。作成時に既定(single)で用意しておく
+			await tx.insert(workPatterns).values({ siteId: row.id });
+			return row;
+		});
 
 		return c.json(site, 201);
 	})
