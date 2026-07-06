@@ -7,6 +7,7 @@ import { imageSize } from "image-size";
 import { z } from "zod";
 import { db } from "../db/client";
 import { areas, assignments, layoutSpecVersions, spots } from "../db/schema";
+import { requireAuth } from "../middleware/auth";
 import { siteScope } from "../middleware/site-scope";
 import { storage } from "../storage";
 import type { AppEnv } from "../types";
@@ -71,6 +72,7 @@ function resolveCurrentVersion<T extends VersionForResolution>(
 }
 
 export const areasRoute = new Hono<AppEnv>()
+	.use("*", requireAuth)
 	.use("*", siteScope)
 	.use("/:id/*", areaGuard)
 	.get(

@@ -30,3 +30,20 @@ export const InvitationSchema = z.object({
 });
 
 export type Invitation = z.infer<typeof InvitationSchema>;
+
+// サインアップ: 名前・会社名・メール・パスワードで新規組織を作成する
+export const SignUpInputSchema = z.object({
+  name: z.string().min(1),
+  companyName: z.string().min(1),
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+export type SignUpInput = z.infer<typeof SignUpInputSchema>;
+
+export const LoginInputSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
+export type LoginInput = z.infer<typeof LoginInputSchema>;

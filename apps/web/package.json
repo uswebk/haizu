@@ -25,6 +25,7 @@
     "@tanstack/react-router-ssr-query": "latest",
     "@tanstack/react-start": "latest",
     "@tanstack/router-plugin": "^1.132.0",
+    "better-auth": "^1.6.22",
     "hono": "^4.12.27",
     "konva": "^9.3.20",
     "lucide-react": "^0.545.0",

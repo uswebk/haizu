@@ -16,6 +16,7 @@ import {
 	siteKeys,
 	updateSite as updateSiteApi,
 } from "#/lib/api/sites";
+import { authClient } from "#/lib/auth-client";
 
 export const MAX_SITES = 10;
 
@@ -56,9 +57,12 @@ const SiteContext = createContext<SiteContextValue | null>(null);
 
 export function SiteProvider({ children }: { children: ReactNode }) {
 	const queryClient = useQueryClient();
+	// 未ログイン（login/signup ページ等）では /sites を叩かない
+	const { data: sessionData } = authClient.useSession();
 	const { data: rawSites = [], isLoading } = useQuery({
 		queryKey: siteKeys.all,
 		queryFn: fetchSites,
+		enabled: !!sessionData,
 	});
 
 	const [currentSiteId, setCurrentSiteIdState] = useState<string | null>(() =>

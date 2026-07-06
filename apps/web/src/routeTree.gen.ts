@@ -9,7 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyOtpRouteImport } from './routes/verify-otp'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SelectSiteRouteImport } from './routes/select-site'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
@@ -31,9 +34,24 @@ import { Route as AppSettingsShiftsRouteImport } from './routes/_app.settings.sh
 import { Route as AppEditorAreaIdRouteImport } from './routes/_app.editor.$areaId'
 import { Route as AppAssignmentAreaIdRouteImport } from './routes/_app.assignment.$areaId'
 
+const VerifyOtpRoute = VerifyOtpRouteImport.update({
+  id: '/verify-otp',
+  path: '/verify-otp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SelectSiteRoute = SelectSiteRouteImport.update({
   id: '/select-site',
   path: '/select-site',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CatalogRoute = CatalogRouteImport.update({
@@ -139,7 +157,10 @@ const AppAssignmentAreaIdRoute = AppAssignmentAreaIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/login': typeof LoginRoute
   '/select-site': typeof SelectSiteRoute
+  '/signup': typeof SignupRoute
+  '/verify-otp': typeof VerifyOtpRoute
   '/assignment': typeof AppAssignmentRouteWithChildren
   '/editor': typeof AppEditorRouteWithChildren
   '/employees': typeof AppEmployeesRoute
@@ -161,7 +182,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/login': typeof LoginRoute
   '/select-site': typeof SelectSiteRoute
+  '/signup': typeof SignupRoute
+  '/verify-otp': typeof VerifyOtpRoute
   '/employees': typeof AppEmployeesRoute
   '/history': typeof AppHistoryRoute
   '/home': typeof AppHomeRoute
@@ -183,7 +207,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/catalog': typeof CatalogRoute
+  '/login': typeof LoginRoute
   '/select-site': typeof SelectSiteRoute
+  '/signup': typeof SignupRoute
+  '/verify-otp': typeof VerifyOtpRoute
   '/_app/assignment': typeof AppAssignmentRouteWithChildren
   '/_app/editor': typeof AppEditorRouteWithChildren
   '/_app/employees': typeof AppEmployeesRoute
@@ -207,7 +234,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/catalog'
+    | '/login'
     | '/select-site'
+    | '/signup'
+    | '/verify-otp'
     | '/assignment'
     | '/editor'
     | '/employees'
@@ -229,7 +259,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/catalog'
+    | '/login'
     | '/select-site'
+    | '/signup'
+    | '/verify-otp'
     | '/employees'
     | '/history'
     | '/home'
@@ -250,7 +283,10 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/catalog'
+    | '/login'
     | '/select-site'
+    | '/signup'
+    | '/verify-otp'
     | '/_app/assignment'
     | '/_app/editor'
     | '/_app/employees'
@@ -274,16 +310,40 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   CatalogRoute: typeof CatalogRoute
+  LoginRoute: typeof LoginRoute
   SelectSiteRoute: typeof SelectSiteRoute
+  SignupRoute: typeof SignupRoute
+  VerifyOtpRoute: typeof VerifyOtpRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verify-otp': {
+      id: '/verify-otp'
+      path: '/verify-otp'
+      fullPath: '/verify-otp'
+      preLoaderRoute: typeof VerifyOtpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/select-site': {
       id: '/select-site'
       path: '/select-site'
       fullPath: '/select-site'
       preLoaderRoute: typeof SelectSiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/catalog': {
@@ -505,7 +565,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   CatalogRoute: CatalogRoute,
+  LoginRoute: LoginRoute,
   SelectSiteRoute: SelectSiteRoute,
+  SignupRoute: SignupRoute,
+  VerifyOtpRoute: VerifyOtpRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

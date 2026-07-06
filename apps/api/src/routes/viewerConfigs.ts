@@ -5,6 +5,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
 import { areas, shifts, viewerConfigs } from "../db/schema";
+import { requireAuth } from "../middleware/auth";
 import { siteScope } from "../middleware/site-scope";
 import type { AppEnv } from "../types";
 
@@ -30,6 +31,7 @@ function serialize(row: typeof viewerConfigs.$inferSelect, shift: ShiftInfo) {
 }
 
 export const viewerConfigsRoute = new Hono<AppEnv>()
+	.use("*", requireAuth)
 	.use("*", siteScope)
 	.get("/", async (c) => {
 		// shifts は left join（ソフト削除済みでも name/時刻は保持されるため表示に使える）

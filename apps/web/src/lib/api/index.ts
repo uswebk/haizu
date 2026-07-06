@@ -25,5 +25,5 @@ export function apiFetch(
 	const siteId = getCurrentSiteId();
 	const headers = new Headers(init.headers);
 	if (siteId) headers.set("x-site-id", siteId);
-	return fetch(input, { ...init, headers });
+	return fetch(input, { ...init, headers, credentials: "include" });
 }

@@ -4,6 +4,7 @@ import { and, eq, inArray, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db/client";
 import { shifts, workPatterns } from "../db/schema";
+import { requireAuth } from "../middleware/auth";
 import { siteScope } from "../middleware/site-scope";
 import type { AppEnv } from "../types";
 
@@ -30,6 +31,7 @@ async function loadShifts(workPatternId: string) {
 }
 
 export const workPatternsRoute = new Hono<AppEnv>()
+	.use("*", requireAuth)
 	.use("*", siteScope)
 	.get("/", async (c) => {
 		// fixme: なるべくget or createは使用したくない。getに対して副作用を発生させたくないため

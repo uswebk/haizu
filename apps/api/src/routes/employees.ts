@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
 import { employeeTags, employees, tags } from "../db/schema";
+import { requireAuth } from "../middleware/auth";
 import { siteScope } from "../middleware/site-scope";
 import type { AppEnv } from "../types";
 
@@ -67,6 +68,7 @@ function isUniqueViolation(error: unknown): boolean {
 }
 
 export const employeesRoute = new Hono<AppEnv>()
+	.use("*", requireAuth)
 	.use("*", siteScope)
 	.get("/", async (c) => {
 		const rows = await db

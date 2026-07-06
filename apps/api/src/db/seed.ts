@@ -1,5 +1,8 @@
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { auth } from "../lib/auth";
+import { signupContext } from "../lib/signup-context";
 import {
 	areas,
 	employees,
@@ -10,6 +13,7 @@ import {
 	sites,
 	spots,
 	tags,
+	user,
 	workPatterns,
 } from "./schema";
 
@@ -114,6 +118,26 @@ async function seed() {
 	if (!siteA) throw new Error("Failed to create sites");
 	console.log(`  Created org + ${insertedSites.length} sites`);
 
+	// ログイン確認用のデモ管理者（Better Auth 経由でパスワードをハッシュ化して作成）。
+	// organizationId / role は signupContext 経由で databaseHooks が設定する。
+	await signupContext.run(
+		{ organizationId: organization.id, role: "admin" },
+		() =>
+			auth.api.signUpEmail({
+				body: {
+					name: "管理 太郎",
+					email: "admin@haiz.co.jp",
+					password: "password123",
+				},
+			}),
+	);
+	// デモユーザーはOTP確認を省略できるよう検証済みにする
+	await db
+		.update(user)
+		.set({ emailVerified: true })
+		.where(eq(user.email, "admin@haiz.co.jp"));
+	console.log("  Created demo user admin@haiz.co.jp / password123");
+
 	// 既存の従業員・タグ・エリア・働き方はすべて先頭拠点(A工場)に紐付ける
 	const siteId = siteA.id;
 
@@ -207,6 +231,8 @@ async function seed() {
 
 	console.log("Done.");
 	await client.end();
+	// auth 用の db クライアント（別接続）が開いたままだと exit しないため明示終了する
+	process.exit(0);
 }
 
 seed().catch((err) => {

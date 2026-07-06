@@ -1,10 +1,30 @@
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	Outlet,
+	redirect,
+	useNavigate,
+} from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { NavItem } from "#/components/ui/NavItem";
 import { useSite } from "#/contexts/site-context";
 import { useDismiss } from "#/hooks/useDismiss";
+import { authClient } from "#/lib/auth-client";
+
+const ROLE_LABEL: Record<string, string> = {
+	admin: "管理者",
+	site_admin: "拠点管理者",
+	general: "一般",
+	viewer: "その他",
+};
 
 export const Route = createFileRoute("/_app")({
+	beforeLoad: async () => {
+		const { data } = await authClient.getSession();
+		if (!data) throw redirect({ to: "/login" });
+		// メールアドレス未確認ならOTP確認画面へ
+		if (!data.user.emailVerified) throw redirect({ to: "/verify-otp" });
+	},
 	component: AppLayout,
 });
 
@@ -26,9 +46,24 @@ const ADMIN_NAV = [
 
 function AppLayout() {
 	const { currentSite } = useSite();
+	const navigate = useNavigate();
+	const { data: session } = authClient.useSession();
+	const user = session?.user as
+		| { name: string; email: string; role: string }
+		| undefined;
+	const userName = user?.name ?? "";
+	const userEmail = user?.email ?? "";
+	const roleLabel = ROLE_LABEL[user?.role ?? ""] ?? "";
+	const initial = userName.charAt(0) || "?";
+
 	const [userMenuOpen, setUserMenuOpen] = useState(false);
 	const userMenuRef = useRef<HTMLDivElement>(null);
 	useDismiss(userMenuOpen, () => setUserMenuOpen(false), userMenuRef);
+
+	const logout = async () => {
+		await authClient.signOut();
+		void navigate({ to: "/login" });
+	};
 
 	return (
 		<div className="flex h-screen bg-app-bg overflow-hidden">
@@ -77,11 +112,11 @@ function AppLayout() {
 
 				<div className="mt-auto border-t border-hairline pt-3.5 pb-1 flex items-center gap-2.5 px-2">
 					<div className="w-8.5 h-8.5 rounded-full bg-ink text-white flex items-center justify-center font-bold text-sm shrink-0">
-						管
+						{initial}
 					</div>
 					<div className="min-w-0 flex-1">
-						<div className="text-[13px] font-semibold truncate">管理 太郎</div>
-						<div className="text-[11px] text-faint">管理者</div>
+						<div className="text-[13px] font-semibold truncate">{userName}</div>
+						<div className="text-[11px] text-faint">{roleLabel}</div>
 					</div>
 				</div>
 			</aside>
@@ -106,7 +141,7 @@ function AppLayout() {
 							2026/6/30（月）
 						</span>
 						<span className="text-[11.5px] font-bold text-ink bg-hairline px-2.75 py-1.25 rounded-pill leading-none">
-							管理者
+							{roleLabel}
 						</span>
 						<div className="relative" ref={userMenuRef}>
 							<button
@@ -114,39 +149,25 @@ function AppLayout() {
 								onClick={() => setUserMenuOpen((v) => !v)}
 								className="w-9 h-9 rounded-full bg-ink text-white flex items-center justify-center font-bold text-sm cursor-pointer border-none"
 							>
-								管
+								{initial}
 							</button>
 							{userMenuOpen && (
 								<div className="absolute top-11.5 right-0 w-62 bg-surface border border-border rounded-[13px] shadow-float z-40 overflow-hidden">
 									<div className="px-4 py-3.75 border-b border-hairline">
-										<div className="text-sm font-bold">管理 太郎</div>
-										<div className="text-xs text-faint mt-0.5">
-											admin@haiz.co.jp
-										</div>
-										<div className="text-[11.5px] text-muted mt-1.5">
-											株式会社haiz
-										</div>
+										<div className="text-sm font-bold">{userName}</div>
+										<div className="text-xs text-faint mt-0.5">{userEmail}</div>
 									</div>
 									<div className="p-1.5">
-										{(
-											[
-												{ label: "アカウント設定", danger: false },
-												{ label: "事業所情報", danger: false },
-												{ label: "ログアウト", danger: true },
-											] as const
-										).map(({ label, danger }) => (
-											<button
-												key={label}
-												type="button"
-												className={`w-full text-left px-2.75 py-2.5 rounded-[9px] text-[13px] font-semibold cursor-pointer border-none bg-transparent ${
-													danger
-														? "text-danger hover:bg-danger-soft"
-														: "text-ink hover:bg-hairline"
-												}`}
-											>
-												{label}
-											</button>
-										))}
+										<button
+											type="button"
+											onClick={() => {
+												setUserMenuOpen(false);
+												void logout();
+											}}
+											className="w-full text-left px-2.75 py-2.5 rounded-[9px] text-[13px] font-semibold cursor-pointer border-none bg-transparent text-danger hover:bg-danger-soft"
+										>
+											ログアウト
+										</button>
 									</div>
 								</div>
 							)}

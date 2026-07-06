@@ -20,6 +20,7 @@ import {
 	shifts,
 	spotAssignments,
 } from "../db/schema";
+import { requireAuth } from "../middleware/auth";
 import { siteScope } from "../middleware/site-scope";
 import type { AppEnv } from "../types";
 
@@ -90,6 +91,7 @@ function serialize(
 }
 
 export const assignmentsRoute = new Hono<AppEnv>()
+	.use("*", requireAuth)
 	.use("*", siteScope)
 	.get("/shift-mismatch", zValidator("query", dateQuery), async (c) => {
 		const { date } = c.req.valid("query");

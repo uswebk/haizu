@@ -4,7 +4,8 @@ import { and, count, eq, ne } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db/client";
 import { employees, sites } from "../db/schema";
-import { resolveDefaultOrganizationId } from "../middleware/site-scope";
+import { requireAuth } from "../middleware/auth";
+import type { AppEnv } from "../types";
 
 const MAX_SITES = 10;
 
@@ -17,9 +18,10 @@ const ICON_PALETTE = [
 	{ bg: "#fde4ec", color: "#e0447b" },
 ];
 
-export const sitesRoute = new Hono()
+export const sitesRoute = new Hono<AppEnv>()
+	.use("*", requireAuth)
 	.get("/", async (c) => {
-		const organizationId = await resolveDefaultOrganizationId();
+		const organizationId = c.get("organizationId");
 
 		const rows = await db
 			.select({
@@ -45,7 +47,7 @@ export const sitesRoute = new Hono()
 
 	.post("/", zValidator("json", SiteInputSchema), async (c) => {
 		const { name, description, isActive } = c.req.valid("json");
-		const organizationId = await resolveDefaultOrganizationId();
+		const organizationId = c.get("organizationId");
 
 		const existing = await db
 			.select({ value: count() })

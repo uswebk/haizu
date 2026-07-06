@@ -71,6 +71,13 @@
       "when": 1783274552385,
       "tag": "0009_outstanding_kingpin",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1783313253549,
+      "tag": "0010_loud_sersi",
+      "breakpoints": true
     }
   ]
 }

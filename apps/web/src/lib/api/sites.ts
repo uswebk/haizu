@@ -1,5 +1,5 @@
 import type { SiteInput } from "@haiz/shared";
-import { API_BASE } from ".";
+import { API_BASE, apiFetch } from ".";
 
 export type Site = {
 	id: string;
@@ -31,15 +31,14 @@ export const siteKeys = {
 	all: ["sites"] as const,
 };
 
-// 拠点一覧は組織スコープ（現在拠点に依存しない）ため apiFetch は使わない。
 export async function fetchSites(): Promise<Site[]> {
-	const res = await fetch(`${API_BASE}/sites`);
+	const res = await apiFetch(`${API_BASE}/sites`);
 	const data = await handleResponse<{ sites: Site[] }>(res);
 	return data.sites;
 }
 
 export async function createSite(input: SiteInput): Promise<Site> {
-	const res = await fetch(`${API_BASE}/sites`, {
+	const res = await apiFetch(`${API_BASE}/sites`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(input),
@@ -48,7 +47,7 @@ export async function createSite(input: SiteInput): Promise<Site> {
 }
 
 export async function updateSite(id: string, input: SiteInput): Promise<Site> {
-	const res = await fetch(`${API_BASE}/sites/${id}`, {
+	const res = await apiFetch(`${API_BASE}/sites/${id}`, {
 		method: "PUT",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(input),

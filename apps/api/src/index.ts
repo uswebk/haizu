@@ -2,8 +2,11 @@ import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { auth } from "./lib/auth";
+import { WEB_ORIGIN } from "./lib/env";
 import { areasRoute } from "./routes/areas";
 import { assignmentsRoute } from "./routes/assignments";
+import { authRoute } from "./routes/auth";
 import { employeesRoute } from "./routes/employees";
 import { sitesRoute } from "./routes/sites";
 import { tagsRoute } from "./routes/tags";
@@ -12,12 +15,18 @@ import { workPatternsRoute } from "./routes/workPatterns";
 
 const app = new Hono();
 
-app.use("*", cors({ origin: "http://localhost:3000" }));
+// セッションCookieをクロスオリジンで送受信するため credentials を許可（許可オリジンは環境変数）
+app.use("*", cors({ origin: WEB_ORIGIN, credentials: true }));
 
 app.get("/health", (c) => c.json({ status: "ok" }));
 app.use("/uploads/*", serveStatic({ root: "./" }));
 
-// 拠点スコープ配下のリソースは各ルート内で siteScope middleware を適用している
+// Better Auth の標準ハンドラ（ログイン・ログアウト・セッション等）
+app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+// 会社名→組織作成を伴うカスタムサインアップ
+app.route("/auth", authRoute);
+
+// 認証・拠点スコープは各ルート内で requireAuth / siteScope を適用している
 app.route("/sites", sitesRoute);
 app.route("/areas", areasRoute);
 app.route("/assignments", assignmentsRoute);
