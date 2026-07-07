@@ -32,6 +32,11 @@ user-invocable: true
      （通常の `PROJECT_TYPE_PROJECT` を想定する）。
    - `list_files` でファイル一覧を取得し、`.dc.html` 拡張子のファイルから対象を絞り込む。
      複数候補がある場合はユーザーに確認する。
+   - **対象の `.dc.html` が `list_projects` の書き込み可能プロジェクトから見つからない場合
+     （例: `list_projects` は design-system しか返さず、目的のプロトタイプが別の
+     `PROJECT_TYPE_PROJECT` にある）は、ユーザーに claude design のプロトタイプ URL を
+     尋ねる。** URL 内の `/p/<projectId>` と `?file=<path>` から `projectId` と対象パスを
+     取り出し、`get_project` / `list_files` で妥当性を確認してから手順2へ進む。
    - ここまではメタデータのみなのでメインコンテキストへの影響は小さい。**`get_file` は
      ここでは呼ばない。**
 
