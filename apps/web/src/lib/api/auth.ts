@@ -21,14 +21,3 @@ export async function signUp(input: SignUpInput): Promise<void> {
 		throw new Error(message);
 	}
 }
-
-// 開発用: OTP画面に表示するため、直近に送信された OTP をAPIから取得する。
-export async function fetchDevOtp(email: string): Promise<string | null> {
-	const res = await fetch(
-		`${API_BASE}/auth/dev-otp?email=${encodeURIComponent(email)}`,
-		{ credentials: "include" },
-	);
-	if (!res.ok) return null;
-	const data = (await res.json()) as { otp: string | null };
-	return data.otp;
-}

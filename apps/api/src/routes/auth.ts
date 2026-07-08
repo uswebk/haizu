@@ -5,8 +5,6 @@ import { Hono } from "hono";
 import { db } from "../db/client";
 import { organizations } from "../db/schema";
 import { auth } from "../lib/auth";
-import { devOtpStore } from "../lib/dev-otp";
-import { isLocal } from "../lib/env";
 import { signupContext } from "../lib/signup-context";
 
 // サインアップは「会社名 → 組織作成」を伴うため、Better Auth 標準の signUp をそのまま
@@ -60,11 +58,3 @@ export const authRoute = new Hono().post(
 		}
 	},
 );
-
-// 開発用: OTP画面に表示するため、直近に送信した OTP を返す。local 以外では無効。
-authRoute.get("/dev-otp", (c) => {
-	if (!isLocal) return c.json({ error: "Not found" }, 404);
-	const email = c.req.query("email");
-	if (!email) return c.json({ error: "email is required" }, 400);
-	return c.json({ otp: devOtpStore.get(email) ?? null });
-});

@@ -1,10 +1,8 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
-import { fetchDevOtp } from "#/lib/api/auth";
 import { authClient, getSession } from "#/lib/auth-client";
-import { isLocal } from "#/lib/env";
 
 export const Route = createFileRoute("/verify-otp")({
 	beforeLoad: async () => {
@@ -12,25 +10,21 @@ export const Route = createFileRoute("/verify-otp")({
 		// 未ログインならログインへ。確認済みならアプリへ。
 		if (!data) throw redirect({ to: "/login" });
 		if (data.user.emailVerified) throw redirect({ to: "/select-site" });
+		// サインアップ直後は authClient のセッションストアがまだ新規ユーザーで
+		// 更新されていないことがあるため、useSession() ではなくここで取得した
+		// フレッシュなセッションのメールを確認対象として使う。
+		return { email: data.user.email };
 	},
 	component: VerifyOtpPage,
 });
 
 function VerifyOtpPage() {
 	const navigate = useNavigate();
-	const { data: session } = authClient.useSession();
-	const email = session?.user.email ?? "";
+	const { email } = Route.useRouteContext();
 
 	const [otp, setOtp] = useState("");
-	const [devOtp, setDevOtp] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
-
-	// local 環境でのみ送信済みのOTPを取得して画面下に表示する
-	useEffect(() => {
-		if (!isLocal || !email) return;
-		void fetchDevOtp(email).then(setDevOtp);
-	}, [email]);
 
 	const submit = async () => {
 		if (!email || otp.length === 0) return;
@@ -92,15 +86,6 @@ function VerifyOtpPage() {
 						{submitting ? "確認中…" : "確認する"}
 					</Button>
 				</form>
-
-				{devOtp && (
-					<div className="mt-4 rounded-md bg-hairline px-3 py-2.5 text-center">
-						<div className="text-[11px] text-faint">開発用: 確認コード</div>
-						<div className="font-mono text-base font-bold tracking-[.2em] text-ink">
-							{devOtp}
-						</div>
-					</div>
-				)}
 			</div>
 		</div>
 	);

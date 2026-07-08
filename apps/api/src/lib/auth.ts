@@ -3,7 +3,6 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP } from "better-auth/plugins";
 import { db } from "../db/client";
 import { account, session, user, verification } from "../db/schema";
-import { devOtpStore } from "./dev-otp";
 import { WEB_ORIGIN } from "./env";
 import { signupContext } from "./signup-context";
 
@@ -65,7 +64,6 @@ export const auth = betterAuth({
 		emailOTP({
 			// 開発用: OTPをストアに保持しつつコンソールにも出力する（実メール送信は未実装）
 			async sendVerificationOTP({ email, otp, type }) {
-				devOtpStore.set(email, otp);
 				devSendEmail(email, `OTP (${type})`, `code: ${otp}`);
 			},
 		}),
