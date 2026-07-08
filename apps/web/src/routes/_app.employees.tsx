@@ -112,7 +112,7 @@ function EmployeeList() {
 		const anchor = document.createElement("a");
 		const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 		anchor.href = url;
-		anchor.download = `haiz_employees_${stamp}.csv`;
+		anchor.download = `haizu_employees_${stamp}.csv`;
 		anchor.click();
 		URL.revokeObjectURL(url);
 	};

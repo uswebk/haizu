@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { ViewerConfigInputSchema } from "@haiz/shared";
+import { ViewerConfigInputSchema } from "@haizu/shared";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";

@@ -1,6 +1,6 @@
 export const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
-const SITE_ID_KEY = "haiz.currentSiteId";
+const SITE_ID_KEY = "haizu.currentSiteId";
 
 export function getCurrentSiteId(): string | null {
 	if (typeof localStorage === "undefined") return null;

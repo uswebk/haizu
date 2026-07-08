@@ -63,7 +63,7 @@ user-invocable: true
      - 「モックデータ（コンポーネント内のダミーデータ）で実装する」
      - 「実際のAPI（`apps/api` の既存/新規エンドポイント）と連携して実装する」
      - 「実際のAPI」が選ばれた場合は、手順4に進む前に対象エンティティに対応する
-       `@haiz/shared` のZodスキーマ（`packages/shared/src/schemas/`）と `apps/api`
+       `@haizu/shared` のZodスキーマ（`packages/shared/src/schemas/`）と `apps/api`
        の既存エンドポイントの有無を確認しておく。既存のものがあれば手順4の
        プロンプトに含めて利用させる。無ければAPI新設はスコープ外とし、
        「確認が必要な点」としてユーザーに報告する（勝手にAPIを新設しない）。

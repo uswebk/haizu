@@ -1,4 +1,4 @@
-import type { WorkPattern, WorkPatternInput } from "@haiz/shared";
+import type { WorkPattern, WorkPatternInput } from "@haizu/shared";
 import { API_BASE, apiFetch } from ".";
 
 async function handleResponse<T>(res: Response): Promise<T> {

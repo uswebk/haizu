@@ -1,4 +1,4 @@
-import type { WorkPattern } from "@haiz/shared";
+import type { WorkPattern } from "@haizu/shared";
 
 export type ShiftOption = { id: string; name: string };
 

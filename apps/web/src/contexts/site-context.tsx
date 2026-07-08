@@ -1,4 +1,4 @@
-import type { SiteInput } from "@haiz/shared";
+import type { SiteInput } from "@haizu/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	createContext,

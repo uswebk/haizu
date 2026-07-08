@@ -1,4 +1,4 @@
-import type { LayoutSpecStatus } from "@haiz/shared";
+import type { LayoutSpecStatus } from "@haizu/shared";
 import type { AreaData, SpotState } from "#/features/editor/types";
 import { API_BASE, apiFetch } from ".";
 

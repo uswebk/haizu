@@ -1,4 +1,4 @@
-import type { Role } from "@haiz/shared";
+import type { Role } from "@haizu/shared";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useSite } from "#/contexts/site-context";
@@ -36,11 +36,11 @@ function SelectSitePage() {
 			<div className="flex items-center gap-2.75 pb-4.5">
 				<img
 					src="/logo.svg"
-					alt="haiz"
+					alt="haizu"
 					className="w-11.5 h-11.5 rounded-[12px]"
 				/>
 				<div>
-					<div className="font-bold text-2xl leading-none text-ink">haiz</div>
+					<div className="font-bold text-2xl leading-none text-ink">haizu</div>
 					<div className="font-mono text-[9.5px] tracking-[.14em] text-faint mt-1">
 						配置管理SYSTEM
 					</div>

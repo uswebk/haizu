@@ -201,7 +201,7 @@ function MemberList() {
 							</span>
 						</div>
 						<div className="text-[13.5px] text-muted mt-1.25">
-							haizを利用するメンバーと権限・担当拠点を管理します。
+							haizuを利用するメンバーと権限・担当拠点を管理します。
 						</div>
 					</div>
 					<Button onClick={openInvite}>＋ メンバーを招待</Button>

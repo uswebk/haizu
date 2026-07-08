@@ -1,4 +1,4 @@
-import type { Role } from "@haiz/shared";
+import type { Role } from "@haizu/shared";
 import type { MemberRow } from "#/features/members/types";
 import { API_BASE, apiFetch } from ".";
 

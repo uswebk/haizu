@@ -1,4 +1,4 @@
-import type { Role } from "@haiz/shared";
+import type { Role } from "@haizu/shared";
 import {
 	createFileRoute,
 	Link,
@@ -70,11 +70,11 @@ function AppLayout() {
 				<div className="flex items-center gap-2.75 px-1.5 pb-4.5">
 					<img
 						src="/logo.svg"
-						alt="haiz"
+						alt="haizu"
 						className="w-9.5 h-9.5 rounded-[10px]"
 					/>
 					<div>
-						<div className="font-bold text-xl leading-none text-ink">haiz</div>
+						<div className="font-bold text-xl leading-none text-ink">haizu</div>
 						<div className="font-mono text-[9.5px] tracking-[.13em] text-faint mt-1">
 							配置管理SYSTEM
 						</div>

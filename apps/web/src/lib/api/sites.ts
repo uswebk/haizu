@@ -1,4 +1,4 @@
-import type { SiteInput } from "@haiz/shared";
+import type { SiteInput } from "@haizu/shared";
 import { API_BASE, apiFetch } from ".";
 
 export type Site = {

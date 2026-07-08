@@ -1,9 +1,9 @@
-import { LoginInputSchema, SignUpInputSchema } from "@haiz/shared";
+import { LoginInputSchema, SignUpInputSchema } from "@haizu/shared";
 import { describe, expect, it } from "vitest";
 
 const validSignUp = {
 	name: "山田太郎",
-	companyName: "haiz株式会社",
+	companyName: "haizu株式会社",
 	email: "taro@example.com",
 	password: "password1",
 };

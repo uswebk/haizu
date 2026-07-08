@@ -22,7 +22,7 @@ CREATE TABLE "sites" (
 ALTER TABLE "sites" ADD CONSTRAINT "sites_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 -- 既存データ保全のため、デフォルト組織・拠点を作成し site_id をバックフィルする
 INSERT INTO "organizations" ("id", "name", "email")
-VALUES ('00000000-0000-0000-0000-000000000001', 'デフォルト組織', 'admin@haiz.co.jp');--> statement-breakpoint
+VALUES ('00000000-0000-0000-0000-000000000001', 'デフォルト組織', 'admin@haizu.co.jp');--> statement-breakpoint
 INSERT INTO "sites" ("id", "organization_id", "name", "description", "icon_bg", "icon_color")
 VALUES ('00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000001', 'A工場', '製造ライン', '#dcf2f0', '#0ea5a4');--> statement-breakpoint
 DROP INDEX "employees_code_unique";--> statement-breakpoint

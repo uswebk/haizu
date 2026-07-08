@@ -1,4 +1,4 @@
-import type { ViewerConfig, WorkPattern } from "@haiz/shared";
+import type { ViewerConfig, WorkPattern } from "@haizu/shared";
 import { describe, expect, it } from "vitest";
 import { resolveViewerDisplay } from "./resolveViewerDisplay";
 

@@ -1,4 +1,4 @@
-import type { Role } from "@haiz/shared";
+import type { Role } from "@haizu/shared";
 
 export type MemberStatus = "active" | "inactive" | "invited";
 

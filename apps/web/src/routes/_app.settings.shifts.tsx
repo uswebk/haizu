@@ -1,4 +1,4 @@
-import type { ShiftMode } from "@haiz/shared";
+import type { ShiftMode } from "@haizu/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";

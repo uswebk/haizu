@@ -1,4 +1,4 @@
-import type { SignUpInput } from "@haiz/shared";
+import type { SignUpInput } from "@haizu/shared";
 import { API_BASE } from ".";
 
 // 会社名→組織作成を伴うカスタムサインアップ（Better Auth 標準の signUp ではなく API 側のラッパを叩く）。

@@ -1,4 +1,4 @@
-import type { Role } from "@haiz/shared";
+import type { Role } from "@haizu/shared";
 import { API_BASE } from ".";
 
 async function extractError(res: Response, fallback: string): Promise<string> {

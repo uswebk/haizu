@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { WorkPatternInputSchema } from "@haiz/shared";
+import { WorkPatternInputSchema } from "@haizu/shared";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db/client";

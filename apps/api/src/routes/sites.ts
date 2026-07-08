@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { SiteInputSchema } from "@haiz/shared";
+import { SiteInputSchema } from "@haizu/shared";
 import { and, count, eq, ne } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db/client";

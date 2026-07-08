@@ -105,7 +105,7 @@ async function seed() {
 
 	const insertedOrgs = await db
 		.insert(organizations)
-		.values({ name: "株式会社haiz", email: "admin@haiz.co.jp" })
+		.values({ name: "株式会社haiz", email: "admin@haizu.co.jp" })
 		.returning();
 	const organization = insertedOrgs[0];
 	if (!organization) throw new Error("Failed to create organization");
@@ -126,7 +126,7 @@ async function seed() {
 			auth.api.signUpEmail({
 				body: {
 					name: "管理 太郎",
-					email: "admin@haiz.co.jp",
+					email: "admin@haizu.co.jp",
 					password: "password123",
 				},
 			}),
@@ -135,8 +135,8 @@ async function seed() {
 	await db
 		.update(user)
 		.set({ emailVerified: true })
-		.where(eq(user.email, "admin@haiz.co.jp"));
-	console.log("  Created demo user admin@haiz.co.jp / password123");
+		.where(eq(user.email, "admin@haizu.co.jp"));
+	console.log("  Created demo user admin@haizu.co.jp / password123");
 
 	// 既存の従業員・タグ・エリア・働き方はすべて先頭拠点(A工場)に紐付ける
 	const siteId = siteA.id;

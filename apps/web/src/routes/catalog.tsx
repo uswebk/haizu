@@ -75,7 +75,7 @@ function Catalog() {
 			<div style={{ maxWidth: 900 }}>
 				<div className="mb-12">
 					<h1 className="text-[26px] font-bold text-ink m-0 mb-1.5">
-						haiz コンポーネントカタログ
+						haizu コンポーネントカタログ
 					</h1>
 					<p className="text-muted text-sm m-0">Design System — 案A ティール</p>
 				</div>
@@ -352,7 +352,7 @@ function Catalog() {
 									{label}
 								</span>
 								<span style={{ fontSize: size, fontWeight: weight }}>
-									haizで現場を最適化する
+									haizuで現場を最適化する
 								</span>
 							</div>
 						))}

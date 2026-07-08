@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**haiz** は工場・倉庫などの現場における人員配置管理SaaSです。フロアマップ上で従業員の配置を管理・割り当て・閲覧するWebアプリケーションです。
+**haizu** は工場・倉庫などの現場における人員配置管理SaaSです。フロアマップ上で従業員の配置を管理・割り当て・閲覧するWebアプリケーションです。
 
 ## ドメイン知識の索引
 
@@ -27,7 +27,7 @@ pnpm + Turborepo 構成：
 
 - `apps/web` — フロントエンド（TanStack Start + React + Vite + Tailwind CSS）
 - `apps/api` — バックエンドAPI（Hono + Node.js、ポート3001）
-- `packages/shared` — Zodスキーマ共有ライブラリ（`@haiz/shared`）
+- `packages/shared` — Zodスキーマ共有ライブラリ（`@haizu/shared`）
 
 ## Commands
 
@@ -99,7 +99,7 @@ docker compose up -d
 
 ### 共有ライブラリ（`packages/shared`）
 
-`@haiz/shared` としてインポート。以下のZodスキーマを提供：
+`@haizu/shared` としてインポート。以下のZodスキーマを提供：
 
 - `organization` / `site` — 組織・拠点
 - `employee` — 従業員
@@ -112,7 +112,7 @@ docker compose up -d
 
 - フロントエンドのルートファイルを追加・変更したら `pnpm generate-routes`（または `tsr generate`）でルートツリーを再生成する。
 - `biome` を使用しているため `eslint` / `prettier` は不要。
-- `@haiz/shared` のスキーマ変更は `packages/shared/src/schemas/` を編集し、`src/index.ts` からエクスポートする。
+- `@haizu/shared` のスキーマ変更は `packages/shared/src/schemas/` を編集し、`src/index.ts` からエクスポートする。
 - `{/* Body */}` のような、コードを読めば自明なコメントは書かない・復元しない。コメントはWHY（非自明な制約・理由）がある場合のみ付ける。
 - `biome-ignore` などの ignore コメントで lint を黙らせない。lint 警告は原因を解消する形で実装を修正する（例: a11y 警告なら `div` の `onClick` ではなく実 `button` 要素を使う）。ignore に頼らざるを得ない場合は自己判断せずユーザーに相談する。
 - コードには自明なコメントは書かず、Whyを書くようにする

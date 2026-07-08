@@ -1,4 +1,4 @@
-import type { ViewerConfig, WorkPattern } from "@haiz/shared";
+import type { ViewerConfig, WorkPattern } from "@haizu/shared";
 import { hmToMinutes, toDateStr } from "#/lib/datetime";
 
 export type ViewerDisplay = { date: string; shiftId: string | null };

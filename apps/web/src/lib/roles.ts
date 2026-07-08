@@ -1,4 +1,4 @@
-import type { Role } from "@haiz/shared";
+import type { Role } from "@haizu/shared";
 
 export const ROLE_LABEL: Record<Role, string> = {
 	admin: "管理者",

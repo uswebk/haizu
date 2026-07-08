@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { AssignmentInputSchema } from "@haiz/shared";
+import { AssignmentInputSchema } from "@haizu/shared";
 import {
 	and,
 	asc,

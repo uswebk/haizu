@@ -1,4 +1,4 @@
-import type { ViewerConfig, ViewerMode } from "@haiz/shared";
+import type { ViewerConfig, ViewerMode } from "@haizu/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";

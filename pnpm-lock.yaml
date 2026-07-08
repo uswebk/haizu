@@ -14,7 +14,7 @@ importers:
 
   apps/api:
     dependencies:
-      '@haiz/shared':
+      '@haizu/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@hono/node-server':
@@ -63,7 +63,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@haiz/shared':
+      '@haizu/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@tailwindcss/vite':

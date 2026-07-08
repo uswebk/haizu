@@ -1,4 +1,4 @@
-import type { ViewerConfig, ViewerConfigInput } from "@haiz/shared";
+import type { ViewerConfig, ViewerConfigInput } from "@haizu/shared";
 import { API_BASE, apiFetch } from ".";
 
 async function handleResponse<T>(res: Response): Promise<T> {

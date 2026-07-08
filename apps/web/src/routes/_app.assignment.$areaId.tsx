@@ -1,4 +1,4 @@
-import type { AssignmentStatus } from "@haiz/shared";
+import type { AssignmentStatus } from "@haizu/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
