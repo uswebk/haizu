@@ -1,18 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Avatar } from "#/components/ui/Avatar";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { RoleBadge } from "#/components/ui/RoleBadge";
 import { Table, type TableColumn } from "#/components/ui/Table";
 import { useSite } from "#/contexts/site-context";
-import { AVATAR_COLORS } from "#/features/employees/palette";
 import {
 	MemberFormDialog,
 	type MemberFormValues,
 } from "#/features/members/MemberFormDialog";
+import { MyProfileCard } from "#/features/members/MyProfileCard";
 import { roleBadgeKey } from "#/features/members/roleBadgeKey";
 import type { MemberRow, MemberStatus } from "#/features/members/types";
 import {
@@ -22,16 +21,11 @@ import {
 	memberKeys,
 	updateMember,
 } from "#/lib/api/members";
+import { authClient } from "#/lib/auth-client";
 
 export const Route = createFileRoute("/_app/members")({
 	component: MemberList,
 });
-
-function avatarColor(id: string): string {
-	let sum = 0;
-	for (const ch of id) sum += ch.charCodeAt(0);
-	return AVATAR_COLORS[sum % AVATAR_COLORS.length];
-}
 
 const STATUS_META: Record<
 	MemberStatus,
@@ -45,9 +39,20 @@ const STATUS_META: Record<
 function MemberList() {
 	const queryClient = useQueryClient();
 	const { activeSites } = useSite();
+	const { data: session } = authClient.useSession();
 	const { data: members = [] } = useQuery({
 		queryKey: memberKeys.all,
 		queryFn: fetchMembers,
+	});
+
+	const me = members.find(
+		(m) => m.kind === "user" && m.email === session?.user.email,
+	);
+	const otherMembers = members.filter((m) => m.id !== me?.id);
+
+	const updateNameMutation = useMutation({
+		mutationFn: (name: string) => authClient.updateUser({ name }),
+		onSuccess: () => void invalidate(),
 	});
 
 	const [search, setSearch] = useState("");
@@ -112,9 +117,9 @@ function MemberList() {
 
 	const filtered = useMemo(() => {
 		const q = search.trim();
-		if (!q) return members;
-		return members.filter((m) => `${m.name}${m.email}`.includes(q));
-	}, [members, search]);
+		if (!q) return otherMembers;
+		return otherMembers.filter((m) => `${m.name}${m.email}`.includes(q));
+	}, [otherMembers, search]);
 
 	const activeCount = members.filter((m) => m.status === "active").length;
 
@@ -124,21 +129,12 @@ function MemberList() {
 			label: "メンバー",
 			width: "2fr",
 			render: (m) => (
-				<div className="flex items-center gap-2.75 min-w-0">
-					<Avatar
-						name={m.name}
-						color={
-							m.status === "active" ? avatarColor(m.id) : "var(--color-faint)"
-						}
-						size={34}
-					/>
-					<div className="min-w-0">
-						<div className="font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
-							{m.name}
-						</div>
-						<div className="text-xs text-faint whitespace-nowrap overflow-hidden text-ellipsis">
-							{m.email}
-						</div>
+				<div className="min-w-0">
+					<div className="font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
+						{m.name}
+					</div>
+					<div className="text-xs text-faint whitespace-nowrap overflow-hidden text-ellipsis">
+						{m.email}
 					</div>
 				</div>
 			),
@@ -206,6 +202,14 @@ function MemberList() {
 					</div>
 					<Button onClick={openInvite}>＋ メンバーを招待</Button>
 				</div>
+
+				{me && (
+					<MyProfileCard
+						member={me}
+						isPending={updateNameMutation.isPending}
+						onSaveName={(name) => updateNameMutation.mutate(name)}
+					/>
+				)}
 
 				<div className="mb-3.5">
 					<Input
