@@ -373,3 +373,58 @@ export const verification = pgTable("verification", {
 		.notNull()
 		.defaultNow(),
 });
+
+const MEMBER_ROLES = ["admin", "site_admin", "general", "viewer"] as const;
+
+// メンバー(user)の担当拠点。admin は全拠点扱いのため紐付けを持たない。
+export const memberSites = pgTable(
+	"member_sites",
+	{
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		siteId: uuid("site_id")
+			.notNull()
+			.references(() => sites.id, { onDelete: "cascade" }),
+	},
+	(t) => [
+		uniqueIndex("member_sites_user_id_site_id_unique").on(t.userId, t.siteId),
+	],
+);
+
+// 招待。メールで招待し、パスワード設定完了で user 化する（受け入れフローは別途）。
+export const invitations = pgTable("invitations", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	organizationId: uuid("organization_id")
+		.notNull()
+		.references(() => organizations.id, { onDelete: "cascade" }),
+	lastName: text("last_name").notNull(),
+	firstName: text("first_name").notNull().default(""),
+	email: text("email").notNull(),
+	role: text("role", { enum: MEMBER_ROLES }).notNull().default("general"),
+	token: text("token").notNull().unique(),
+	expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+	acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
+// 招待の担当拠点。user 化した際に member_sites へ引き継ぐ想定。
+export const invitationSites = pgTable(
+	"invitation_sites",
+	{
+		invitationId: uuid("invitation_id")
+			.notNull()
+			.references(() => invitations.id, { onDelete: "cascade" }),
+		siteId: uuid("site_id")
+			.notNull()
+			.references(() => sites.id, { onDelete: "cascade" }),
+	},
+	(t) => [
+		uniqueIndex("invitation_sites_invitation_id_site_id_unique").on(
+			t.invitationId,
+			t.siteId,
+		),
+	],
+);
