@@ -1,48 +1,43 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import {
-	createRootRoute,
+	createRootRouteWithContext,
 	HeadContent,
 	Outlet,
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
-import { SiteProvider } from "#/contexts/site-context";
 import appCss from "../styles.css?url";
 
-const queryClient = new QueryClient();
-
-export const Route = createRootRoute({
-	component: () => (
-		<QueryClientProvider client={queryClient}>
-			<SiteProvider>
-				<Outlet />
-			</SiteProvider>
-		</QueryClientProvider>
-	),
-	head: () => ({
-		meta: [
-			{
-				charSet: "utf-8",
-			},
-			{
-				name: "viewport",
-				content: "width=device-width, initial-scale=1",
-			},
-			{
-				title: "haizu",
-			},
-		],
-		links: [
-			{
-				rel: "stylesheet",
-				href: appCss,
-			},
-		],
-	}),
-	shellComponent: RootDocument,
-});
+// QueryClientProvider は setupRouterSsrQueryIntegration がリクエスト単位の
+// QueryClient で自動的に差し込む（ここで手動ラップ＋シングルトンにしない）。
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
+	{
+		component: () => <Outlet />,
+		head: () => ({
+			meta: [
+				{
+					charSet: "utf-8",
+				},
+				{
+					name: "viewport",
+					content: "width=device-width, initial-scale=1",
+				},
+				{
+					title: "haizu",
+				},
+			],
+			links: [
+				{
+					rel: "stylesheet",
+					href: appCss,
+				},
+			],
+		}),
+		shellComponent: RootDocument,
+	},
+);
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (

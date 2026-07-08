@@ -1,4 +1,3 @@
-import type { Role } from "@haizu/shared";
 import {
 	createFileRoute,
 	Link,
@@ -8,21 +7,31 @@ import {
 } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { NavItem } from "#/components/ui/NavItem";
-import { useSite } from "#/contexts/site-context";
+import { SiteProvider, useSite } from "#/contexts/site-context";
 import { useDismiss } from "#/hooks/useDismiss";
 import { authClient } from "#/lib/auth-client";
 import { formatDateLabel, todayStr } from "#/lib/datetime";
 import { ROLE_LABEL } from "#/lib/roles";
+import { fetchSession } from "#/lib/session";
 
 export const Route = createFileRoute("/_app")({
 	beforeLoad: async () => {
-		const { data } = await authClient.getSession();
-		if (!data) throw redirect({ to: "/login" });
+		const user = await fetchSession();
+		if (!user) throw redirect({ to: "/login" });
 		// メールアドレス未確認ならOTP確認画面へ
-		if (!data.user.emailVerified) throw redirect({ to: "/verify-otp" });
+		if (!user.emailVerified) throw redirect({ to: "/verify-otp" });
+		return { user };
 	},
 	component: AppLayout,
 });
+
+function AppLayout() {
+	return (
+		<SiteProvider>
+			<AppLayoutInner />
+		</SiteProvider>
+	);
+}
 
 const MAIN_NAV = [
 	{ label: "ホーム", to: "/home" as const },
@@ -40,16 +49,13 @@ const ADMIN_NAV = [
 	{ label: "事業所設定", to: "/organization-settings" as const },
 ];
 
-function AppLayout() {
+function AppLayoutInner() {
 	const { currentSite } = useSite();
 	const navigate = useNavigate();
-	const { data: session } = authClient.useSession();
-	const user = session?.user as
-		| { name: string; email: string; role: Role }
-		| undefined;
-	const userName = user?.name ?? "";
-	const userEmail = user?.email ?? "";
-	const roleLabel = user ? ROLE_LABEL[user.role] : "";
+	const { user } = Route.useRouteContext();
+	const userName = user.name;
+	const userEmail = user.email;
+	const roleLabel = ROLE_LABEL[user.role];
 	const initial = userName.charAt(0) || "?";
 
 	const todayLabel = formatDateLabel(todayStr());

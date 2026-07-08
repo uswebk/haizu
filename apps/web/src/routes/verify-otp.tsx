@@ -2,18 +2,16 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
-import { authClient, getSession } from "#/lib/auth-client";
+import { authClient } from "#/lib/auth-client";
+import { fetchSession } from "#/lib/session";
 
 export const Route = createFileRoute("/verify-otp")({
 	beforeLoad: async () => {
-		const { data } = await getSession();
+		const user = await fetchSession();
 		// 未ログインならログインへ。確認済みならアプリへ。
-		if (!data) throw redirect({ to: "/login" });
-		if (data.user.emailVerified) throw redirect({ to: "/select-site" });
-		// サインアップ直後は authClient のセッションストアがまだ新規ユーザーで
-		// 更新されていないことがあるため、useSession() ではなくここで取得した
-		// フレッシュなセッションのメールを確認対象として使う。
-		return { email: data.user.email };
+		if (!user) throw redirect({ to: "/login" });
+		if (user.emailVerified) throw redirect({ to: "/select-site" });
+		return { email: user.email };
 	},
 	component: VerifyOtpPage,
 });

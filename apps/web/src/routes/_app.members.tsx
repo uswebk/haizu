@@ -39,15 +39,13 @@ const STATUS_META: Record<
 function MemberList() {
 	const queryClient = useQueryClient();
 	const { activeSites } = useSite();
-	const { data: session } = authClient.useSession();
+	const { user } = Route.useRouteContext();
 	const { data: members = [] } = useQuery({
 		queryKey: memberKeys.all,
 		queryFn: fetchMembers,
 	});
 
-	const me = members.find(
-		(m) => m.kind === "user" && m.email === session?.user.email,
-	);
+	const me = members.find((m) => m.kind === "user" && m.email === user.email);
 	const otherMembers = members.filter((m) => m.id !== me?.id);
 
 	const updateNameMutation = useMutation({

@@ -1,29 +1,36 @@
-import type { Role } from "@haizu/shared";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useSite } from "#/contexts/site-context";
+import { SiteProvider, useSite } from "#/contexts/site-context";
 import { SiteEditDialog } from "#/features/sites/SiteEditDialog";
 import { SiteIcon } from "#/features/sites/SiteIcon";
-import { authClient } from "#/lib/auth-client";
 import { ROLE_LABEL } from "#/lib/roles";
+import { fetchSession } from "#/lib/session";
 
 export const Route = createFileRoute("/select-site")({
 	beforeLoad: async () => {
-		const { data } = await authClient.getSession();
-		if (!data) throw redirect({ to: "/login" });
-		if (!data.user.emailVerified) throw redirect({ to: "/verify-otp" });
+		const user = await fetchSession();
+		if (!user) throw redirect({ to: "/login" });
+		if (!user.emailVerified) throw redirect({ to: "/verify-otp" });
+		return { user };
 	},
 	component: SelectSitePage,
 });
 
 function SelectSitePage() {
+	return (
+		<SiteProvider>
+			<SelectSiteInner />
+		</SiteProvider>
+	);
+}
+
+function SelectSiteInner() {
 	const navigate = useNavigate();
 	const { activeSites, canAddSite, switchSite, addSite } = useSite();
 	const [addOpen, setAddOpen] = useState(false);
-	const { data: session } = authClient.useSession();
-	const user = session?.user as { name: string; role: Role } | undefined;
-	const userName = user?.name ?? "";
-	const roleLabel = user ? ROLE_LABEL[user.role] : "";
+	const { user } = Route.useRouteContext();
+	const userName = user.name;
+	const roleLabel = ROLE_LABEL[user.role];
 	const initial = userName.charAt(0) || "?";
 
 	const select = (id: string) => {
