@@ -8,6 +8,7 @@ import { areasRoute } from "./routes/areas";
 import { assignmentsRoute } from "./routes/assignments";
 import { authRoute } from "./routes/auth";
 import { employeesRoute } from "./routes/employees";
+import { invitationsRoute } from "./routes/invitations";
 import { membersRoute } from "./routes/members";
 import { sitesRoute } from "./routes/sites";
 import { tagsRoute } from "./routes/tags";
@@ -26,6 +27,8 @@ app.use("/uploads/*", serveStatic({ root: "./" }));
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 // 会社名→組織作成を伴うカスタムサインアップ
 app.route("/auth", authRoute);
+// 招待の受け入れ（トークン所持のみで認証不要）
+app.route("/invitations", invitationsRoute);
 
 // 認証・拠点スコープは各ルート内で requireAuth / siteScope を適用している
 app.route("/sites", sitesRoute);

@@ -12,6 +12,8 @@ import {
 	sites,
 	user,
 } from "../db/schema";
+import { devSendEmail } from "../lib/dev-email";
+import { WEB_ORIGIN } from "../lib/env";
 import { requireAuth } from "../middleware/auth";
 import type { AppEnv } from "../types";
 
@@ -181,6 +183,9 @@ export const membersRoute = new Hono<AppEnv>()
 			}
 			return row;
 		});
+
+		const acceptUrl = `${WEB_ORIGIN}/invite-accept?token=${invitation.token}`;
+		devSendEmail(invitation.email, "メンバー招待", acceptUrl);
 
 		const member: MemberResponse = {
 			id: invitation.id,

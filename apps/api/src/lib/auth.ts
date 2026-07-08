@@ -3,14 +3,9 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP } from "better-auth/plugins";
 import { db } from "../db/client";
 import { account, session, user, verification } from "../db/schema";
+import { devSendEmail } from "./dev-email";
 import { WEB_ORIGIN } from "./env";
 import { signupContext } from "./signup-context";
-
-// メール送信は未実装のため、開発用スタブとしてコンソールに出力する。
-// 将来 OTP・招待・パスワードリセットを実装する際に実送信へ差し替える。
-function devSendEmail(to: string, subject: string, body: string) {
-	console.log(`\n[dev-email] to=${to}\n  subject: ${subject}\n  ${body}\n`);
-}
 
 export const auth = betterAuth({
 	database: drizzleAdapter(db, {

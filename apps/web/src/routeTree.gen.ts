@@ -13,6 +13,7 @@ import { Route as VerifyOtpRouteImport } from './routes/verify-otp'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SelectSiteRouteImport } from './routes/select-site'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as InviteAcceptRouteImport } from './routes/invite-accept'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
@@ -52,6 +53,11 @@ const SelectSiteRoute = SelectSiteRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteAcceptRoute = InviteAcceptRouteImport.update({
+  id: '/invite-accept',
+  path: '/invite-accept',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CatalogRoute = CatalogRouteImport.update({
@@ -157,6 +163,7 @@ const AppAssignmentAreaIdRoute = AppAssignmentAreaIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/invite-accept': typeof InviteAcceptRoute
   '/login': typeof LoginRoute
   '/select-site': typeof SelectSiteRoute
   '/signup': typeof SignupRoute
@@ -182,6 +189,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/invite-accept': typeof InviteAcceptRoute
   '/login': typeof LoginRoute
   '/select-site': typeof SelectSiteRoute
   '/signup': typeof SignupRoute
@@ -207,6 +215,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/catalog': typeof CatalogRoute
+  '/invite-accept': typeof InviteAcceptRoute
   '/login': typeof LoginRoute
   '/select-site': typeof SelectSiteRoute
   '/signup': typeof SignupRoute
@@ -234,6 +243,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/catalog'
+    | '/invite-accept'
     | '/login'
     | '/select-site'
     | '/signup'
@@ -259,6 +269,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/catalog'
+    | '/invite-accept'
     | '/login'
     | '/select-site'
     | '/signup'
@@ -283,6 +294,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/catalog'
+    | '/invite-accept'
     | '/login'
     | '/select-site'
     | '/signup'
@@ -310,6 +322,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   CatalogRoute: typeof CatalogRoute
+  InviteAcceptRoute: typeof InviteAcceptRoute
   LoginRoute: typeof LoginRoute
   SelectSiteRoute: typeof SelectSiteRoute
   SignupRoute: typeof SignupRoute
@@ -344,6 +357,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite-accept': {
+      id: '/invite-accept'
+      path: '/invite-accept'
+      fullPath: '/invite-accept'
+      preLoaderRoute: typeof InviteAcceptRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/catalog': {
@@ -565,6 +585,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   CatalogRoute: CatalogRoute,
+  InviteAcceptRoute: InviteAcceptRoute,
   LoginRoute: LoginRoute,
   SelectSiteRoute: SelectSiteRoute,
   SignupRoute: SignupRoute,
