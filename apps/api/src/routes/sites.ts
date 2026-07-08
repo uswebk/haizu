@@ -1,9 +1,9 @@
 import { zValidator } from "@hono/zod-validator";
 import { SiteInputSchema } from "@haizu/shared";
-import { and, count, eq, ne } from "drizzle-orm";
+import { and, count, eq, inArray, ne } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db/client";
-import { employees, sites, workPatterns } from "../db/schema";
+import { employees, memberSites, sites, workPatterns } from "../db/schema";
 import { requireAuth } from "../middleware/auth";
 import type { AppEnv } from "../types";
 
@@ -22,6 +22,20 @@ export const sitesRoute = new Hono<AppEnv>()
 	.use("*", requireAuth)
 	.get("/", async (c) => {
 		const organizationId = c.get("organizationId");
+		const actor = c.get("user");
+
+		// ドメイン: 拠点は招待されているメンバーのみ閲覧可能（管理者は全拠点）
+		let allowedSiteIds: string[] | null = null;
+		if (actor.role !== "admin") {
+			const links = await db
+				.select({ siteId: memberSites.siteId })
+				.from(memberSites)
+				.where(eq(memberSites.userId, actor.id));
+			allowedSiteIds = links.map((l) => l.siteId);
+			if (allowedSiteIds.length === 0) {
+				return c.json({ sites: [] });
+			}
+		}
 
 		const rows = await db
 			.select({
@@ -38,7 +52,14 @@ export const sitesRoute = new Hono<AppEnv>()
 			})
 			.from(sites)
 			.leftJoin(employees, eq(employees.siteId, sites.id))
-			.where(eq(sites.organizationId, organizationId))
+			.where(
+				allowedSiteIds
+					? and(
+							eq(sites.organizationId, organizationId),
+							inArray(sites.id, allowedSiteIds),
+						)
+					: eq(sites.organizationId, organizationId),
+			)
 			.groupBy(sites.id)
 			.orderBy(sites.createdAt, sites.name);
 
@@ -48,6 +69,11 @@ export const sitesRoute = new Hono<AppEnv>()
 	.post("/", zValidator("json", SiteInputSchema), async (c) => {
 		const { name, description, isActive } = c.req.valid("json");
 		const organizationId = c.get("organizationId");
+
+		// ドメイン: 拠点管理は「管理者」のみが行う
+		if (c.get("user").role !== "admin") {
+			return c.json({ error: "拠点を作成する権限がありません" }, 403);
+		}
 
 		const existing = await db
 			.select({ value: count() })
@@ -88,8 +114,17 @@ export const sitesRoute = new Hono<AppEnv>()
 	.put("/:id", zValidator("json", SiteInputSchema), async (c) => {
 		const { id } = c.req.param();
 		const { name, description, isActive } = c.req.valid("json");
+		const organizationId = c.get("organizationId");
+		const actor = c.get("user");
 
-		const target = await db.query.sites.findFirst({ where: eq(sites.id, id) });
+		// ドメイン: 拠点管理は「管理者」のみが行う
+		if (actor.role !== "admin") {
+			return c.json({ error: "拠点を編集する権限がありません" }, 403);
+		}
+
+		const target = await db.query.sites.findFirst({
+			where: and(eq(sites.id, id), eq(sites.organizationId, organizationId)),
+		});
 		if (!target) return c.json({ error: "Not found" }, 404);
 
 		// ドメイン: 拠点は削除不可・非アクティブ化のみ。最後のアクティブ拠点は無効化できない。
