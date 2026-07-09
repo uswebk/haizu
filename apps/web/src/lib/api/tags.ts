@@ -1,25 +1,10 @@
-import { API_BASE, apiFetch } from ".";
+import { API_BASE, apiFetch, handleResponse } from ".";
 
 export type Tag = {
 	id: string;
 	name: string;
 	employeeCount: number;
 };
-
-async function handleResponse<T>(res: Response): Promise<T> {
-	if (!res.ok) {
-		const body = await res.json().catch(() => null);
-		const message =
-			body &&
-			typeof body === "object" &&
-			"error" in body &&
-			typeof body.error === "string"
-				? body.error
-				: `API error: ${res.status}`;
-		throw new Error(message);
-	}
-	return res.json() as Promise<T>;
-}
 
 export const tagKeys = {
 	all: ["tags"] as const,

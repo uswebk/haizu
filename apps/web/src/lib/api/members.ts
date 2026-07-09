@@ -1,21 +1,6 @@
 import type { Role } from "@haizu/shared";
 import type { MemberRow } from "#/features/members/types";
-import { API_BASE, apiFetch } from ".";
-
-async function handleResponse<T>(res: Response): Promise<T> {
-	if (!res.ok) {
-		const body = await res.json().catch(() => null);
-		const message =
-			body &&
-			typeof body === "object" &&
-			"error" in body &&
-			typeof body.error === "string"
-				? body.error
-				: `API error: ${res.status}`;
-		throw new Error(message);
-	}
-	return res.json() as Promise<T>;
-}
+import { API_BASE, apiFetch, handleResponse } from ".";
 
 export const memberKeys = {
 	all: ["members"] as const,

@@ -1,10 +1,5 @@
 import type { WorkPattern, WorkPatternInput } from "@haizu/shared";
-import { API_BASE, apiFetch } from ".";
-
-async function handleResponse<T>(res: Response): Promise<T> {
-	if (!res.ok) throw new Error(`API error: ${res.status}`);
-	return res.json() as Promise<T>;
-}
+import { API_BASE, apiFetch, handleResponse } from ".";
 
 export const workPatternKeys = {
 	detail: ["work-pattern"] as const,

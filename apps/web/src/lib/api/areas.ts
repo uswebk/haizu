@@ -1,6 +1,6 @@
 import type { LayoutSpecStatus } from "@haizu/shared";
 import type { AreaData, SpotState } from "#/features/editor/types";
-import { API_BASE, apiFetch } from ".";
+import { API_BASE, apiFetch, handleResponse } from ".";
 
 export type AreaListItem = {
 	id: string;
@@ -10,21 +10,6 @@ export type AreaListItem = {
 	currentVersion: string | null;
 	currentStatus: LayoutSpecStatus | null;
 };
-
-async function handleResponse<T>(res: Response): Promise<T> {
-	if (!res.ok) {
-		const body = await res.json().catch(() => null);
-		const message =
-			body &&
-			typeof body === "object" &&
-			"error" in body &&
-			typeof body.error === "string"
-				? body.error
-				: `API error: ${res.status}`;
-		throw new Error(message);
-	}
-	return res.json() as Promise<T>;
-}
 
 export const areaKeys = {
 	all: ["areas"] as const,

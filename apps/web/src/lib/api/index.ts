@@ -1,5 +1,21 @@
 export const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
+// APIレスポンスの共通ハンドラ。エラー時はサーバの { error } メッセージを優先して throw する。
+export async function handleResponse<T>(res: Response): Promise<T> {
+	if (!res.ok) {
+		const body = await res.json().catch(() => null);
+		const message =
+			body &&
+			typeof body === "object" &&
+			"error" in body &&
+			typeof body.error === "string"
+				? body.error
+				: `API error: ${res.status}`;
+		throw new Error(message);
+	}
+	return res.json() as Promise<T>;
+}
+
 const SITE_ID_KEY = "haizu.currentSiteId";
 
 export function getCurrentSiteId(): string | null {
