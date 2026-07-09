@@ -1,10 +1,8 @@
+import { MIN_PASSWORD_LENGTH } from "@haizu/shared";
 import { useState } from "react";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { authClient } from "#/lib/auth-client";
-
-// auth.ts の minPasswordLength と揃える
-const MIN_PASSWORD_LENGTH = 8;
 
 export function PasswordChange() {
 	const [open, setOpen] = useState(false);

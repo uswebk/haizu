@@ -14,6 +14,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SelectSiteRouteImport } from './routes/select-site'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InviteAcceptRouteImport } from './routes/invite-accept'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
@@ -58,6 +59,11 @@ const LoginRoute = LoginRouteImport.update({
 const InviteAcceptRoute = InviteAcceptRouteImport.update({
   id: '/invite-accept',
   path: '/invite-accept',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CatalogRoute = CatalogRouteImport.update({
@@ -163,6 +169,7 @@ const AppAssignmentAreaIdRoute = AppAssignmentAreaIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/invite-accept': typeof InviteAcceptRoute
   '/login': typeof LoginRoute
   '/select-site': typeof SelectSiteRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/invite-accept': typeof InviteAcceptRoute
   '/login': typeof LoginRoute
   '/select-site': typeof SelectSiteRoute
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/catalog': typeof CatalogRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/invite-accept': typeof InviteAcceptRoute
   '/login': typeof LoginRoute
   '/select-site': typeof SelectSiteRoute
@@ -243,6 +252,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/catalog'
+    | '/forgot-password'
     | '/invite-accept'
     | '/login'
     | '/select-site'
@@ -269,6 +279,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/catalog'
+    | '/forgot-password'
     | '/invite-accept'
     | '/login'
     | '/select-site'
@@ -294,6 +305,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/catalog'
+    | '/forgot-password'
     | '/invite-accept'
     | '/login'
     | '/select-site'
@@ -322,6 +334,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   CatalogRoute: typeof CatalogRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   InviteAcceptRoute: typeof InviteAcceptRoute
   LoginRoute: typeof LoginRoute
   SelectSiteRoute: typeof SelectSiteRoute
@@ -364,6 +377,13 @@ declare module '@tanstack/react-router' {
       path: '/invite-accept'
       fullPath: '/invite-accept'
       preLoaderRoute: typeof InviteAcceptRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/catalog': {
@@ -585,6 +605,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   CatalogRoute: CatalogRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   InviteAcceptRoute: InviteAcceptRoute,
   LoginRoute: LoginRoute,
   SelectSiteRoute: SelectSiteRoute,

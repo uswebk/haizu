@@ -86,7 +86,13 @@ function LoginPage() {
 					</Button>
 				</form>
 
-				<div className="text-[12.5px] text-muted mt-4 text-center">
+				<div className="text-[12.5px] text-center mt-4">
+					<Link to="/forgot-password" className="text-primary font-semibold">
+						パスワードを忘れた方
+					</Link>
+				</div>
+
+				<div className="text-[12.5px] text-muted mt-2 text-center">
 					アカウントをお持ちでない方は{" "}
 					<Link to="/signup" className="text-primary font-semibold">
 						新規登録

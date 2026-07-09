@@ -1,3 +1,4 @@
+import { MIN_PASSWORD_LENGTH } from "@haizu/shared";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP } from "better-auth/plugins";
@@ -14,7 +15,7 @@ export const auth = betterAuth({
 	}),
 	emailAndPassword: {
 		enabled: true,
-		minPasswordLength: 8,
+		minPasswordLength: MIN_PASSWORD_LENGTH,
 		// MVP では OTP を使わずログイン可能にする（メール確認は次フェーズ）
 		requireEmailVerification: false,
 		sendResetPassword: async ({ user: u, url }) => {
