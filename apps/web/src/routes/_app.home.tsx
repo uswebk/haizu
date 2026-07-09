@@ -42,7 +42,10 @@ function Home() {
 
 	const hasShifts = !!workPattern;
 	const hasEmployees = employees.length > 0;
-	const hasAreas = areas.length > 0;
+	// 下書きのみでは配置に使えないため、公開済みの規格を持つエリアがあって初めて完了扱いにする
+	const hasAreas = areas.some((a) => a.currentStatus === "published");
+	// エリアは存在するが未公開（下書きのみ）の状態
+	const hasDraftArea = !hasAreas && areas.length > 0;
 	const setupComplete = hasShifts && hasEmployees && hasAreas;
 	const canSetup = user.role === "admin" || user.role === "site_admin";
 
@@ -53,6 +56,7 @@ function Home() {
 					hasShifts={hasShifts}
 					hasEmployees={hasEmployees}
 					hasAreas={hasAreas}
+					hasDraftArea={hasDraftArea}
 				/>
 			) : (
 				workPattern && (

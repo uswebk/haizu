@@ -26,6 +26,12 @@ export function formatDateLabel(date: string): string {
 	return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}（${JP_WEEK[d.getDay()]}）`;
 }
 
+// "YYYY-MM-DD" → "YYYY年MM月DD日"
+export function formatDateJp(date: string): string {
+	const d = new Date(`${date}T00:00:00`);
+	return `${d.getFullYear()}年${pad2(d.getMonth() + 1)}月${pad2(d.getDate())}日`;
+}
+
 // Date → "YYYY/M/D（曜） HH:MM:SS"
 export function formatClock(d: Date): string {
 	const date = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}（${JP_WEEK[d.getDay()]}）`;
