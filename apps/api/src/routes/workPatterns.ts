@@ -25,7 +25,8 @@ export const workPatternsRoute = new Hono<AppEnv>()
 		const workPattern = await db.query.workPatterns.findFirst({
 			where: eq(workPatterns.siteId, c.get("siteId")),
 		});
-		if (!workPattern) return c.json({ error: "Not found" }, 404);
+		// 拠点作成時に勤務体制は自動生成しない。未登録なら null を返す
+		if (!workPattern) return c.json(null);
 		const rows = await loadShifts(workPattern.id);
 
 		return c.json({
@@ -42,10 +43,19 @@ export const workPatternsRoute = new Hono<AppEnv>()
 
 	.put("/", zValidator("json", WorkPatternInputSchema), async (c) => {
 		const { mode, shifts: newShifts } = c.req.valid("json");
-		const workPattern = await db.query.workPatterns.findFirst({
+		const existingPattern = await db.query.workPatterns.findFirst({
 			where: eq(workPatterns.siteId, c.get("siteId")),
 		});
-		if (!workPattern) return c.json({ error: "Not found" }, 404);
+		// 未登録拠点でも保存で作成する（勤務体制はユーザーが明示登録する）
+		const workPattern =
+			existingPattern ??
+			(
+				await db
+					.insert(workPatterns)
+					.values({ siteId: c.get("siteId"), mode })
+					.returning()
+			)[0];
+		if (!workPattern) return c.json({ error: "Insert failed" }, 500);
 
 		const rows = mode === "single" ? [] : newShifts;
 

@@ -58,6 +58,27 @@ function AssignmentList() {
 			search: (prev) => ({ ...prev, shiftId: id }),
 		});
 
+	if (workPattern === null) {
+		return (
+			<div className="p-7 overflow-auto h-full">
+				<div className="max-w-245">
+					<div className="text-[22px] font-bold">配置決め</div>
+					<div className="border-[1.4px] border-dashed border-dash rounded-lg p-7.5 text-center bg-empty-bg mt-4.5">
+						<div className="text-[13.5px] text-muted">
+							配置決めを始めるには、先に勤務体制（シフト）を登録してください。
+						</div>
+						<Link
+							to="/settings/shifts"
+							className="inline-block mt-3.5 text-[13px] font-bold text-primary hover:text-primary-hover"
+						>
+							シフトを登録する →
+						</Link>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="p-7 overflow-auto h-full">
 			<div className="max-w-245">

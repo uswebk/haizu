@@ -11,7 +11,7 @@ const mod = (n: number, m: number) => ((n % m) + m) % m;
 // leadMinutes は正=分前（シフト開始より前に切替）／負=分後（遅らせて切替）。
 export function resolveViewerDisplay(
 	config: ViewerConfig,
-	workPattern: WorkPattern | undefined,
+	workPattern: WorkPattern | null | undefined,
 	now: Date,
 ): ViewerDisplay {
 	if (config.mode === "manual") {

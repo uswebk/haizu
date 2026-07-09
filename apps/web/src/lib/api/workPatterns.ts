@@ -10,9 +10,9 @@ export const workPatternKeys = {
 	detail: ["work-pattern"] as const,
 };
 
-export async function fetchWorkPattern(): Promise<WorkPattern> {
+export async function fetchWorkPattern(): Promise<WorkPattern | null> {
 	const res = await apiFetch(`${API_BASE}/work-pattern`);
-	return handleResponse<WorkPattern>(res);
+	return handleResponse<WorkPattern | null>(res);
 }
 
 export async function saveWorkPattern(

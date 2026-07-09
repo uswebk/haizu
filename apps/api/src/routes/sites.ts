@@ -3,7 +3,7 @@ import { SiteInputSchema } from "@haizu/shared";
 import { and, count, eq, inArray, ne } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db/client";
-import { employees, memberSites, sites, workPatterns } from "../db/schema";
+import { employees, memberSites, sites } from "../db/schema";
 import { requireAuth } from "../middleware/auth";
 import type { AppEnv } from "../types";
 
@@ -102,9 +102,6 @@ export const sitesRoute = new Hono<AppEnv>()
 				.returning();
 			const row = inserted[0];
 			if (!row) throw new Error("Insert failed");
-
-			// 拠点は勤務体制を1件持つ。作成時に既定(single)で用意しておく
-			await tx.insert(workPatterns).values({ siteId: row.id });
 			return row;
 		});
 

@@ -35,7 +35,7 @@ function newShift(): DraftShift {
 function ShiftSettings() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const { data: workPattern } = useQuery({
+	const { data: workPattern, isPending } = useQuery({
 		queryKey: workPatternKeys.detail,
 		queryFn: fetchWorkPattern,
 	});
@@ -47,13 +47,13 @@ function ShiftSettings() {
 	// 取得＆下書き初期化が完了するまでモード選択を出さない（初期 single のちらつき防止）
 	const [ready, setReady] = useState(false);
 
-	// 取得データから下書きを初期化する
+	// 取得データから下書きを初期化する（未登録=null は single 既定で初期化）
 	useEffect(() => {
-		if (!workPattern) return;
-		setMode(workPattern.mode);
+		if (isPending) return;
+		setMode(workPattern?.mode ?? "single");
 		setDeletedNotice(false);
 		setShifts(
-			workPattern.shifts.map((s) => ({
+			(workPattern?.shifts ?? []).map((s) => ({
 				key: s.id,
 				id: s.id,
 				name: s.name,
@@ -62,7 +62,7 @@ function ShiftSettings() {
 			})),
 		);
 		setReady(true);
-	}, [workPattern]);
+	}, [workPattern, isPending]);
 
 	const saveMutation = useMutation({
 		mutationFn: () =>

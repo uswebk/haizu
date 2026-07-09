@@ -1,6 +1,6 @@
 import type { AssignmentStatus } from "@haizu/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Avatar } from "#/components/ui/Avatar";
 import { Badge } from "#/components/ui/Badge";
@@ -237,6 +237,43 @@ function AssignmentDetail() {
 		if (dragId.current) unassignEmp(dragId.current);
 		dragId.current = null;
 	};
+
+	if (workPattern === null) {
+		return (
+			<div className="p-7 h-full">
+				<div className="flex flex-col h-full bg-surface border border-border rounded-lg overflow-hidden shadow-card">
+					<div className="h-12.5 shrink-0 flex items-center gap-2.5 px-3.5 border-b border-border">
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={() =>
+								navigate({
+									to: "/assignment",
+									search: (prev) => ({ ...prev, date }),
+								})
+							}
+						>
+							← 配置決め一覧
+						</Button>
+					</div>
+					<div className="flex-1 flex flex-col items-center justify-center gap-2.5">
+						<div className="text-sm font-bold">
+							勤務体制（シフト）が未登録です
+						</div>
+						<div className="text-xs text-faint">
+							先にシフトを登録すると、この画面から配置決めができます
+						</div>
+						<Link
+							to="/settings/shifts"
+							className="mt-1 text-[13px] font-bold text-primary hover:text-primary-hover"
+						>
+							シフトを登録する →
+						</Link>
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	if (isUnpublished) {
 		return (

@@ -19,6 +19,7 @@ import {
 	layoutSpecVersions,
 	shifts,
 	spotAssignments,
+	workPatterns,
 } from "../db/schema";
 import { requireAuth } from "../middleware/auth";
 import { siteScope } from "../middleware/site-scope";
@@ -230,6 +231,17 @@ export const assignmentsRoute = new Hono<AppEnv>()
 
 	.put("/", zValidator("json", AssignmentInputSchema), async (c) => {
 		const input = c.req.valid("json");
+
+		// 勤務体制が未登録の拠点では配置決めできない（シフトが配置の前提）
+		const workPattern = await db.query.workPatterns.findFirst({
+			where: eq(workPatterns.siteId, c.get("siteId")),
+		});
+		if (!workPattern) {
+			return c.json(
+				{ error: "勤務体制が未登録のため配置決めできません" },
+				400,
+			);
+		}
 
 		// 対象エリアが現在拠点に属することを検証する
 		const area = await db.query.areas.findFirst({
