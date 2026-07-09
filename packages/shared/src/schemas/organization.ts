@@ -10,3 +10,11 @@ export const OrganizationSchema = z.object({
 });
 
 export type Organization = z.infer<typeof OrganizationSchema>;
+
+export const OrganizationUpdateInputSchema = z.object({
+  name: z.string().min(1),
+});
+
+export type OrganizationUpdateInput = z.infer<
+  typeof OrganizationUpdateInputSchema
+>;

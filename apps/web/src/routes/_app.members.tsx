@@ -198,7 +198,6 @@ function MemberList() {
 							haizuを利用するメンバーと権限・担当拠点を管理します。
 						</div>
 					</div>
-					<Button onClick={openInvite}>＋ メンバーを招待</Button>
 				</div>
 
 				{me && (
@@ -209,13 +208,14 @@ function MemberList() {
 					/>
 				)}
 
-				<div className="mb-3.5">
+				<div className="mb-3.5 flex items-center gap-2.5">
 					<Input
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						placeholder="名前・メールで検索"
 						className="min-w-55 w-70 max-w-full"
 					/>
+					<Button onClick={openInvite}>＋ メンバーを招待</Button>
 				</div>
 
 				<Table columns={columns} rows={filtered} rowKey={(m) => m.id} />

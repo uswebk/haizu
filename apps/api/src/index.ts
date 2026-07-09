@@ -4,12 +4,14 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { auth } from "./lib/auth";
 import { WEB_ORIGIN } from "./lib/env";
+import { accountRoute } from "./routes/account";
 import { areasRoute } from "./routes/areas";
 import { assignmentsRoute } from "./routes/assignments";
 import { authRoute } from "./routes/auth";
 import { employeesRoute } from "./routes/employees";
 import { invitationsRoute } from "./routes/invitations";
 import { membersRoute } from "./routes/members";
+import { organizationsRoute } from "./routes/organizations";
 import { sitesRoute } from "./routes/sites";
 import { tagsRoute } from "./routes/tags";
 import { viewerConfigsRoute } from "./routes/viewerConfigs";
@@ -31,6 +33,8 @@ app.route("/auth", authRoute);
 app.route("/invitations", invitationsRoute);
 
 // 認証・拠点スコープは各ルート内で requireAuth / siteScope を適用している
+app.route("/account", accountRoute);
+app.route("/organizations", organizationsRoute);
 app.route("/sites", sitesRoute);
 app.route("/areas", areasRoute);
 app.route("/assignments", assignmentsRoute);
