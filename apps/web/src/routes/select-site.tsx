@@ -68,7 +68,7 @@ function SelectSiteInner() {
 						className="w-57 text-left bg-surface border border-border rounded-section p-5.5 cursor-pointer transition-shadow duration-150 hover:shadow-float"
 					>
 						<SiteIcon icon={site.icon} size="lg" />
-						<div className="text-[17px] font-bold text-ink mt-3.5">
+						<div className="text-[17px] font-bold text-ink mt-3.5 truncate">
 							{site.name}
 						</div>
 						<div className="text-[12.5px] text-faint mt-0.5">

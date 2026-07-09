@@ -63,6 +63,7 @@ export function SiteEditDialog({
 							value={name}
 							onChange={(e) => setName(e.target.value)}
 							placeholder="例：D工場"
+							maxLength={30}
 							autoFocus
 						/>
 					</div>

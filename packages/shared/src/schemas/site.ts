@@ -15,7 +15,7 @@ export const SiteSchema = z.object({
 export type Site = z.infer<typeof SiteSchema>;
 
 export const SiteInputSchema = z.object({
-  name: z.string().min(1).max(50),
+  name: z.string().min(1).max(30),
   description: z.string().max(200).default(""),
   isActive: z.boolean().default(true),
 });
