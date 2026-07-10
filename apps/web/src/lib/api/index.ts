@@ -16,18 +16,16 @@ export async function handleResponse<T>(res: Response): Promise<T> {
 	return res.json() as Promise<T>;
 }
 
-// 現在拠点はURL(/s/$siteId)が真実。apiFetch は同期的に値が要るため、
-// 拠点レイアウトが解決した siteId をここへ流し込む。
-// SSR中はリクエスト間でモジュール変数が共有されるため、クライアントでのみ保持する。
-let currentSiteId: string | null = null;
+// 現在拠点はURL(/s/$siteId/...)が真実なので、常にURLから読む。
+// beforeLoad で変数へ流し込む方式だと、SSR済みページのハイドレート時に
+// beforeLoad がクライアントで再実行されず、x-site-id が欠落する。
+// SSR中は window が無く、モジュール変数はリクエスト間で共有されるため null を返す。
+const SITE_PATH_PATTERN = /^\/s\/([^/]+)/;
 
 export function getCurrentSiteId(): string | null {
 	if (typeof window === "undefined") return null;
-	return currentSiteId;
-}
-
-export function setCurrentSiteId(id: string): void {
-	currentSiteId = id;
+	const match = window.location.pathname.match(SITE_PATH_PATTERN);
+	return match?.[1] ?? null;
 }
 
 // 拠点スコープの各APIへ、現在拠点IDを x-site-id ヘッダーとして自動付与する fetch ラッパ。

@@ -10,12 +10,14 @@ import { useRef, useState } from "react";
 import { NavItem } from "#/components/ui/NavItem";
 import { SiteProvider, useSite } from "#/contexts/site-context";
 import { useDismiss } from "#/hooks/useDismiss";
-import { getCurrentSiteId, setCurrentSiteId } from "#/lib/api";
 import { siteKeys } from "#/lib/api/sites";
 import { authClient } from "#/lib/auth-client";
 import { formatDateLabel, todayStr } from "#/lib/datetime";
 import { ROLE_LABEL } from "#/lib/roles";
 import { fetchSiteRole } from "#/lib/session";
+
+// 直前に表示していた拠点。拠点をまたいだ遷移の検出だけに使う（クライアント限定）。
+let lastSiteId: string | null = null;
 
 // 現在の拠点はURLが真実。ここで所属と実効ロールを検証し、子ルートへ渡す。
 export const Route = createFileRoute("/_app/s/$siteId")({
@@ -24,17 +26,15 @@ export const Route = createFileRoute("/_app/s/$siteId")({
 		// 存在しない・非アクティブ・所属していない拠点は拠点選択へ戻す
 		if (!siteRole) throw redirect({ to: "/select-site" });
 
-		// apiFetch が x-site-id を同期的に組み立てるため、クライアント側へ流し込む。
 		// 拠点が変わった直後に前拠点のキャッシュが残ると一瞬前データが見えるため破棄する。
 		// 拠点一覧(["sites"])は組織スコープなので除外する。
 		if (typeof window !== "undefined") {
-			const changed = getCurrentSiteId() !== params.siteId;
-			setCurrentSiteId(params.siteId);
-			if (changed) {
+			if (lastSiteId !== null && lastSiteId !== params.siteId) {
 				context.queryClient.removeQueries({
 					predicate: (query) => query.queryKey[0] !== siteKeys.all[0],
 				});
 			}
+			lastSiteId = params.siteId;
 		}
 		return { siteRole };
 	},
@@ -202,6 +202,7 @@ function SiteLayoutInner() {
 									<div className="p-1.5">
 										<Link
 											to="/account"
+											search={{ site: siteId }}
 											onClick={() => setUserMenuOpen(false)}
 											className="block px-2.75 py-2.5 rounded-[9px] text-[13px] font-semibold hover:bg-app-bg"
 										>
