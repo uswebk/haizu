@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db } from "../db/client";
 import { employeeTags, tags } from "../db/schema";
 import { requireAuth } from "../middleware/auth";
+import { requireSiteWritePermission } from "../middleware/require-permission";
 import { siteScope } from "../middleware/site-scope";
 import type { AppEnv } from "../types";
 
@@ -26,6 +27,7 @@ function isUniqueViolation(error: unknown): boolean {
 export const tagsRoute = new Hono<AppEnv>()
 	.use("*", requireAuth)
 	.use("*", siteScope)
+	.use("*", requireSiteWritePermission("tag:write"))
 	.get("/", async (c) => {
 		const rows = await db
 			.select({

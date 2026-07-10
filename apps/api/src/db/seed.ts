@@ -21,17 +21,40 @@ const client = postgres(process.env.DATABASE_URL!, { prepare: false });
 const db = drizzle(client);
 
 const SITES = [
-	{ name: "A工場", description: "製造ライン", iconBg: "#dcf2f0", iconColor: "#0ea5a4" },
-	{ name: "B倉庫", description: "物流センター", iconBg: "#e3eefe", iconColor: "#2f6df0" },
-	{ name: "C工事現場", description: "建設現場", iconBg: "#fbecd8", iconColor: "#e07b1a" },
+	{
+		name: "A工場",
+		description: "製造ライン",
+		iconBg: "#dcf2f0",
+		iconColor: "#0ea5a4",
+	},
+	{
+		name: "B倉庫",
+		description: "物流センター",
+		iconBg: "#e3eefe",
+		iconColor: "#2f6df0",
+	},
+	{
+		name: "C工事現場",
+		description: "建設現場",
+		iconBg: "#fbecd8",
+		iconColor: "#e07b1a",
+	},
 ];
 
 const MOCK_DATA = [
 	{
 		name: "ライン1",
 		versions: [
-			{ version: 1, status: "draft" as const, planImageName: "1F フロア図.png" },
-			{ version: 2, status: "published" as const, planImageName: "1F フロア図.png" },
+			{
+				version: 1,
+				status: "draft" as const,
+				planImageName: "1F フロア図.png",
+			},
+			{
+				version: 2,
+				status: "published" as const,
+				planImageName: "1F フロア図.png",
+			},
 		],
 		activeVersionIndex: 1,
 		spots: [
@@ -46,7 +69,11 @@ const MOCK_DATA = [
 	{
 		name: "ライン2",
 		versions: [
-			{ version: 1, status: "published" as const, planImageName: "1F フロア図.png" },
+			{
+				version: 1,
+				status: "published" as const,
+				planImageName: "1F フロア図.png",
+			},
 		],
 		activeVersionIndex: 0,
 		spots: [
@@ -70,7 +97,14 @@ const MOCK_DATA = [
 	},
 ];
 
-const TAG_NAMES = ["製造ライン", "リーダー", "検査", "梱包", "物流", "フォークリフト"];
+const TAG_NAMES = [
+	"製造ライン",
+	"リーダー",
+	"検査",
+	"梱包",
+	"物流",
+	"フォークリフト",
+];
 
 const SHIFTS = [
 	{ name: "日勤", startTime: "08:00", endTime: "17:00" },
@@ -220,9 +254,11 @@ async function seed() {
 			if (!ver) continue;
 
 			if (i === data.activeVersionIndex && data.spots.length > 0) {
-				await db.insert(spots).values(
-					data.spots.map((s) => ({ ...s, layoutSpecVersionId: ver.id })),
-				);
+				await db
+					.insert(spots)
+					.values(
+						data.spots.map((s) => ({ ...s, layoutSpecVersionId: ver.id })),
+					);
 			}
 		}
 

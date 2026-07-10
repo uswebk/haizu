@@ -1,5 +1,6 @@
 import type { SiteInput } from "@haizu/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import {
 	createContext,
 	type ReactNode,
@@ -39,6 +40,7 @@ const PLACEHOLDER: SiteView = {
 	iconColor: "#0ea5a4",
 	isActive: true,
 	employeeCount: 0,
+	role: "viewer",
 	icon: { bg: "#dcf2f0", color: "#0ea5a4" },
 };
 
@@ -57,6 +59,7 @@ const SiteContext = createContext<SiteContextValue | null>(null);
 
 export function SiteProvider({ children }: { children: ReactNode }) {
 	const queryClient = useQueryClient();
+	const router = useRouter();
 	const { showSuccess } = useSnackbar();
 	// SiteProvider は認証済みエリア(_app / select-site)でのみマウントされる。
 	const { data: rawSites = [], isLoading } = useQuery({
@@ -112,6 +115,9 @@ export function SiteProvider({ children }: { children: ReactNode }) {
 			if (!sites.some((s) => s.id === id && s.isActive)) return;
 			setCurrentSiteId(id);
 			setCurrentSiteIdState(id);
+			// 拠点ごとに権限が異なるため、実効ロールを解決し直す必要がある。
+			// beforeLoad は Cookie の現在拠点を読むので、ルートを再評価させる。
+			void router.invalidate();
 			// 拠点が変わると x-site-id が変わる。invalidate だと再取得中も前拠点の
 			// キャッシュが表示され一瞬前データがちらつくため、拠点スコープの
 			// クエリはキャッシュごと破棄して即ローディング状態にする。
@@ -138,6 +144,7 @@ export function SiteProvider({ children }: { children: ReactNode }) {
 		currentSiteId,
 		isLoading,
 		queryClient,
+		router,
 		addMutation,
 		updateMutation,
 	]);

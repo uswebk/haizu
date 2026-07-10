@@ -14,6 +14,7 @@ import {
 } from "#/lib/api/assignments";
 import { fetchEmployees } from "#/lib/api/employees";
 import { formatDateLabel, yesterdayStr } from "#/lib/datetime";
+import { assertScreen } from "#/lib/guards";
 
 type HistorySearch = {
 	date?: string;
@@ -39,6 +40,9 @@ export const Route = createFileRoute("/_app/history")({
 				? search.selShiftLabel
 				: undefined,
 	}),
+	beforeLoad: ({ context }) => {
+		assertScreen(context.user.role, context.siteRole, "history");
+	},
 	component: History,
 });
 

@@ -1,6 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { zValidator } from "@hono/zod-validator";
-import { type Role, RoleSchema } from "@haizu/shared";
+import {
+	type OrgRole,
+	OrgRoleSchema,
+	type SiteRole,
+	SiteRoleSchema,
+} from "@haizu/shared";
 import { and, eq, inArray } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -14,37 +19,81 @@ import {
 } from "../db/schema";
 import { devSendEmail } from "../lib/dev-email";
 import { WEB_ORIGIN } from "../lib/env";
+import {
+	assertSitesManageable,
+	evaluateOrgRoleAssignment,
+} from "../lib/member-role-policy";
 import { requireAuth } from "../middleware/auth";
+import { requireSitePermission } from "../middleware/require-permission";
+import { siteScope } from "../middleware/site-scope";
 import type { AppEnv } from "../types";
 
 const INVITE_TTL_DAYS = 7;
 
-const inviteInput = z.object({
-	lastName: z.string().min(1),
-	firstName: z.string(),
-	email: z.string().email(),
-	role: RoleSchema,
-	siteIds: z.array(z.string().uuid()),
+const siteRoleInput = z.object({
+	siteId: z.string().uuid(),
+	role: SiteRoleSchema,
 });
 
+// 不変条件: メンバーは必ず1つ以上の拠点に所属する（管理者は全拠点アクセスのため割り当てを持たない）。
+// これを破ると、どの画面にも入れないユーザーが生まれる。
+const NO_SITE_MESSAGE = "担当拠点を1つ以上選択してください";
+
+const inviteInput = z
+	.object({
+		lastName: z.string().min(1),
+		firstName: z.string(),
+		email: z.string().email(),
+		orgRole: OrgRoleSchema,
+		siteRoles: z.array(siteRoleInput),
+	})
+	.refine((v) => v.orgRole === "admin" || v.siteRoles.length > 0, {
+		path: ["siteRoles"],
+		message: NO_SITE_MESSAGE,
+	});
+
 const updateInput = z.object({
-	role: RoleSchema,
-	siteIds: z.array(z.string().uuid()),
+	orgRole: OrgRoleSchema,
+	siteRoles: z.array(siteRoleInput),
 	isActive: z.boolean(),
 });
+
+type SiteRoleAssignment = { siteId: string; role: SiteRole };
 
 type MemberResponse = {
 	id: string;
 	kind: "user" | "invitation";
 	name: string;
 	email: string;
-	role: Role;
-	siteIds: string[];
+	orgRole: OrgRole;
+	siteRoles: SiteRoleAssignment[];
+	// 管理者は全拠点にアクセスできるため siteRoles を持たない
 	allSites: boolean;
 	status: "active" | "inactive" | "invited";
 };
 
-// 指定した組織に属する拠点idのみを許可する（他組織の拠点混入を防ぐ）
+// 操作者が拠点ロールを設定できる拠点。管理者は組織の全拠点
+async function manageableSiteIds(
+	organizationId: string,
+	actor: { id: string; role: OrgRole },
+): Promise<string[]> {
+	if (actor.role === "admin") {
+		const rows = await db
+			.select({ id: sites.id })
+			.from(sites)
+			.where(eq(sites.organizationId, organizationId));
+		return rows.map((r) => r.id);
+	}
+	const rows = await db
+		.select({ siteId: memberSites.siteId })
+		.from(memberSites)
+		.where(
+			and(eq(memberSites.userId, actor.id), eq(memberSites.role, "site_admin")),
+		);
+	return rows.map((r) => r.siteId);
+}
+
+// 指定した拠点idがすべて組織に属することを確認する（他組織の拠点混入を防ぐ）
 async function assertSitesInOrg(organizationId: string, siteIds: string[]) {
 	if (siteIds.length === 0) return true;
 	const rows = await db
@@ -56,11 +105,18 @@ async function assertSitesInOrg(organizationId: string, siteIds: string[]) {
 	return rows.length === siteIds.length;
 }
 
+// メンバー管理は「現在拠点の拠点管理者」のみが行う（管理者は全拠点で拠点管理者相当）。
+// 一覧も他メンバーのメールアドレスを含むため、閲覧ごと制限する。
 export const membersRoute = new Hono<AppEnv>()
 	.use("*", requireAuth)
+	.use("*", siteScope)
+	.use("*", requireSitePermission("member:manage"))
 
 	.get("/", async (c) => {
 		const organizationId = c.get("organizationId");
+		const actor = c.get("user");
+		const manageable = await manageableSiteIds(organizationId, actor);
+		const visible = new Set(manageable);
 
 		const users = await db
 			.select()
@@ -97,33 +153,47 @@ export const membersRoute = new Hono<AppEnv>()
 					)
 			: [];
 
+		// 拠点管理者には、自分が管理する拠点の割り当てだけを見せる
+		const scopeSiteRoles = (rows: SiteRoleAssignment[]) =>
+			actor.role === "admin" ? rows : rows.filter((r) => visible.has(r.siteId));
+		// 管理者以外は、自分の管理拠点に関係しないメンバーを見られない
+		const isVisibleMember = (m: MemberResponse) =>
+			actor.role === "admin" || m.allSites || m.siteRoles.length > 0;
+
 		const members: MemberResponse[] = [
-			...users.map((u) => ({
-				id: u.id,
-				kind: "user" as const,
-				name: u.name,
-				email: u.email,
-				role: u.role,
-				siteIds: userSiteLinks
-					.filter((l) => l.userId === u.id)
-					.map((l) => l.siteId),
-				allSites: u.role === "admin",
-				status: (u.isActive ? "active" : "inactive") as "active" | "inactive",
-			})),
+			...users
+				.map<MemberResponse>((u) => ({
+					id: u.id,
+					kind: "user",
+					name: u.name,
+					email: u.email,
+					orgRole: u.role,
+					siteRoles: scopeSiteRoles(
+						userSiteLinks
+							.filter((l) => l.userId === u.id)
+							.map((l) => ({ siteId: l.siteId, role: l.role })),
+					),
+					allSites: u.role === "admin",
+					status: u.isActive ? "active" : "inactive",
+				}))
+				.filter(isVisibleMember),
 			...pending
 				.filter((i) => i.acceptedAt === null)
-				.map((i) => ({
+				.map<MemberResponse>((i) => ({
 					id: i.id,
-					kind: "invitation" as const,
+					kind: "invitation",
 					name: `${i.lastName} ${i.firstName}`.trim(),
 					email: i.email,
-					role: i.role,
-					siteIds: invitationSiteLinks
-						.filter((l) => l.invitationId === i.id)
-						.map((l) => l.siteId),
+					orgRole: i.role,
+					siteRoles: scopeSiteRoles(
+						invitationSiteLinks
+							.filter((l) => l.invitationId === i.id)
+							.map((l) => ({ siteId: l.siteId, role: l.role })),
+					),
 					allSites: i.role === "admin",
-					status: "invited" as const,
-				})),
+					status: "invited",
+				}))
+				.filter(isVisibleMember),
 		];
 
 		return c.json({ members });
@@ -131,11 +201,31 @@ export const membersRoute = new Hono<AppEnv>()
 
 	.post("/invite", zValidator("json", inviteInput), async (c) => {
 		const organizationId = c.get("organizationId");
+		const actor = c.get("user");
 		const input = c.req.valid("json");
-		const siteIds = input.role === "admin" ? [] : input.siteIds;
+
+		// 招待経由での権限昇格を防ぐ。PUT /:id と同じルールを適用する。
+		const orgAssignment = evaluateOrgRoleAssignment({
+			actorOrgRole: actor.role,
+			isSelf: false,
+			targetOrgRole: null,
+			nextOrgRole: input.orgRole,
+		});
+		if (!orgAssignment.ok) {
+			return c.json({ error: orgAssignment.message }, orgAssignment.status);
+		}
+
+		// 管理者は全拠点にアクセスできるため、拠点ごとの割り当ては持たせない
+		const siteRoles = input.orgRole === "admin" ? [] : input.siteRoles;
+		const siteIds = siteRoles.map((s) => s.siteId);
 
 		if (!(await assertSitesInOrg(organizationId, siteIds))) {
 			return c.json({ error: "この事業所に存在しない拠点が含まれています" }, 400);
+		}
+		const manageable = await manageableSiteIds(organizationId, actor);
+		const scopeCheck = assertSitesManageable(manageable, siteIds);
+		if (!scopeCheck.ok) {
+			return c.json({ error: scopeCheck.message }, scopeCheck.status);
 		}
 
 		// 同一組織で既にメンバー登録済み / 招待中のメールは弾く
@@ -169,17 +259,21 @@ export const membersRoute = new Hono<AppEnv>()
 					lastName: input.lastName,
 					firstName: input.firstName,
 					email: input.email,
-					role: input.role,
+					role: input.orgRole,
 					token: randomUUID(),
 					expiresAt,
 				})
 				.returning();
 			const row = inserted[0];
 			if (!row) throw new Error("Insert failed");
-			if (siteIds.length > 0) {
-				await tx
-					.insert(invitationSites)
-					.values(siteIds.map((siteId) => ({ invitationId: row.id, siteId })));
+			if (siteRoles.length > 0) {
+				await tx.insert(invitationSites).values(
+					siteRoles.map((s) => ({
+						invitationId: row.id,
+						siteId: s.siteId,
+						role: s.role,
+					})),
+				);
 			}
 			return row;
 		});
@@ -192,8 +286,8 @@ export const membersRoute = new Hono<AppEnv>()
 			kind: "invitation",
 			name: `${invitation.lastName} ${invitation.firstName}`.trim(),
 			email: invitation.email,
-			role: invitation.role,
-			siteIds,
+			orgRole: invitation.role,
+			siteRoles,
 			allSites: invitation.role === "admin",
 			status: "invited",
 		};
@@ -206,42 +300,82 @@ export const membersRoute = new Hono<AppEnv>()
 		const actor = c.get("user");
 		const input = c.req.valid("json");
 
-		if (actor.role !== "admin" && actor.role !== "site_admin") {
-			return c.json({ error: "権限を変更する権限がありません" }, 403);
-		}
-
 		const target = await db.query.user.findFirst({
 			where: and(eq(user.id, id), eq(user.organizationId, organizationId)),
 		});
 		if (!target) return c.json({ error: "Not found" }, 404);
 
-		// ドメイン: 自身の権限は変更できない
-		if (actor.id === target.id && input.role !== target.role) {
-			return c.json({ error: "自身の権限は変更できません" }, 403);
-		}
-		// ドメイン: 拠点管理者は「管理者」権限の付与・変更ができない
-		if (
-			actor.role === "site_admin" &&
-			(target.role === "admin" || input.role === "admin")
-		) {
-			return c.json({ error: "拠点管理者は管理者権限を設定できません" }, 403);
+		const orgAssignment = evaluateOrgRoleAssignment({
+			actorOrgRole: actor.role,
+			isSelf: actor.id === target.id,
+			targetOrgRole: target.role,
+			nextOrgRole: input.orgRole,
+		});
+		if (!orgAssignment.ok) {
+			return c.json({ error: orgAssignment.message }, orgAssignment.status);
 		}
 
-		const siteIds = input.role === "admin" ? [] : input.siteIds;
+		const siteRoles = input.orgRole === "admin" ? [] : input.siteRoles;
+		const siteIds = siteRoles.map((s) => s.siteId);
 		if (!(await assertSitesInOrg(organizationId, siteIds))) {
 			return c.json({ error: "この事業所に存在しない拠点が含まれています" }, 400);
+		}
+
+		const manageable = await manageableSiteIds(organizationId, actor);
+		const scopeCheck = assertSitesManageable(manageable, siteIds);
+		if (!scopeCheck.ok) {
+			return c.json({ error: scopeCheck.message }, scopeCheck.status);
+		}
+
+		// 拠点管理者は自分の管理拠点しか置き換えないため、管理外に残る所属も数に入れる。
+		if (input.orgRole === "member") {
+			const manageableSet = new Set(manageable);
+			const existing = await db
+				.select({ siteId: memberSites.siteId })
+				.from(memberSites)
+				.where(eq(memberSites.userId, id));
+			const preserved = existing.filter((r) => !manageableSet.has(r.siteId));
+			if (preserved.length + siteRoles.length === 0) {
+				return c.json({ error: NO_SITE_MESSAGE }, 400);
+			}
 		}
 
 		await db.transaction(async (tx) => {
 			await tx
 				.update(user)
-				.set({ role: input.role, isActive: input.isActive, updatedAt: new Date() })
+				.set({
+					role: input.orgRole,
+					isActive: input.isActive,
+					updatedAt: new Date(),
+				})
 				.where(eq(user.id, id));
-			await tx.delete(memberSites).where(eq(memberSites.userId, id));
-			if (siteIds.length > 0) {
+
+			if (input.orgRole === "admin") {
+				// 管理者は全拠点アクセスのため拠点割り当てを持たない
+				await tx.delete(memberSites).where(eq(memberSites.userId, id));
+				return;
+			}
+
+			// 拠点管理者は自分の管理外拠点の割り当てを見られない。まとめて削除すると
+			// 他拠点の割り当てを消してしまうため、管理できる拠点の行だけを置き換える。
+			if (manageable.length > 0) {
 				await tx
-					.insert(memberSites)
-					.values(siteIds.map((siteId) => ({ userId: id, siteId })));
+					.delete(memberSites)
+					.where(
+						and(
+							eq(memberSites.userId, id),
+							inArray(memberSites.siteId, manageable),
+						),
+					);
+			}
+			if (siteRoles.length > 0) {
+				await tx.insert(memberSites).values(
+					siteRoles.map((s) => ({
+						userId: id,
+						siteId: s.siteId,
+						role: s.role,
+					})),
+				);
 			}
 		});
 
@@ -250,9 +384,9 @@ export const membersRoute = new Hono<AppEnv>()
 			kind: "user",
 			name: target.name,
 			email: target.email,
-			role: input.role,
-			siteIds,
-			allSites: input.role === "admin",
+			orgRole: input.orgRole,
+			siteRoles,
+			allSites: input.orgRole === "admin",
 			status: input.isActive ? "active" : "inactive",
 		};
 		return c.json(member);

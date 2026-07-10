@@ -2,8 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { EmptyState } from "#/components/ui/EmptyState";
 import { OrganizationNameForm } from "#/features/organization/OrganizationNameForm";
 import { OrgEmailChange } from "#/features/organization/OrgEmailChange";
+import { assertScreen } from "#/lib/guards";
 
 export const Route = createFileRoute("/_app/organization-settings")({
+	beforeLoad: ({ context }) => {
+		assertScreen(context.user.role, context.siteRole, "organization-settings");
+	},
 	component: OrganizationSettingsPage,
 });
 

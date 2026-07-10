@@ -7,11 +7,11 @@ import { fetchSession } from "#/lib/session";
 
 export const Route = createFileRoute("/verify-otp")({
 	beforeLoad: async () => {
-		const user = await fetchSession();
+		const auth = await fetchSession();
 		// 未ログインならログインへ。確認済みならアプリへ。
-		if (!user) throw redirect({ to: "/login" });
-		if (user.emailVerified) throw redirect({ to: "/select-site" });
-		return { email: user.email };
+		if (!auth) throw redirect({ to: "/login" });
+		if (auth.user.emailVerified) throw redirect({ to: "/select-site" });
+		return { email: auth.user.email };
 	},
 	component: VerifyOtpPage,
 });

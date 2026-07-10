@@ -1,4 +1,4 @@
-import type { SiteInput } from "@haizu/shared";
+import type { SiteInput, SiteRole } from "@haizu/shared";
 import { API_BASE, apiFetch, handleResponse } from ".";
 
 export type Site = {
@@ -10,6 +10,7 @@ export type Site = {
 	iconColor: string;
 	isActive: boolean;
 	employeeCount: number;
+	role: SiteRole;
 };
 
 export const siteKeys = {

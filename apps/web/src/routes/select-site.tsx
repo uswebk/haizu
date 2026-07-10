@@ -1,3 +1,4 @@
+import { displayRole, landingScreen } from "@haizu/shared";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { SiteProvider, useSite } from "#/contexts/site-context";
@@ -8,10 +9,10 @@ import { fetchSession } from "#/lib/session";
 
 export const Route = createFileRoute("/select-site")({
 	beforeLoad: async () => {
-		const user = await fetchSession();
-		if (!user) throw redirect({ to: "/login" });
-		if (!user.emailVerified) throw redirect({ to: "/verify-otp" });
-		return { user };
+		const auth = await fetchSession();
+		if (!auth) throw redirect({ to: "/login" });
+		if (!auth.user.emailVerified) throw redirect({ to: "/verify-otp" });
+		return auth;
 	},
 	component: SelectSitePage,
 });
@@ -28,14 +29,18 @@ function SelectSiteInner() {
 	const navigate = useNavigate();
 	const { activeSites, canAddSite, switchSite, addSite } = useSite();
 	const [addOpen, setAddOpen] = useState(false);
-	const { user } = Route.useRouteContext();
+	const { user, siteRole } = Route.useRouteContext();
 	const userName = user.name;
-	const roleLabel = ROLE_LABEL[user.role];
+	// 表示は「現在拠点における実効ロール」。拠点未所属なら「その他」相当。
+	const roleLabel = ROLE_LABEL[displayRole(user.role, siteRole) ?? "viewer"];
 	const initial = userName.charAt(0) || "?";
 
+	// 遷移先は「選択した拠点における実効ロール」で決まる（拠点ごとに権限が異なるため）
 	const select = (id: string) => {
+		const target = activeSites.find((s) => s.id === id);
+		if (!target) return;
 		switchSite(id);
-		void navigate({ to: "/home" });
+		void navigate({ to: landingScreen(user.role, target.role) });
 	};
 
 	return (

@@ -1,4 +1,4 @@
-import type { Role } from "@haizu/shared";
+import type { DisplayRole } from "@haizu/shared";
 import { useState } from "react";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
@@ -20,11 +20,17 @@ const STATUS_META: Record<
 
 type Props = {
 	member: MemberRow;
+	displayRole: DisplayRole;
 	isPending: boolean;
 	onSaveName: (name: string) => void;
 };
 
-export function MyProfileCard({ member, isPending, onSaveName }: Props) {
+export function MyProfileCard({
+	member,
+	displayRole,
+	isPending,
+	onSaveName,
+}: Props) {
 	const [editing, setEditing] = useState(false);
 	const [name, setName] = useState(member.name);
 
@@ -89,7 +95,7 @@ export function MyProfileCard({ member, isPending, onSaveName }: Props) {
 					<div className="text-xs text-faint mt-1">{member.email}</div>
 				</div>
 				<div className="flex items-center gap-2.5 shrink-0">
-					<RoleBadge role={roleBadgeKey(member.role as Role)} />
+					<RoleBadge role={roleBadgeKey(displayRole)} />
 					<Badge tone={STATUS_META[member.status].tone}>
 						{STATUS_META[member.status].label}
 					</Badge>

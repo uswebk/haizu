@@ -1,20 +1,23 @@
-import { zValidator } from "@hono/zod-validator";
 import { OrganizationUpdateInputSchema } from "@haizu/shared";
+import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
 import { organizations } from "../db/schema";
-import { consumeEmailOtp, storeEmailOtp } from "../lib/email-otp";
 import { devSendEmail } from "../lib/dev-email";
+import { consumeEmailOtp, storeEmailOtp } from "../lib/email-otp";
 import { requireAuth } from "../middleware/auth";
+import { requireOrgWritePermission } from "../middleware/require-permission";
 import type { AppEnv } from "../types";
 
 const emailRequestSchema = z.object({ newEmail: z.string().email() });
 const emailVerifySchema = z.object({ otp: z.string().min(1) });
 
+// 事業所情報の閲覧は全ロール、変更は「管理者」のみ。
 export const organizationsRoute = new Hono<AppEnv>()
 	.use("*", requireAuth)
+	.use("*", requireOrgWritePermission("org:write"))
 	.get("/", async (c) => {
 		const org = await db.query.organizations.findFirst({
 			where: eq(organizations.id, c.get("organizationId")),
@@ -30,9 +33,6 @@ export const organizationsRoute = new Hono<AppEnv>()
 	})
 
 	.put("/", zValidator("json", OrganizationUpdateInputSchema), async (c) => {
-		if (c.get("user").role !== "admin") {
-			return c.json({ error: "権限がありません" }, 403);
-		}
 		const { name } = c.req.valid("json");
 
 		const updated = await db
@@ -51,19 +51,20 @@ export const organizationsRoute = new Hono<AppEnv>()
 		});
 	})
 
-	// 事業所の連絡先メール変更: 管理者のみ。新アドレス宛のOTPで受信可否を確認する。
+	// 事業所の連絡先メール変更: 新アドレス宛のOTPで受信可否を確認する。
 	.post(
 		"/contact-email/otp",
 		zValidator("json", emailRequestSchema),
 		async (c) => {
-			if (c.get("user").role !== "admin") {
-				return c.json({ error: "権限がありません" }, 403);
-			}
 			const organizationId = c.get("organizationId");
 			const { newEmail } = c.req.valid("json");
 
 			const otp = await storeEmailOtp(`org-email:${organizationId}`, newEmail);
-			devSendEmail(newEmail, "事業所メールアドレスの確認コード", `code: ${otp}`);
+			devSendEmail(
+				newEmail,
+				"事業所メールアドレスの確認コード",
+				`code: ${otp}`,
+			);
 			return c.json({ ok: true });
 		},
 	)
@@ -72,9 +73,6 @@ export const organizationsRoute = new Hono<AppEnv>()
 		"/contact-email/verify",
 		zValidator("json", emailVerifySchema),
 		async (c) => {
-			if (c.get("user").role !== "admin") {
-				return c.json({ error: "権限がありません" }, 403);
-			}
 			const organizationId = c.get("organizationId");
 			const { otp } = c.req.valid("json");
 

@@ -7,7 +7,6 @@ import {
 	acceptInvitation,
 	fetchInvitationPreview,
 } from "#/lib/api/invitations";
-import { ROLE_LABEL } from "#/lib/roles";
 
 type InviteAcceptSearch = { token?: string };
 
@@ -133,7 +132,8 @@ function InviteAcceptPage() {
 			<div className="text-lg font-bold">パスワードの設定</div>
 			<div className="text-[13px] text-muted mt-1">
 				{invitation.lastName} {invitation.firstName} 様（{invitation.email}）を
-				{ROLE_LABEL[invitation.role]}として招待します。
+				{invitation.orgRole === "admin" ? "管理者" : "メンバー"}
+				として招待します。
 			</div>
 
 			<form

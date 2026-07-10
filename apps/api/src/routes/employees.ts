@@ -3,8 +3,9 @@ import { and, eq, inArray } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
-import { employeeTags, employees, tags } from "../db/schema";
+import { employees, employeeTags, tags } from "../db/schema";
 import { requireAuth } from "../middleware/auth";
+import { requireSiteWritePermission } from "../middleware/require-permission";
 import { siteScope } from "../middleware/site-scope";
 import type { AppEnv } from "../types";
 
@@ -70,6 +71,7 @@ function isUniqueViolation(error: unknown): boolean {
 export const employeesRoute = new Hono<AppEnv>()
 	.use("*", requireAuth)
 	.use("*", siteScope)
+	.use("*", requireSiteWritePermission("employee:write"))
 	.get("/", async (c) => {
 		const rows = await db
 			.select()
@@ -107,18 +109,13 @@ export const employeesRoute = new Hono<AppEnv>()
 
 	.post(
 		"/import",
-		zValidator(
-			"json",
-			z.object({ employees: z.array(employeeInput).min(1) }),
-		),
+		zValidator("json", z.object({ employees: z.array(employeeInput).min(1) })),
 		async (c) => {
 			const siteId = c.get("siteId");
 			const { employees: incoming } = c.req.valid("json");
 
 			// 参照される全タグが当該拠点に属することを検証（他拠点タグ混入防止）
-			const referencedTagIds = [
-				...new Set(incoming.flatMap((e) => e.tagIds)),
-			];
+			const referencedTagIds = [...new Set(incoming.flatMap((e) => e.tagIds))];
 			if (referencedTagIds.length > 0) {
 				const siteTags = await db
 					.select({ id: tags.id })
@@ -129,7 +126,10 @@ export const employeesRoute = new Hono<AppEnv>()
 				const validTagIds = new Set(siteTags.map((t) => t.id));
 				const invalid = referencedTagIds.filter((id) => !validTagIds.has(id));
 				if (invalid.length > 0) {
-					return c.json({ error: "この拠点に存在しないタグが含まれています" }, 400);
+					return c.json(
+						{ error: "この拠点に存在しないタグが含まれています" },
+						400,
+					);
 				}
 			}
 

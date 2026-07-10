@@ -5,8 +5,12 @@ import {
 	useMatches,
 } from "@tanstack/react-router";
 import { Card } from "#/components/ui/Card";
+import { assertScreen } from "#/lib/guards";
 
 export const Route = createFileRoute("/_app/settings")({
+	beforeLoad: ({ context }) => {
+		assertScreen(context.user.role, context.siteRole, "settings");
+	},
 	component: SettingsLayout,
 });
 

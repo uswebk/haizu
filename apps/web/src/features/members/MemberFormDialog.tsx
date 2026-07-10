@@ -1,4 +1,4 @@
-import type { Role } from "@haizu/shared";
+import { type OrgRole, SITE_ROLES, type SiteRole } from "@haizu/shared";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
@@ -6,14 +6,14 @@ import { OptionCard } from "#/components/ui/OptionCard";
 import { useSite } from "#/contexts/site-context";
 import { useDismiss } from "#/hooks/useDismiss";
 import { ROLE_LABEL } from "#/lib/roles";
-import type { MemberRow } from "./types";
+import type { MemberRow, SiteRoleAssignment } from "./types";
 
 export type MemberFormValues = {
 	lastName: string;
 	firstName: string;
 	email: string;
-	role: Role;
-	siteIds: string[];
+	orgRole: OrgRole;
+	siteRoles: SiteRoleAssignment[];
 	isActive: boolean;
 };
 
@@ -27,14 +27,13 @@ type Props = {
 	onCancel: () => void;
 };
 
-const ROLE_DESCRIPTIONS: Record<Role, string> = {
-	admin: "全拠点・全設定にアクセス",
-	site_admin: "担当拠点の編集が可能",
-	general: "一般権限（設定不可）",
+const SITE_ROLE_DESCRIPTIONS: Record<SiteRole, string> = {
+	site_admin: "この拠点の編集が可能",
+	general: "ホーム・配置履歴・ビュアーの閲覧のみ",
 	viewer: "ビュアー閲覧のみ",
 };
 
-const ROLE_ORDER: Role[] = ["admin", "site_admin", "general", "viewer"];
+const SITE_ROLE_ORDER = SITE_ROLES;
 
 function draftFromProps(
 	mode: "invite" | "edit",
@@ -45,8 +44,8 @@ function draftFromProps(
 			lastName: "",
 			firstName: "",
 			email: initialValue.email,
-			role: initialValue.role,
-			siteIds: initialValue.allSites ? [] : [...initialValue.siteIds],
+			orgRole: initialValue.orgRole,
+			siteRoles: initialValue.allSites ? [] : [...initialValue.siteRoles],
 			isActive: initialValue.status !== "inactive",
 		};
 	}
@@ -54,8 +53,8 @@ function draftFromProps(
 		lastName: "",
 		firstName: "",
 		email: "",
-		role: "general",
-		siteIds: [],
+		orgRole: "member",
+		siteRoles: [],
 		isActive: true,
 	};
 }
@@ -85,18 +84,32 @@ export function MemberFormDialog({
 
 	if (!open) return null;
 
+	// 拠点の割り当てを外す / 既定ロール(一般)で追加する
 	const toggleSite = (siteId: string) => {
 		setDraft((d) => ({
 			...d,
-			siteIds: d.siteIds.includes(siteId)
-				? d.siteIds.filter((s) => s !== siteId)
-				: [...d.siteIds, siteId],
+			siteRoles: d.siteRoles.some((s) => s.siteId === siteId)
+				? d.siteRoles.filter((s) => s.siteId !== siteId)
+				: [...d.siteRoles, { siteId, role: "general" }],
 		}));
 	};
 
+	// 拠点ごとに異なるロールを設定できる（A拠点=拠点管理者, B拠点=一般 など）
+	const setSiteRole = (siteId: string, role: SiteRole) => {
+		setDraft((d) => ({
+			...d,
+			siteRoles: d.siteRoles.map((s) =>
+				s.siteId === siteId ? { ...s, role } : s,
+			),
+		}));
+	};
+
+	// メンバーは必ず1つ以上の拠点に所属する（拠点ゼロだとどの画面にも入れない）
+	const hasSite = draft.orgRole === "admin" || draft.siteRoles.length > 0;
 	const canSave =
-		mode === "edit" ||
-		(draft.lastName.trim().length > 0 && draft.email.trim().length > 0);
+		hasSite &&
+		(mode === "edit" ||
+			(draft.lastName.trim().length > 0 && draft.email.trim().length > 0));
 
 	const handleSave = () => {
 		if (!canSave) return;
@@ -158,48 +171,104 @@ export function MemberFormDialog({
 					</>
 				)}
 
-				<div className="mb-2 text-xs font-semibold text-muted">権限</div>
+				<div className="mb-2 text-xs font-semibold text-muted">組織権限</div>
 				<div className="flex flex-col gap-2 mb-4.5">
-					{ROLE_ORDER.map((role) => (
-						<OptionCard
-							key={role}
-							title={ROLE_LABEL[role]}
-							description={ROLE_DESCRIPTIONS[role]}
-							selected={draft.role === role}
-							onClick={() => setDraft((d) => ({ ...d, role }))}
-						/>
-					))}
+					<OptionCard
+						title="管理者"
+						description="全拠点・事業所設定にアクセス"
+						selected={draft.orgRole === "admin"}
+						onClick={() =>
+							setDraft((d) => ({ ...d, orgRole: "admin", siteRoles: [] }))
+						}
+					/>
+					<OptionCard
+						title="メンバー"
+						description="拠点ごとに権限を設定する"
+						selected={draft.orgRole === "member"}
+						onClick={() => setDraft((d) => ({ ...d, orgRole: "member" }))}
+					/>
 				</div>
 
-				{draft.role === "admin" ? (
+				{draft.orgRole === "admin" ? (
 					<div className="mb-4.5 px-3.75 py-3.25 border border-border rounded-md bg-app-bg text-[12.5px] text-muted">
 						全拠点にアクセスできます
 					</div>
 				) : (
 					<>
 						<div className="mb-2 text-xs font-semibold text-muted">
-							担当拠点
-							<span className="text-faint font-medium">（複数選択可）</span>
+							担当拠点と権限
+							<span className="text-faint font-medium">
+								（拠点ごとに異なる権限を設定できます）
+							</span>
 						</div>
-						<div className="flex flex-wrap gap-2 mb-4.5">
+						<div className="flex flex-col gap-2 mb-4.5">
 							{activeSites.map((site) => {
-								const on = draft.siteIds.includes(site.id);
+								const assigned = draft.siteRoles.find(
+									(s) => s.siteId === site.id,
+								);
 								return (
-									<button
+									<div
 										key={site.id}
-										type="button"
-										onClick={() => toggleSite(site.id)}
-										className={`text-[12.5px] px-3.25 py-2 rounded-sm border cursor-pointer ${
-											on
-												? "font-bold border-primary text-primary bg-primary-soft"
-												: "font-semibold border-border text-muted bg-surface"
+										className={`px-3.25 py-2.75 border rounded-md ${
+											assigned ? "border-primary" : "border-border"
 										}`}
 									>
-										{site.name}
-									</button>
+										{/* 拠点の選択はチェックボックス。権限の選択(primary)と色の役割を分ける */}
+										<button
+											type="button"
+											onClick={() => toggleSite(site.id)}
+											className="w-full flex items-center gap-2.5 cursor-pointer border-none bg-transparent p-0 text-left"
+										>
+											<span
+												className={`w-4.5 h-4.5 shrink-0 rounded-[5px] border flex items-center justify-center text-[11px] leading-none ${
+													assigned
+														? "bg-ink border-ink text-white"
+														: "bg-surface border-border text-transparent"
+												}`}
+											>
+												✓
+											</span>
+											<span
+												className={`text-[13px] min-w-0 truncate ${
+													assigned
+														? "font-bold text-ink"
+														: "font-semibold text-muted"
+												}`}
+												title={site.name}
+											>
+												{site.name}
+											</span>
+										</button>
+
+										{assigned && (
+											<div className="flex flex-wrap gap-1.5 mt-2.5 pl-7">
+												{SITE_ROLE_ORDER.map((role) => (
+													<button
+														key={role}
+														type="button"
+														title={SITE_ROLE_DESCRIPTIONS[role]}
+														onClick={() => setSiteRole(site.id, role)}
+														className={`text-[12px] px-2.5 py-1.5 rounded-sm border cursor-pointer whitespace-nowrap ${
+															assigned.role === role
+																? "font-bold border-primary text-primary bg-primary-soft"
+																: "font-semibold border-border text-muted bg-surface"
+														}`}
+													>
+														{ROLE_LABEL[role]}
+													</button>
+												))}
+											</div>
+										)}
+									</div>
 								);
 							})}
 						</div>
+
+						{!hasSite && (
+							<div className="-mt-2.5 mb-4.5 text-[12px] text-warning">
+								担当拠点を1つ以上選択してください
+							</div>
+						)}
 					</>
 				)}
 

@@ -4,8 +4,8 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
 import { user } from "../db/schema";
-import { consumeEmailOtp, storeEmailOtp } from "../lib/email-otp";
 import { devSendEmail } from "../lib/dev-email";
+import { consumeEmailOtp, storeEmailOtp } from "../lib/email-otp";
 import { requireAuth } from "../middleware/auth";
 import type { AppEnv } from "../types";
 
@@ -58,7 +58,11 @@ export const accountRoute = new Hono<AppEnv>()
 
 		await db
 			.update(user)
-			.set({ email: result.newEmail, emailVerified: true, updatedAt: new Date() })
+			.set({
+				email: result.newEmail,
+				emailVerified: true,
+				updatedAt: new Date(),
+			})
 			.where(eq(user.id, userId));
 
 		return c.json({ ok: true, email: result.newEmail });

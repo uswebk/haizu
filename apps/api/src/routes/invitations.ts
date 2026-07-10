@@ -23,10 +23,18 @@ async function resolveInvitation(token: string): Promise<InvitationState> {
 		return { ok: false, status: 404, message: "招待が見つかりません" };
 	}
 	if (invitation.acceptedAt !== null) {
-		return { ok: false, status: 410, message: "この招待は既に使用されています" };
+		return {
+			ok: false,
+			status: 410,
+			message: "この招待は既に使用されています",
+		};
 	}
 	if (invitation.expiresAt < new Date()) {
-		return { ok: false, status: 410, message: "この招待の有効期限が切れています" };
+		return {
+			ok: false,
+			status: 410,
+			message: "この招待の有効期限が切れています",
+		};
 	}
 	return { ok: true, invitation };
 }
@@ -38,7 +46,7 @@ export const invitationsRoute = new Hono()
 		if (!state.ok) return c.json({ error: state.message }, state.status);
 
 		const { lastName, firstName, email, role } = state.invitation;
-		return c.json({ lastName, firstName, email, role });
+		return c.json({ lastName, firstName, email, orgRole: role });
 	})
 
 	.post("/:token/accept", zValidator("json", acceptInput), async (c) => {
@@ -77,15 +85,21 @@ export const invitationsRoute = new Hono()
 			.where(eq(user.id, createdUserId));
 
 		const siteLinks = await db
-			.select({ siteId: invitationSites.siteId })
+			.select({ siteId: invitationSites.siteId, role: invitationSites.role })
 			.from(invitationSites)
 			.where(eq(invitationSites.invitationId, invitation.id));
 
 		await db.transaction(async (tx) => {
 			if (siteLinks.length > 0) {
-				await tx.insert(memberSites).values(
-					siteLinks.map((l) => ({ userId: createdUserId, siteId: l.siteId })),
-				);
+				await tx
+					.insert(memberSites)
+					.values(
+						siteLinks.map((l) => ({
+							userId: createdUserId,
+							siteId: l.siteId,
+							role: l.role,
+						})),
+					);
 			}
 			await tx
 				.update(invitations)

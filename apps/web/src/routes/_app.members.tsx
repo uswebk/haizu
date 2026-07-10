@@ -12,7 +12,6 @@ import {
 	MemberFormDialog,
 	type MemberFormValues,
 } from "#/features/members/MemberFormDialog";
-import { MyProfileCard } from "#/features/members/MyProfileCard";
 import { roleBadgeKey } from "#/features/members/roleBadgeKey";
 import type { MemberRow, MemberStatus } from "#/features/members/types";
 import {
@@ -22,9 +21,13 @@ import {
 	memberKeys,
 	updateMember,
 } from "#/lib/api/members";
-import { authClient } from "#/lib/auth-client";
+import { assertScreen } from "#/lib/guards";
+import { ROLE_LABEL } from "#/lib/roles";
 
 export const Route = createFileRoute("/_app/members")({
+	beforeLoad: ({ context }) => {
+		assertScreen(context.user.role, context.siteRole, "members");
+	},
 	component: MemberList,
 });
 
@@ -50,14 +53,6 @@ function MemberList() {
 	const me = members.find((m) => m.kind === "user" && m.email === user.email);
 	const otherMembers = members.filter((m) => m.id !== me?.id);
 
-	const updateNameMutation = useMutation({
-		mutationFn: (name: string) => authClient.updateUser({ name }),
-		onSuccess: () => {
-			void invalidate();
-			showSuccess("名前を更新しました");
-		},
-	});
-
 	const [search, setSearch] = useState("");
 	const [dialogMode, setDialogMode] = useState<"invite" | "edit" | null>(null);
 	const [editingMember, setEditingMember] = useState<MemberRow | null>(null);
@@ -70,16 +65,16 @@ function MemberList() {
 		mutationFn: (data: MemberFormValues) =>
 			editingMember
 				? updateMember(editingMember.id, {
-						role: data.role,
-						siteIds: data.siteIds,
+						orgRole: data.orgRole,
+						siteRoles: data.siteRoles,
 						isActive: data.isActive,
 					})
 				: inviteMember({
 						lastName: data.lastName,
 						firstName: data.firstName,
 						email: data.email,
-						role: data.role,
-						siteIds: data.siteIds,
+						orgRole: data.orgRole,
+						siteRoles: data.siteRoles,
 					}),
 		onSuccess: () => {
 			void invalidate();
@@ -152,18 +147,37 @@ function MemberList() {
 			key: "role",
 			label: "権限",
 			width: "1fr",
-			render: (m) => <RoleBadge role={roleBadgeKey(m.role)} />,
+			render: (m) =>
+				m.allSites ? (
+					<RoleBadge role={roleBadgeKey("admin")} />
+				) : (
+					<span className="text-[12.5px] text-muted">メンバー</span>
+				),
 		},
 		{
 			key: "sites",
-			label: "担当拠点",
-			width: "1.4fr",
+			label: "担当拠点と権限",
+			width: "1.8fr",
 			render: (m) => {
 				if (m.allSites) return <span>全拠点</span>;
-				const names = m.siteIds
-					.map(siteName)
-					.filter((n): n is string => n !== null);
-				return <span>{names.length > 0 ? names.join("、") : "—"}</span>;
+				if (m.siteRoles.length === 0) return <span>—</span>;
+				// 拠点ごとに権限が異なりうるため「拠点名: 権限」で並べる
+				return (
+					<div className="flex flex-wrap gap-1.5">
+						{m.siteRoles.map((sr) => {
+							const name = siteName(sr.siteId);
+							if (!name) return null;
+							return (
+								<span
+									key={sr.siteId}
+									className="text-[11.5px] text-muted bg-hairline rounded-pill px-2 py-0.75"
+								>
+									{name}: {ROLE_LABEL[sr.role]}
+								</span>
+							);
+						})}
+					</div>
+				);
 			},
 		},
 		{
@@ -210,14 +224,6 @@ function MemberList() {
 						</div>
 					</div>
 				</div>
-
-				{me && (
-					<MyProfileCard
-						member={me}
-						isPending={updateNameMutation.isPending}
-						onSaveName={(name) => updateNameMutation.mutate(name)}
-					/>
-				)}
 
 				<div className="mb-3.5 flex items-center gap-2.5">
 					<Input

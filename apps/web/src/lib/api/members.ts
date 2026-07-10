@@ -1,5 +1,5 @@
-import type { Role } from "@haizu/shared";
-import type { MemberRow } from "#/features/members/types";
+import type { OrgRole } from "@haizu/shared";
+import type { MemberRow, SiteRoleAssignment } from "#/features/members/types";
 import { API_BASE, apiFetch, handleResponse } from ".";
 
 export const memberKeys = {
@@ -16,8 +16,8 @@ export type InviteMemberInput = {
 	lastName: string;
 	firstName: string;
 	email: string;
-	role: Role;
-	siteIds: string[];
+	orgRole: OrgRole;
+	siteRoles: SiteRoleAssignment[];
 };
 
 export async function inviteMember(
@@ -32,8 +32,8 @@ export async function inviteMember(
 }
 
 export type UpdateMemberInput = {
-	role: Role;
-	siteIds: string[];
+	orgRole: OrgRole;
+	siteRoles: SiteRoleAssignment[];
 	isActive: boolean;
 };
 

@@ -28,6 +28,7 @@ import { Route as AppHistoryRouteImport } from './routes/_app.history'
 import { Route as AppEmployeesRouteImport } from './routes/_app.employees'
 import { Route as AppEditorRouteImport } from './routes/_app.editor'
 import { Route as AppAssignmentRouteImport } from './routes/_app.assignment'
+import { Route as AppAccountRouteImport } from './routes/_app.account'
 import { Route as AppEditorIndexRouteImport } from './routes/_app.editor.index'
 import { Route as AppAssignmentIndexRouteImport } from './routes/_app.assignment.index'
 import { Route as AppSettingsViewerRouteImport } from './routes/_app.settings.viewer'
@@ -130,6 +131,11 @@ const AppAssignmentRoute = AppAssignmentRouteImport.update({
   path: '/assignment',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAccountRoute = AppAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppEditorIndexRoute = AppEditorIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -175,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/select-site': typeof SelectSiteRoute
   '/signup': typeof SignupRoute
   '/verify-otp': typeof VerifyOtpRoute
+  '/account': typeof AppAccountRoute
   '/assignment': typeof AppAssignmentRouteWithChildren
   '/editor': typeof AppEditorRouteWithChildren
   '/employees': typeof AppEmployeesRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/select-site': typeof SelectSiteRoute
   '/signup': typeof SignupRoute
   '/verify-otp': typeof VerifyOtpRoute
+  '/account': typeof AppAccountRoute
   '/employees': typeof AppEmployeesRoute
   '/history': typeof AppHistoryRoute
   '/home': typeof AppHomeRoute
@@ -229,6 +237,7 @@ export interface FileRoutesById {
   '/select-site': typeof SelectSiteRoute
   '/signup': typeof SignupRoute
   '/verify-otp': typeof VerifyOtpRoute
+  '/_app/account': typeof AppAccountRoute
   '/_app/assignment': typeof AppAssignmentRouteWithChildren
   '/_app/editor': typeof AppEditorRouteWithChildren
   '/_app/employees': typeof AppEmployeesRoute
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
     | '/select-site'
     | '/signup'
     | '/verify-otp'
+    | '/account'
     | '/assignment'
     | '/editor'
     | '/employees'
@@ -285,6 +295,7 @@ export interface FileRouteTypes {
     | '/select-site'
     | '/signup'
     | '/verify-otp'
+    | '/account'
     | '/employees'
     | '/history'
     | '/home'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/select-site'
     | '/signup'
     | '/verify-otp'
+    | '/_app/account'
     | '/_app/assignment'
     | '/_app/editor'
     | '/_app/employees'
@@ -477,6 +489,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssignmentRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/account': {
+      id: '/_app/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AppAccountRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/editor/': {
       id: '/_app/editor/'
       path: '/'
@@ -574,6 +593,7 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
+  AppAccountRoute: typeof AppAccountRoute
   AppAssignmentRoute: typeof AppAssignmentRouteWithChildren
   AppEditorRoute: typeof AppEditorRouteWithChildren
   AppEmployeesRoute: typeof AppEmployeesRoute
@@ -587,6 +607,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAccountRoute: AppAccountRoute,
   AppAssignmentRoute: AppAssignmentRouteWithChildren,
   AppEditorRoute: AppEditorRouteWithChildren,
   AppEmployeesRoute: AppEmployeesRoute,

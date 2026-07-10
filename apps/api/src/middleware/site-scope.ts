@@ -1,3 +1,4 @@
+import { effectiveSiteRole } from "@haizu/shared";
 import { and, eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 import { db } from "../db/client";
@@ -7,6 +8,7 @@ import type { AppEnv } from "../types";
 // requireAuth の後段で使う。x-site-id で選択された拠点が、セッションユーザーの組織に
 // 属し、かつ（管理者以外は）その拠点に招待されたメンバーであることを検証する
 // （他組織の拠点や、自分が招待されていない拠点へのなりすましアクセスを防ぐ）。
+// あわせて、その拠点における実効ロールを解決して siteRole に載せる。
 export const siteScope = createMiddleware<AppEnv>(async (c, next) => {
 	const siteId = c.req.header("x-site-id");
 	if (!siteId) {
@@ -24,18 +26,18 @@ export const siteScope = createMiddleware<AppEnv>(async (c, next) => {
 	}
 
 	const actor = c.get("user");
-	if (actor.role !== "admin") {
-		const membership = await db.query.memberSites.findFirst({
-			where: and(
-				eq(memberSites.userId, actor.id),
-				eq(memberSites.siteId, site.id),
-			),
-		});
-		if (!membership) {
-			return c.json({ error: "この拠点にアクセスする権限がありません" }, 403);
-		}
+	const membership = await db.query.memberSites.findFirst({
+		where: and(
+			eq(memberSites.userId, actor.id),
+			eq(memberSites.siteId, site.id),
+		),
+	});
+	const role = effectiveSiteRole(actor.role, membership?.role ?? null);
+	if (!role) {
+		return c.json({ error: "この拠点にアクセスする権限がありません" }, 403);
 	}
 
 	c.set("siteId", site.id);
+	c.set("siteRole", role);
 	await next();
 });

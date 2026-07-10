@@ -33,13 +33,16 @@ export async function consumeEmailOtp(
 	)[0];
 	if (!row) return { ok: false, error: "確認コードが見つかりません" };
 	if (row.expiresAt.getTime() < Date.now()) {
-		await db.delete(verification).where(eq(verification.identifier, identifier));
+		await db
+			.delete(verification)
+			.where(eq(verification.identifier, identifier));
 		return { ok: false, error: "確認コードの有効期限が切れました" };
 	}
 	const sep = row.value.indexOf(":");
 	const savedOtp = row.value.slice(0, sep);
 	const newEmail = row.value.slice(sep + 1);
-	if (savedOtp !== otp) return { ok: false, error: "確認コードが正しくありません" };
+	if (savedOtp !== otp)
+		return { ok: false, error: "確認コードが正しくありません" };
 	await db.delete(verification).where(eq(verification.identifier, identifier));
 	return { ok: true, newEmail };
 }

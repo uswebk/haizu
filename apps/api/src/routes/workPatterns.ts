@@ -1,10 +1,11 @@
-import { zValidator } from "@hono/zod-validator";
 import { WorkPatternInputSchema } from "@haizu/shared";
+import { zValidator } from "@hono/zod-validator";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db/client";
 import { shifts, workPatterns } from "../db/schema";
 import { requireAuth } from "../middleware/auth";
+import { requireSiteWritePermission } from "../middleware/require-permission";
 import { siteScope } from "../middleware/site-scope";
 import type { AppEnv } from "../types";
 
@@ -21,6 +22,7 @@ async function loadShifts(workPatternId: string) {
 export const workPatternsRoute = new Hono<AppEnv>()
 	.use("*", requireAuth)
 	.use("*", siteScope)
+	.use("*", requireSiteWritePermission("shift:write"))
 	.get("/", async (c) => {
 		const workPattern = await db.query.workPatterns.findFirst({
 			where: eq(workPatterns.siteId, c.get("siteId")),

@@ -8,6 +8,7 @@ import { z } from "zod";
 import { db } from "../db/client";
 import { areas, assignments, layoutSpecVersions, spots } from "../db/schema";
 import { requireAuth } from "../middleware/auth";
+import { requireSiteWritePermission } from "../middleware/require-permission";
 import { siteScope } from "../middleware/site-scope";
 import { storage } from "../storage";
 import type { AppEnv } from "../types";
@@ -74,6 +75,7 @@ function resolveCurrentVersion<T extends VersionForResolution>(
 export const areasRoute = new Hono<AppEnv>()
 	.use("*", requireAuth)
 	.use("*", siteScope)
+	.use("*", requireSiteWritePermission("area:write"))
 	.use("/:id/*", areaGuard)
 	.get(
 		"/",
@@ -438,7 +440,10 @@ export const areasRoute = new Hono<AppEnv>()
 				);
 			}
 
-			return c.json({ id: newVersion.id, label: `v${newVersion.version}` }, 201);
+			return c.json(
+				{ id: newVersion.id, label: `v${newVersion.version}` },
+				201,
+			);
 		},
 	)
 

@@ -1,3 +1,4 @@
+import { ORG_ROLES, SITE_ROLES } from "@haizu/shared";
 import { sql } from "drizzle-orm";
 import {
 	boolean,
@@ -310,11 +311,8 @@ export const user = pgTable("user", {
 	organizationId: uuid("organization_id")
 		.notNull()
 		.references(() => organizations.id, { onDelete: "cascade" }),
-	role: text("role", {
-		enum: ["admin", "site_admin", "general", "viewer"],
-	})
-		.notNull()
-		.default("admin"),
+	// 組織ロール。拠点ごとの権限は member_sites.role が持つ。
+	role: text("role", { enum: ORG_ROLES }).notNull().default("member"),
 	isActive: boolean("is_active").notNull().default(true),
 });
 
@@ -374,8 +372,6 @@ export const verification = pgTable("verification", {
 		.defaultNow(),
 });
 
-const MEMBER_ROLES = ["admin", "site_admin", "general", "viewer"] as const;
-
 // メンバー(user)の担当拠点。admin は全拠点扱いのため紐付けを持たない。
 export const memberSites = pgTable(
 	"member_sites",
@@ -386,6 +382,8 @@ export const memberSites = pgTable(
 		siteId: uuid("site_id")
 			.notNull()
 			.references(() => sites.id, { onDelete: "cascade" }),
+		// この拠点における権限。拠点ごとに異なってよい（A拠点=拠点管理者, B拠点=一般 など）
+		role: text("role", { enum: SITE_ROLES }).notNull().default("general"),
 	},
 	(t) => [
 		uniqueIndex("member_sites_user_id_site_id_unique").on(t.userId, t.siteId),
@@ -401,7 +399,7 @@ export const invitations = pgTable("invitations", {
 	lastName: text("last_name").notNull(),
 	firstName: text("first_name").notNull().default(""),
 	email: text("email").notNull(),
-	role: text("role", { enum: MEMBER_ROLES }).notNull().default("general"),
+	role: text("role", { enum: ORG_ROLES }).notNull().default("member"),
 	token: text("token").notNull().unique(),
 	expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
 	acceptedAt: timestamp("accepted_at", { withTimezone: true }),
@@ -420,6 +418,7 @@ export const invitationSites = pgTable(
 		siteId: uuid("site_id")
 			.notNull()
 			.references(() => sites.id, { onDelete: "cascade" }),
+		role: text("role", { enum: SITE_ROLES }).notNull().default("general"),
 	},
 	(t) => [
 		uniqueIndex("invitation_sites_invitation_id_site_id_unique").on(

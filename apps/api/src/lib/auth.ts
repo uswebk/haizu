@@ -32,8 +32,19 @@ export const auth = betterAuth({
 		// サインアップ時に databaseHooks 経由でサーバー側からのみ設定する（テナント越境防止）。
 		additionalFields: {
 			organizationId: { type: "string", required: false, input: false },
-			role: { type: "string", required: false, defaultValue: "admin", input: false },
-			isActive: { type: "boolean", required: false, defaultValue: true, input: false },
+			// 組織ロール。拠点ごとの権限は member_sites.role が持つ。
+			role: {
+				type: "string",
+				required: false,
+				defaultValue: "member",
+				input: false,
+			},
+			isActive: {
+				type: "boolean",
+				required: false,
+				defaultValue: true,
+				input: false,
+			},
 		},
 	},
 	databaseHooks: {

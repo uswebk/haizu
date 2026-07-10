@@ -8,8 +8,12 @@ import {
 	type SiteEditState,
 } from "#/features/sites/SiteEditDialog";
 import { SiteIcon } from "#/features/sites/SiteIcon";
+import { assertScreen } from "#/lib/guards";
 
 export const Route = createFileRoute("/_app/sites")({
+	beforeLoad: ({ context }) => {
+		assertScreen(context.user.role, context.siteRole, "sites");
+	},
 	component: SitesPage,
 });
 

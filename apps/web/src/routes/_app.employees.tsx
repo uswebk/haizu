@@ -27,6 +27,7 @@ import {
 	updateEmployee,
 } from "#/lib/api/employees";
 import { fetchTags, tagKeys } from "#/lib/api/tags";
+import { assertScreen } from "#/lib/guards";
 
 const CURRENT_SITE = "A工場";
 const PAGE_SIZE = 50;
@@ -40,6 +41,9 @@ const FILTERS: { key: EmployeeFilter; label: string }[] = [
 ];
 
 export const Route = createFileRoute("/_app/employees")({
+	beforeLoad: ({ context }) => {
+		assertScreen(context.user.role, context.siteRole, "employees");
+	},
 	component: EmployeeList,
 });
 

@@ -1,3 +1,4 @@
+import { canSite } from "@haizu/shared";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { HomeSummary } from "#/features/home/HomeSummary";
@@ -6,13 +7,17 @@ import { areaKeys, fetchAreas } from "#/lib/api/areas";
 import { employeeKeys, fetchEmployees } from "#/lib/api/employees";
 import { fetchWorkPattern, workPatternKeys } from "#/lib/api/workPatterns";
 import { todayStr } from "#/lib/datetime";
+import { assertScreen } from "#/lib/guards";
 
 export const Route = createFileRoute("/_app/home")({
+	beforeLoad: ({ context }) => {
+		assertScreen(context.user.role, context.siteRole, "home");
+	},
 	component: Home,
 });
 
 function Home() {
-	const { user } = Route.useRouteContext();
+	const { siteRole } = Route.useRouteContext();
 	const today = todayStr();
 
 	const workPatternQuery = useQuery({
@@ -47,7 +52,8 @@ function Home() {
 	// エリアは存在するが未公開（下書きのみ）の状態
 	const hasDraftArea = !hasAreas && areas.length > 0;
 	const setupComplete = hasShifts && hasEmployees && hasAreas;
-	const canSetup = user.role === "admin" || user.role === "site_admin";
+	// 初期セットアップはシフト・従業員・配置エリアの作成を促すもの。書き込み権限が無ければ出さない。
+	const canSetup = canSite(siteRole, "area:write");
 
 	return (
 		<div className="p-7 overflow-auto h-full">

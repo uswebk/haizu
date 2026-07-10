@@ -1,3 +1,4 @@
+import type { OrgRole } from "@haizu/shared";
 import { createMiddleware } from "hono/factory";
 import { auth } from "../lib/auth";
 import type { AppEnv } from "../types";
@@ -13,7 +14,7 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
 	const user = session.user as {
 		id: string;
 		organizationId: string;
-		role: string;
+		role: OrgRole;
 		isActive: boolean;
 		emailVerified: boolean;
 	};
@@ -22,7 +23,11 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
 		return c.json({ error: access.message }, access.status);
 	}
 
-	c.set("user", { id: user.id, organizationId: user.organizationId, role: user.role });
+	c.set("user", {
+		id: user.id,
+		organizationId: user.organizationId,
+		role: user.role,
+	});
 	c.set("organizationId", user.organizationId);
 	await next();
 });

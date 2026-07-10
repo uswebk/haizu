@@ -1,4 +1,4 @@
-import type { Role } from "@haizu/shared";
+import type { OrgRole } from "@haizu/shared";
 import { API_BASE } from ".";
 
 async function extractError(res: Response, fallback: string): Promise<string> {
@@ -15,7 +15,7 @@ export type InvitationPreview = {
 	lastName: string;
 	firstName: string;
 	email: string;
-	role: Role;
+	orgRole: OrgRole;
 };
 
 export async function fetchInvitationPreview(

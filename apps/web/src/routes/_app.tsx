@@ -1,3 +1,4 @@
+import { canAccessScreen, displayRole } from "@haizu/shared";
 import {
 	createFileRoute,
 	Link,
@@ -16,11 +17,11 @@ import { fetchSession } from "#/lib/session";
 
 export const Route = createFileRoute("/_app")({
 	beforeLoad: async () => {
-		const user = await fetchSession();
-		if (!user) throw redirect({ to: "/login" });
+		const auth = await fetchSession();
+		if (!auth) throw redirect({ to: "/login" });
 		// メールアドレス未確認ならOTP確認画面へ
-		if (!user.emailVerified) throw redirect({ to: "/verify-otp" });
-		return { user };
+		if (!auth.user.emailVerified) throw redirect({ to: "/verify-otp" });
+		return auth;
 	},
 	component: AppLayout,
 });
@@ -34,29 +35,45 @@ function AppLayout() {
 }
 
 const MAIN_NAV = [
-	{ label: "ホーム", to: "/home" as const },
-	{ label: "配置エリア", to: "/editor" as const },
-	{ label: "配置決め", to: "/assignment" as const },
-	{ label: "配置履歴", to: "/history" as const },
-	{ label: "ビュアー", to: "/viewer" as const },
-	{ label: "従業員", to: "/employees" as const },
-	{ label: "設定", to: "/settings" as const },
+	{ label: "ホーム", to: "/home" as const, screen: "home" as const },
+	{ label: "配置エリア", to: "/editor" as const, screen: "editor" as const },
+	{
+		label: "配置決め",
+		to: "/assignment" as const,
+		screen: "assignment" as const,
+	},
+	{ label: "配置履歴", to: "/history" as const, screen: "history" as const },
+	{ label: "ビュアー", to: "/viewer" as const, screen: "viewer" as const },
+	{ label: "従業員", to: "/employees" as const, screen: "employees" as const },
+	{ label: "設定", to: "/settings" as const, screen: "settings" as const },
 ];
 
 const ADMIN_NAV = [
-	{ label: "拠点管理", to: "/sites" as const },
-	{ label: "メンバー", to: "/members" as const },
-	{ label: "事業所設定", to: "/organization-settings" as const },
+	{ label: "拠点管理", to: "/sites" as const, screen: "sites" as const },
+	{ label: "メンバー", to: "/members" as const, screen: "members" as const },
+	{
+		label: "事業所設定",
+		to: "/organization-settings" as const,
+		screen: "organization-settings" as const,
+	},
 ];
 
 function AppLayoutInner() {
 	const { currentSite } = useSite();
 	const navigate = useNavigate();
-	const { user } = Route.useRouteContext();
+	const { user, siteRole } = Route.useRouteContext();
 	const userName = user.name;
 	const userEmail = user.email;
-	const roleLabel = ROLE_LABEL[user.role];
+	// 表示は「現在拠点における実効ロール」。拠点未所属なら「その他」相当。
+	const roleLabel = ROLE_LABEL[displayRole(user.role, siteRole) ?? "viewer"];
 	const initial = userName.charAt(0) || "?";
+
+	const mainNav = MAIN_NAV.filter((i) =>
+		canAccessScreen(user.role, siteRole, i.screen),
+	);
+	const adminNav = ADMIN_NAV.filter((i) =>
+		canAccessScreen(user.role, siteRole, i.screen),
+	);
 
 	const todayLabel = formatDateLabel(todayStr());
 
@@ -90,7 +107,7 @@ function AppLayoutInner() {
 				<div className="font-mono text-[10.5px] tracking-[.12em] text-faint px-3 pb-2">
 					{currentSite.name}管理
 				</div>
-				{MAIN_NAV.map((item) => (
+				{mainNav.map((item) => (
 					<Link
 						key={item.to}
 						to={item.to}
@@ -103,16 +120,20 @@ function AppLayoutInner() {
 					</Link>
 				))}
 
-				<div className="font-mono text-[10.5px] tracking-[.12em] text-faint px-3 pb-2 pt-4.5">
-					事業所管理
-				</div>
-				{ADMIN_NAV.map((item) => (
-					<Link key={item.to} to={item.to} className="block">
-						{({ isActive }) => (
-							<NavItem active={isActive}>{item.label}</NavItem>
-						)}
-					</Link>
-				))}
+				{adminNav.length > 0 && (
+					<>
+						<div className="font-mono text-[10.5px] tracking-[.12em] text-faint px-3 pb-2 pt-4.5">
+							事業所管理
+						</div>
+						{adminNav.map((item) => (
+							<Link key={item.to} to={item.to} className="block">
+								{({ isActive }) => (
+									<NavItem active={isActive}>{item.label}</NavItem>
+								)}
+							</Link>
+						))}
+					</>
+				)}
 
 				<div className="mt-auto border-t border-hairline pt-3.5 pb-1 flex items-center gap-2.5 px-2">
 					<div className="w-8.5 h-8.5 rounded-full bg-ink text-white flex items-center justify-center font-bold text-sm shrink-0">
@@ -162,6 +183,13 @@ function AppLayoutInner() {
 										<div className="text-xs text-faint mt-0.5">{userEmail}</div>
 									</div>
 									<div className="p-1.5">
+										<Link
+											to="/account"
+											onClick={() => setUserMenuOpen(false)}
+											className="block px-2.75 py-2.5 rounded-[9px] text-[13px] font-semibold hover:bg-app-bg"
+										>
+											アカウント設定
+										</Link>
 										<button
 											type="button"
 											onClick={() => {

@@ -1,5 +1,5 @@
-import { zValidator } from "@hono/zod-validator";
 import { SignUpInputSchema } from "@haizu/shared";
+import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db/client";

@@ -1,11 +1,12 @@
-import { zValidator } from "@hono/zod-validator";
 import { ViewerConfigInputSchema } from "@haizu/shared";
+import { zValidator } from "@hono/zod-validator";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
 import { areas, shifts, viewerConfigs } from "../db/schema";
 import { requireAuth } from "../middleware/auth";
+import { requireSiteWritePermission } from "../middleware/require-permission";
 import { siteScope } from "../middleware/site-scope";
 import type { AppEnv } from "../types";
 
@@ -33,6 +34,7 @@ function serialize(row: typeof viewerConfigs.$inferSelect, shift: ShiftInfo) {
 export const viewerConfigsRoute = new Hono<AppEnv>()
 	.use("*", requireAuth)
 	.use("*", siteScope)
+	.use("*", requireSiteWritePermission("viewer_config:write"))
 	.get("/", async (c) => {
 		// shifts は left join（ソフト削除済みでも name/時刻は保持されるため表示に使える）
 		// エリア経由で現在拠点に絞り込む
