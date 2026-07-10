@@ -9,11 +9,13 @@ import { fetchAssignments } from "#/lib/api/assignments";
 import { formatDateJp } from "#/lib/datetime";
 
 export function HomeSummary({
+	siteId,
 	today,
 	areas,
 	activeEmployeeCount,
 	workPattern,
 }: {
+	siteId: string;
 	today: string;
 	areas: AreaListItem[];
 	activeEmployeeCount: number;
@@ -109,7 +111,8 @@ export function HomeSummary({
 					sub={
 						unplacedAreaCount > 0 ? (
 							<Link
-								to="/assignment"
+								to="/s/$siteId/assignment"
+								params={{ siteId }}
 								className="text-[13px] font-bold text-primary hover:text-primary-hover"
 							>
 								未配置 {unplacedAreaCount} エリアを配置 →
@@ -152,8 +155,8 @@ export function HomeSummary({
 									className="border-b border-hairline last:border-b-0"
 								>
 									<Link
-										to="/assignment/$areaId"
-										params={{ areaId: area.id }}
+										to="/s/$siteId/assignment/$areaId"
+										params={{ siteId, areaId: area.id }}
 										search={{ date: today }}
 										className="flex items-center gap-3 px-4.5 py-3 hover:bg-hairline transition-colors duration-150"
 									>

@@ -1,16 +1,7 @@
 import type { SiteInput } from "@haizu/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
-import {
-	createContext,
-	type ReactNode,
-	useContext,
-	useEffect,
-	useMemo,
-	useState,
-} from "react";
+import { createContext, type ReactNode, useContext, useMemo } from "react";
 import { useSnackbar } from "#/contexts/snackbar-context";
-import { getCurrentSiteId, setCurrentSiteId } from "#/lib/api";
 import {
 	createSite,
 	fetchSites,
@@ -50,40 +41,31 @@ type SiteContextValue = {
 	currentSite: SiteView;
 	canAddSite: boolean;
 	isLoading: boolean;
-	switchSite: (id: string) => void;
 	addSite: (input: SiteInput) => void;
 	updateSite: (id: string, input: SiteInput) => void;
 };
 
 const SiteContext = createContext<SiteContextValue | null>(null);
 
-export function SiteProvider({ children }: { children: ReactNode }) {
+// 現在の拠点はURL(/s/$siteId)が真実なので、siteId は呼び出し側から受け取る。
+// 拠点未選択の画面（拠点選択画面）では siteId を渡さない。
+export function SiteProvider({
+	siteId,
+	children,
+}: {
+	siteId?: string;
+	children: ReactNode;
+}) {
 	const queryClient = useQueryClient();
-	const router = useRouter();
 	const { showSuccess } = useSnackbar();
-	// SiteProvider は認証済みエリア(_app / select-site)でのみマウントされる。
+	// SiteProvider は認証済みエリアでのみマウントされる。
 	const { data: rawSites = [], isLoading } = useQuery({
 		queryKey: siteKeys.all,
 		queryFn: fetchSites,
 	});
 
-	const [currentSiteId, setCurrentSiteIdState] = useState<string | null>(() =>
-		getCurrentSiteId(),
-	);
-
 	const sites = useMemo(() => rawSites.map(toView), [rawSites]);
 	const activeSites = useMemo(() => sites.filter((s) => s.isActive), [sites]);
-
-	// 初回ロードや、選択中拠点が無効になった場合は先頭のアクティブ拠点を選ぶ。
-	useEffect(() => {
-		const first = activeSites[0];
-		if (!first) return;
-		const valid = activeSites.some((s) => s.id === currentSiteId);
-		if (!valid) {
-			setCurrentSiteId(first.id);
-			setCurrentSiteIdState(first.id);
-		}
-	}, [activeSites, currentSiteId]);
 
 	const invalidateSites = () =>
 		queryClient.invalidateQueries({ queryKey: siteKeys.all });
@@ -106,26 +88,7 @@ export function SiteProvider({ children }: { children: ReactNode }) {
 	});
 
 	const value = useMemo<SiteContextValue>(() => {
-		const currentSite =
-			sites.find((s) => s.id === currentSiteId) ??
-			activeSites[0] ??
-			PLACEHOLDER;
-
-		const switchSite = (id: string) => {
-			if (!sites.some((s) => s.id === id && s.isActive)) return;
-			setCurrentSiteId(id);
-			setCurrentSiteIdState(id);
-			// 拠点ごとに権限が異なるため、実効ロールを解決し直す必要がある。
-			// beforeLoad は Cookie の現在拠点を読むので、ルートを再評価させる。
-			void router.invalidate();
-			// 拠点が変わると x-site-id が変わる。invalidate だと再取得中も前拠点の
-			// キャッシュが表示され一瞬前データがちらつくため、拠点スコープの
-			// クエリはキャッシュごと破棄して即ローディング状態にする。
-			// 拠点一覧(["sites"])は組織スコープで変わらないので除外する。
-			queryClient.removeQueries({
-				predicate: (query) => query.queryKey[0] !== siteKeys.all[0],
-			});
-		};
+		const currentSite = sites.find((s) => s.id === siteId) ?? PLACEHOLDER;
 
 		return {
 			sites,
@@ -133,21 +96,11 @@ export function SiteProvider({ children }: { children: ReactNode }) {
 			currentSite,
 			canAddSite: sites.length < MAX_SITES,
 			isLoading,
-			switchSite,
 			addSite: (input: SiteInput) => addMutation.mutate(input),
 			updateSite: (id: string, input: SiteInput) =>
 				updateMutation.mutate({ id, input }),
 		};
-	}, [
-		sites,
-		activeSites,
-		currentSiteId,
-		isLoading,
-		queryClient,
-		router,
-		addMutation,
-		updateMutation,
-	]);
+	}, [sites, activeSites, siteId, isLoading, addMutation, updateMutation]);
 
 	return <SiteContext.Provider value={value}>{children}</SiteContext.Provider>;
 }

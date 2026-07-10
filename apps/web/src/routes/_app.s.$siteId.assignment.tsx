@@ -6,13 +6,18 @@ export type AssignmentSearch = {
 	shiftId?: string;
 };
 
-export const Route = createFileRoute("/_app/assignment")({
+export const Route = createFileRoute("/_app/s/$siteId/assignment")({
 	validateSearch: (search): AssignmentSearch => ({
 		date: typeof search.date === "string" ? search.date : undefined,
 		shiftId: typeof search.shiftId === "string" ? search.shiftId : undefined,
 	}),
-	beforeLoad: ({ context }) => {
-		assertScreen(context.user.role, context.siteRole, "assignment");
+	beforeLoad: ({ context, params }) => {
+		assertScreen(
+			context.user.role,
+			context.siteRole,
+			params.siteId,
+			"assignment",
+		);
 	},
 	component: () => <Outlet />,
 });

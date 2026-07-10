@@ -30,12 +30,12 @@ const BASE_WIDTH = 760;
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2;
 
-export const Route = createFileRoute("/_app/assignment/$areaId")({
+export const Route = createFileRoute("/_app/s/$siteId/assignment/$areaId")({
 	component: AssignmentDetail,
 });
 
 function AssignmentDetail() {
-	const { areaId } = Route.useParams();
+	const { siteId, areaId } = Route.useParams();
 	const search = Route.useSearch();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
@@ -215,14 +215,14 @@ function AssignmentDetail() {
 
 	const setDate = (d: string) =>
 		navigate({
-			to: "/assignment/$areaId",
-			params: { areaId },
+			to: "/s/$siteId/assignment/$areaId",
+			params: { siteId, areaId },
 			search: (prev) => ({ ...prev, date: d }),
 		});
 	const setShift = (id: string) =>
 		navigate({
-			to: "/assignment/$areaId",
-			params: { areaId },
+			to: "/s/$siteId/assignment/$areaId",
+			params: { siteId, areaId },
 			search: (prev) => ({ ...prev, shiftId: id }),
 		});
 
@@ -253,7 +253,8 @@ function AssignmentDetail() {
 							size="sm"
 							onClick={() =>
 								navigate({
-									to: "/assignment",
+									to: "/s/$siteId/assignment",
+									params: { siteId },
 									search: (prev) => ({ ...prev, date }),
 								})
 							}
@@ -269,7 +270,8 @@ function AssignmentDetail() {
 							先にシフトを登録すると、この画面から配置決めができます
 						</div>
 						<Link
-							to="/settings/shifts"
+							to="/s/$siteId/settings/shifts"
+							params={{ siteId }}
 							className="mt-1 text-[13px] font-bold text-primary hover:text-primary-hover"
 						>
 							シフトを登録する →
@@ -290,7 +292,8 @@ function AssignmentDetail() {
 							size="sm"
 							onClick={() =>
 								navigate({
-									to: "/assignment",
+									to: "/s/$siteId/assignment",
+									params: { siteId },
 									search: (prev) => ({ ...prev, date }),
 								})
 							}
@@ -324,7 +327,8 @@ function AssignmentDetail() {
 							size="sm"
 							onClick={() =>
 								navigate({
-									to: "/assignment",
+									to: "/s/$siteId/assignment",
+									params: { siteId },
 									search: (prev) => ({ ...prev, date }),
 								})
 							}

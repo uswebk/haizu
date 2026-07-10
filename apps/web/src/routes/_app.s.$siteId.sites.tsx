@@ -10,9 +10,9 @@ import {
 import { SiteIcon } from "#/features/sites/SiteIcon";
 import { assertScreen } from "#/lib/guards";
 
-export const Route = createFileRoute("/_app/sites")({
-	beforeLoad: ({ context }) => {
-		assertScreen(context.user.role, context.siteRole, "sites");
+export const Route = createFileRoute("/_app/s/$siteId/sites")({
+	beforeLoad: ({ context, params }) => {
+		assertScreen(context.user.role, context.siteRole, params.siteId, "sites");
 	},
 	component: SitesPage,
 });

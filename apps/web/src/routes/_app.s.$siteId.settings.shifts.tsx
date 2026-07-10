@@ -20,7 +20,7 @@ type DraftShift = {
 	endTime: string;
 };
 
-export const Route = createFileRoute("/_app/settings/shifts")({
+export const Route = createFileRoute("/_app/s/$siteId/settings/shifts")({
 	component: ShiftSettings,
 });
 
@@ -34,6 +34,7 @@ function newShift(): DraftShift {
 }
 
 function ShiftSettings() {
+	const { siteId } = Route.useParams();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { showSuccess } = useSnackbar();
@@ -147,7 +148,8 @@ function ShiftSettings() {
 			<div className="p-7 overflow-auto h-full">
 				<div className="max-w-190">
 					<Link
-						to="/settings"
+						to="/s/$siteId/settings"
+						params={{ siteId }}
 						className="text-xs font-semibold text-muted hover:text-ink"
 					>
 						← 設定
@@ -163,7 +165,8 @@ function ShiftSettings() {
 		<div className="p-7 overflow-auto h-full">
 			<div className="max-w-190">
 				<Link
-					to="/settings"
+					to="/s/$siteId/settings"
+					params={{ siteId }}
 					className="text-xs font-semibold text-muted hover:text-ink"
 				>
 					← 設定
@@ -296,7 +299,9 @@ function ShiftSettings() {
 					)}
 					<Button
 						variant="secondary"
-						onClick={() => navigate({ to: "/settings" })}
+						onClick={() =>
+							navigate({ to: "/s/$siteId/settings", params: { siteId } })
+						}
 						disabled={saveMutation.isPending}
 					>
 						キャンセル

@@ -9,15 +9,16 @@ import { fetchWorkPattern, workPatternKeys } from "#/lib/api/workPatterns";
 import { todayStr } from "#/lib/datetime";
 import { assertScreen } from "#/lib/guards";
 
-export const Route = createFileRoute("/_app/home")({
-	beforeLoad: ({ context }) => {
-		assertScreen(context.user.role, context.siteRole, "home");
+export const Route = createFileRoute("/_app/s/$siteId/home")({
+	beforeLoad: ({ context, params }) => {
+		assertScreen(context.user.role, context.siteRole, params.siteId, "home");
 	},
 	component: Home,
 });
 
 function Home() {
 	const { siteRole } = Route.useRouteContext();
+	const { siteId } = Route.useParams();
 	const today = todayStr();
 
 	const workPatternQuery = useQuery({
@@ -59,6 +60,7 @@ function Home() {
 		<div className="p-7 overflow-auto h-full">
 			{canSetup && !setupComplete ? (
 				<SetupChecklist
+					siteId={siteId}
 					hasShifts={hasShifts}
 					hasEmployees={hasEmployees}
 					hasAreas={hasAreas}
@@ -67,6 +69,7 @@ function Home() {
 			) : (
 				workPattern && (
 					<HomeSummary
+						siteId={siteId}
 						today={today}
 						areas={areas}
 						activeEmployeeCount={employees.filter((e) => e.isActive).length}

@@ -40,9 +40,14 @@ const FILTERS: { key: EmployeeFilter; label: string }[] = [
 	{ key: "inactive", label: "無効" },
 ];
 
-export const Route = createFileRoute("/_app/employees")({
-	beforeLoad: ({ context }) => {
-		assertScreen(context.user.role, context.siteRole, "employees");
+export const Route = createFileRoute("/_app/s/$siteId/employees")({
+	beforeLoad: ({ context, params }) => {
+		assertScreen(
+			context.user.role,
+			context.siteRole,
+			params.siteId,
+			"employees",
+		);
 	},
 	component: EmployeeList,
 });

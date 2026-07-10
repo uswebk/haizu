@@ -14,7 +14,7 @@ import {
 } from "#/lib/api/viewer";
 import { todayStr } from "#/lib/datetime";
 
-export const Route = createFileRoute("/_app/settings/viewer")({
+export const Route = createFileRoute("/_app/s/$siteId/settings/viewer")({
 	component: ViewerSettings,
 });
 
@@ -42,6 +42,7 @@ function defaultConfig(areaId: string): ViewerConfig {
 }
 
 function ViewerSettings() {
+	const { siteId } = Route.useParams();
 	const queryClient = useQueryClient();
 	const { showSuccess } = useSnackbar();
 	const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
@@ -302,7 +303,8 @@ function ViewerSettings() {
 		<div className="p-7 overflow-auto h-full">
 			<div className="max-w-180">
 				<Link
-					to="/settings"
+					to="/s/$siteId/settings"
+					params={{ siteId }}
 					className="text-xs font-semibold text-muted hover:text-ink"
 				>
 					← 設定

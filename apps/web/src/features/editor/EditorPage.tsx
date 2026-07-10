@@ -33,9 +33,9 @@ const BASE_WIDTH = 760;
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2;
 
-type Props = { areaId: string };
+type Props = { siteId: string; areaId: string };
 
-export function EditorPage({ areaId }: Props) {
+export function EditorPage({ siteId, areaId }: Props) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { showSuccess } = useSnackbar();
@@ -315,7 +315,7 @@ export function EditorPage({ areaId }: Props) {
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: areaKeys.all });
 			showSuccess("配置エリアを削除しました");
-			navigate({ to: "/editor" });
+			navigate({ to: "/s/$siteId/editor", params: { siteId } });
 		},
 		onError: (error) => {
 			setDeleteAreaError(
@@ -340,7 +340,9 @@ export function EditorPage({ areaId }: Props) {
 					<div className="flex items-center gap-2.5 min-w-0">
 						<button
 							type="button"
-							onClick={() => navigate({ to: "/editor" })}
+							onClick={() =>
+								navigate({ to: "/s/$siteId/editor", params: { siteId } })
+							}
 							className="font-sans text-[12.5px] font-semibold text-muted bg-transparent border-none px-2 py-1.5 rounded-sm cursor-pointer hover:bg-hairline shrink-0"
 						>
 							← エリア一覧

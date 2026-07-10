@@ -25,7 +25,7 @@ type HistorySearch = {
 	selShiftLabel?: string;
 };
 
-export const Route = createFileRoute("/_app/history")({
+export const Route = createFileRoute("/_app/s/$siteId/history")({
 	validateSearch: (search): HistorySearch => ({
 		date: typeof search.date === "string" ? search.date : undefined,
 		page:
@@ -40,8 +40,8 @@ export const Route = createFileRoute("/_app/history")({
 				? search.selShiftLabel
 				: undefined,
 	}),
-	beforeLoad: ({ context }) => {
-		assertScreen(context.user.role, context.siteRole, "history");
+	beforeLoad: ({ context, params }) => {
+		assertScreen(context.user.role, context.siteRole, params.siteId, "history");
 	},
 	component: History,
 });
@@ -71,6 +71,7 @@ function History() {
 
 function HistoryList() {
 	const search = Route.useSearch();
+	const { siteId } = Route.useParams();
 	const navigate = useNavigate();
 	// 日付は必須。未指定時は前日をデフォルトにする（全件検索を防ぐため）
 	const filterDate = search.date ?? yesterdayStr();
@@ -94,11 +95,16 @@ function HistoryList() {
 	// 日付フィルタを変えたらページを1に戻す
 	const setDate = (date: string) =>
 		navigate({
-			to: "/history",
+			to: "/s/$siteId/history",
+			params: { siteId },
 			search: (prev) => ({ ...prev, date, page: undefined }),
 		});
 	const setPage = (next: number) =>
-		navigate({ to: "/history", search: (prev) => ({ ...prev, page: next }) });
+		navigate({
+			to: "/s/$siteId/history",
+			params: { siteId },
+			search: (prev) => ({ ...prev, page: next }),
+		});
 
 	return (
 		<div className="p-7 overflow-auto h-full">
@@ -150,7 +156,8 @@ function HistoryList() {
 									type="button"
 									onClick={() =>
 										navigate({
-											to: "/history",
+											to: "/s/$siteId/history",
+											params: { siteId },
 											search: (prev) => ({
 												...prev,
 												selArea: entry.areaId,
@@ -232,6 +239,7 @@ function HistoryList() {
 }
 
 function HistoryDetail() {
+	const { siteId } = Route.useParams();
 	const search = Route.useSearch();
 	const navigate = useNavigate();
 	const areaId = search.selArea as string;
@@ -278,7 +286,8 @@ function HistoryDetail() {
 
 	const back = () =>
 		navigate({
-			to: "/history",
+			to: "/s/$siteId/history",
+			params: { siteId },
 			search: (prev) => ({
 				...prev,
 				selArea: undefined,

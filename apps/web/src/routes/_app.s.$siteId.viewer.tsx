@@ -28,7 +28,7 @@ const BOARD_PADDING = 56;
 
 type ViewerSearch = { area?: string };
 
-export const Route = createFileRoute("/_app/viewer")({
+export const Route = createFileRoute("/_app/s/$siteId/viewer")({
 	validateSearch: (search): ViewerSearch => ({
 		area: typeof search.area === "string" ? search.area : undefined,
 	}),
@@ -108,6 +108,7 @@ function ViewerAreaCard({
 	config: ViewerConfig;
 	workPattern: ReturnType<typeof useCommonData>["workPattern"];
 }) {
+	const { siteId } = Route.useParams();
 	const navigate = useNavigate();
 	const display = workPattern
 		? resolveViewerDisplay(config, workPattern, new Date())
@@ -134,7 +135,13 @@ function ViewerAreaCard({
 	return (
 		<button
 			type="button"
-			onClick={() => navigate({ to: "/viewer", search: { area: area.id } })}
+			onClick={() =>
+				navigate({
+					to: "/s/$siteId/viewer",
+					params: { siteId },
+					search: { area: area.id },
+				})
+			}
 			className="text-left bg-surface border border-border rounded-lg p-4.5 shadow-card cursor-pointer hover:shadow-float transition-shadow duration-150"
 		>
 			<div className="flex items-center justify-between gap-2.5">
@@ -177,6 +184,7 @@ function ViewerAreaCard({
 }
 
 function ViewerDetail({ areaId }: { areaId: string }) {
+	const { siteId } = Route.useParams();
 	const navigate = useNavigate();
 	const { configByArea, workPattern } = useCommonData();
 	const [zoom, setZoom] = useState(1);
@@ -306,7 +314,13 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 				<div className="flex items-center gap-3 min-w-0">
 					<button
 						type="button"
-						onClick={() => navigate({ to: "/viewer", search: {} })}
+						onClick={() =>
+							navigate({
+								to: "/s/$siteId/viewer",
+								params: { siteId },
+								search: {},
+							})
+						}
 						className="font-sans text-[12.5px] font-semibold text-muted bg-transparent border-none px-2 py-1.5 rounded-sm cursor-pointer hover:bg-hairline"
 					>
 						← ビュアー一覧

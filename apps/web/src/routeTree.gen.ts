@@ -18,24 +18,25 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppViewerRouteImport } from './routes/_app.viewer'
-import { Route as AppSitesRouteImport } from './routes/_app.sites'
-import { Route as AppSettingsRouteImport } from './routes/_app.settings'
-import { Route as AppOrganizationSettingsRouteImport } from './routes/_app.organization-settings'
-import { Route as AppMembersRouteImport } from './routes/_app.members'
-import { Route as AppHomeRouteImport } from './routes/_app.home'
-import { Route as AppHistoryRouteImport } from './routes/_app.history'
-import { Route as AppEmployeesRouteImport } from './routes/_app.employees'
-import { Route as AppEditorRouteImport } from './routes/_app.editor'
-import { Route as AppAssignmentRouteImport } from './routes/_app.assignment'
 import { Route as AppAccountRouteImport } from './routes/_app.account'
-import { Route as AppEditorIndexRouteImport } from './routes/_app.editor.index'
-import { Route as AppAssignmentIndexRouteImport } from './routes/_app.assignment.index'
-import { Route as AppSettingsViewerRouteImport } from './routes/_app.settings.viewer'
-import { Route as AppSettingsTagsRouteImport } from './routes/_app.settings.tags'
-import { Route as AppSettingsShiftsRouteImport } from './routes/_app.settings.shifts'
-import { Route as AppEditorAreaIdRouteImport } from './routes/_app.editor.$areaId'
-import { Route as AppAssignmentAreaIdRouteImport } from './routes/_app.assignment.$areaId'
+import { Route as AppSSiteIdRouteImport } from './routes/_app.s.$siteId'
+import { Route as AppSSiteIdViewerRouteImport } from './routes/_app.s.$siteId.viewer'
+import { Route as AppSSiteIdSitesRouteImport } from './routes/_app.s.$siteId.sites'
+import { Route as AppSSiteIdSettingsRouteImport } from './routes/_app.s.$siteId.settings'
+import { Route as AppSSiteIdOrganizationSettingsRouteImport } from './routes/_app.s.$siteId.organization-settings'
+import { Route as AppSSiteIdMembersRouteImport } from './routes/_app.s.$siteId.members'
+import { Route as AppSSiteIdHomeRouteImport } from './routes/_app.s.$siteId.home'
+import { Route as AppSSiteIdHistoryRouteImport } from './routes/_app.s.$siteId.history'
+import { Route as AppSSiteIdEmployeesRouteImport } from './routes/_app.s.$siteId.employees'
+import { Route as AppSSiteIdEditorRouteImport } from './routes/_app.s.$siteId.editor'
+import { Route as AppSSiteIdAssignmentRouteImport } from './routes/_app.s.$siteId.assignment'
+import { Route as AppSSiteIdEditorIndexRouteImport } from './routes/_app.s.$siteId.editor.index'
+import { Route as AppSSiteIdAssignmentIndexRouteImport } from './routes/_app.s.$siteId.assignment.index'
+import { Route as AppSSiteIdSettingsViewerRouteImport } from './routes/_app.s.$siteId.settings.viewer'
+import { Route as AppSSiteIdSettingsTagsRouteImport } from './routes/_app.s.$siteId.settings.tags'
+import { Route as AppSSiteIdSettingsShiftsRouteImport } from './routes/_app.s.$siteId.settings.shifts'
+import { Route as AppSSiteIdEditorAreaIdRouteImport } from './routes/_app.s.$siteId.editor.$areaId'
+import { Route as AppSSiteIdAssignmentAreaIdRouteImport } from './routes/_app.s.$siteId.assignment.$areaId'
 
 const VerifyOtpRoute = VerifyOtpRouteImport.update({
   id: '/verify-otp',
@@ -81,96 +82,106 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppViewerRoute = AppViewerRouteImport.update({
-  id: '/viewer',
-  path: '/viewer',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSitesRoute = AppSitesRouteImport.update({
-  id: '/sites',
-  path: '/sites',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppOrganizationSettingsRoute = AppOrganizationSettingsRouteImport.update({
-  id: '/organization-settings',
-  path: '/organization-settings',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppMembersRoute = AppMembersRouteImport.update({
-  id: '/members',
-  path: '/members',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppHomeRoute = AppHomeRouteImport.update({
-  id: '/home',
-  path: '/home',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppHistoryRoute = AppHistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppEmployeesRoute = AppEmployeesRouteImport.update({
-  id: '/employees',
-  path: '/employees',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppEditorRoute = AppEditorRouteImport.update({
-  id: '/editor',
-  path: '/editor',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppAssignmentRoute = AppAssignmentRouteImport.update({
-  id: '/assignment',
-  path: '/assignment',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppAccountRoute = AppAccountRouteImport.update({
   id: '/account',
   path: '/account',
   getParentRoute: () => AppRoute,
 } as any)
-const AppEditorIndexRoute = AppEditorIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppEditorRoute,
+const AppSSiteIdRoute = AppSSiteIdRouteImport.update({
+  id: '/s/$siteId',
+  path: '/s/$siteId',
+  getParentRoute: () => AppRoute,
 } as any)
-const AppAssignmentIndexRoute = AppAssignmentIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppAssignmentRoute,
-} as any)
-const AppSettingsViewerRoute = AppSettingsViewerRouteImport.update({
+const AppSSiteIdViewerRoute = AppSSiteIdViewerRouteImport.update({
   id: '/viewer',
   path: '/viewer',
-  getParentRoute: () => AppSettingsRoute,
+  getParentRoute: () => AppSSiteIdRoute,
 } as any)
-const AppSettingsTagsRoute = AppSettingsTagsRouteImport.update({
+const AppSSiteIdSitesRoute = AppSSiteIdSitesRouteImport.update({
+  id: '/sites',
+  path: '/sites',
+  getParentRoute: () => AppSSiteIdRoute,
+} as any)
+const AppSSiteIdSettingsRoute = AppSSiteIdSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppSSiteIdRoute,
+} as any)
+const AppSSiteIdOrganizationSettingsRoute =
+  AppSSiteIdOrganizationSettingsRouteImport.update({
+    id: '/organization-settings',
+    path: '/organization-settings',
+    getParentRoute: () => AppSSiteIdRoute,
+  } as any)
+const AppSSiteIdMembersRoute = AppSSiteIdMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AppSSiteIdRoute,
+} as any)
+const AppSSiteIdHomeRoute = AppSSiteIdHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AppSSiteIdRoute,
+} as any)
+const AppSSiteIdHistoryRoute = AppSSiteIdHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AppSSiteIdRoute,
+} as any)
+const AppSSiteIdEmployeesRoute = AppSSiteIdEmployeesRouteImport.update({
+  id: '/employees',
+  path: '/employees',
+  getParentRoute: () => AppSSiteIdRoute,
+} as any)
+const AppSSiteIdEditorRoute = AppSSiteIdEditorRouteImport.update({
+  id: '/editor',
+  path: '/editor',
+  getParentRoute: () => AppSSiteIdRoute,
+} as any)
+const AppSSiteIdAssignmentRoute = AppSSiteIdAssignmentRouteImport.update({
+  id: '/assignment',
+  path: '/assignment',
+  getParentRoute: () => AppSSiteIdRoute,
+} as any)
+const AppSSiteIdEditorIndexRoute = AppSSiteIdEditorIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppSSiteIdEditorRoute,
+} as any)
+const AppSSiteIdAssignmentIndexRoute =
+  AppSSiteIdAssignmentIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AppSSiteIdAssignmentRoute,
+  } as any)
+const AppSSiteIdSettingsViewerRoute =
+  AppSSiteIdSettingsViewerRouteImport.update({
+    id: '/viewer',
+    path: '/viewer',
+    getParentRoute: () => AppSSiteIdSettingsRoute,
+  } as any)
+const AppSSiteIdSettingsTagsRoute = AppSSiteIdSettingsTagsRouteImport.update({
   id: '/tags',
   path: '/tags',
-  getParentRoute: () => AppSettingsRoute,
+  getParentRoute: () => AppSSiteIdSettingsRoute,
 } as any)
-const AppSettingsShiftsRoute = AppSettingsShiftsRouteImport.update({
-  id: '/shifts',
-  path: '/shifts',
-  getParentRoute: () => AppSettingsRoute,
-} as any)
-const AppEditorAreaIdRoute = AppEditorAreaIdRouteImport.update({
+const AppSSiteIdSettingsShiftsRoute =
+  AppSSiteIdSettingsShiftsRouteImport.update({
+    id: '/shifts',
+    path: '/shifts',
+    getParentRoute: () => AppSSiteIdSettingsRoute,
+  } as any)
+const AppSSiteIdEditorAreaIdRoute = AppSSiteIdEditorAreaIdRouteImport.update({
   id: '/$areaId',
   path: '/$areaId',
-  getParentRoute: () => AppEditorRoute,
+  getParentRoute: () => AppSSiteIdEditorRoute,
 } as any)
-const AppAssignmentAreaIdRoute = AppAssignmentAreaIdRouteImport.update({
-  id: '/$areaId',
-  path: '/$areaId',
-  getParentRoute: () => AppAssignmentRoute,
-} as any)
+const AppSSiteIdAssignmentAreaIdRoute =
+  AppSSiteIdAssignmentAreaIdRouteImport.update({
+    id: '/$areaId',
+    path: '/$areaId',
+    getParentRoute: () => AppSSiteIdAssignmentRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -182,23 +193,24 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/verify-otp': typeof VerifyOtpRoute
   '/account': typeof AppAccountRoute
-  '/assignment': typeof AppAssignmentRouteWithChildren
-  '/editor': typeof AppEditorRouteWithChildren
-  '/employees': typeof AppEmployeesRoute
-  '/history': typeof AppHistoryRoute
-  '/home': typeof AppHomeRoute
-  '/members': typeof AppMembersRoute
-  '/organization-settings': typeof AppOrganizationSettingsRoute
-  '/settings': typeof AppSettingsRouteWithChildren
-  '/sites': typeof AppSitesRoute
-  '/viewer': typeof AppViewerRoute
-  '/assignment/$areaId': typeof AppAssignmentAreaIdRoute
-  '/editor/$areaId': typeof AppEditorAreaIdRoute
-  '/settings/shifts': typeof AppSettingsShiftsRoute
-  '/settings/tags': typeof AppSettingsTagsRoute
-  '/settings/viewer': typeof AppSettingsViewerRoute
-  '/assignment/': typeof AppAssignmentIndexRoute
-  '/editor/': typeof AppEditorIndexRoute
+  '/s/$siteId': typeof AppSSiteIdRouteWithChildren
+  '/s/$siteId/assignment': typeof AppSSiteIdAssignmentRouteWithChildren
+  '/s/$siteId/editor': typeof AppSSiteIdEditorRouteWithChildren
+  '/s/$siteId/employees': typeof AppSSiteIdEmployeesRoute
+  '/s/$siteId/history': typeof AppSSiteIdHistoryRoute
+  '/s/$siteId/home': typeof AppSSiteIdHomeRoute
+  '/s/$siteId/members': typeof AppSSiteIdMembersRoute
+  '/s/$siteId/organization-settings': typeof AppSSiteIdOrganizationSettingsRoute
+  '/s/$siteId/settings': typeof AppSSiteIdSettingsRouteWithChildren
+  '/s/$siteId/sites': typeof AppSSiteIdSitesRoute
+  '/s/$siteId/viewer': typeof AppSSiteIdViewerRoute
+  '/s/$siteId/assignment/$areaId': typeof AppSSiteIdAssignmentAreaIdRoute
+  '/s/$siteId/editor/$areaId': typeof AppSSiteIdEditorAreaIdRoute
+  '/s/$siteId/settings/shifts': typeof AppSSiteIdSettingsShiftsRoute
+  '/s/$siteId/settings/tags': typeof AppSSiteIdSettingsTagsRoute
+  '/s/$siteId/settings/viewer': typeof AppSSiteIdSettingsViewerRoute
+  '/s/$siteId/assignment/': typeof AppSSiteIdAssignmentIndexRoute
+  '/s/$siteId/editor/': typeof AppSSiteIdEditorIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -210,21 +222,22 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/verify-otp': typeof VerifyOtpRoute
   '/account': typeof AppAccountRoute
-  '/employees': typeof AppEmployeesRoute
-  '/history': typeof AppHistoryRoute
-  '/home': typeof AppHomeRoute
-  '/members': typeof AppMembersRoute
-  '/organization-settings': typeof AppOrganizationSettingsRoute
-  '/settings': typeof AppSettingsRouteWithChildren
-  '/sites': typeof AppSitesRoute
-  '/viewer': typeof AppViewerRoute
-  '/assignment/$areaId': typeof AppAssignmentAreaIdRoute
-  '/editor/$areaId': typeof AppEditorAreaIdRoute
-  '/settings/shifts': typeof AppSettingsShiftsRoute
-  '/settings/tags': typeof AppSettingsTagsRoute
-  '/settings/viewer': typeof AppSettingsViewerRoute
-  '/assignment': typeof AppAssignmentIndexRoute
-  '/editor': typeof AppEditorIndexRoute
+  '/s/$siteId': typeof AppSSiteIdRouteWithChildren
+  '/s/$siteId/employees': typeof AppSSiteIdEmployeesRoute
+  '/s/$siteId/history': typeof AppSSiteIdHistoryRoute
+  '/s/$siteId/home': typeof AppSSiteIdHomeRoute
+  '/s/$siteId/members': typeof AppSSiteIdMembersRoute
+  '/s/$siteId/organization-settings': typeof AppSSiteIdOrganizationSettingsRoute
+  '/s/$siteId/settings': typeof AppSSiteIdSettingsRouteWithChildren
+  '/s/$siteId/sites': typeof AppSSiteIdSitesRoute
+  '/s/$siteId/viewer': typeof AppSSiteIdViewerRoute
+  '/s/$siteId/assignment/$areaId': typeof AppSSiteIdAssignmentAreaIdRoute
+  '/s/$siteId/editor/$areaId': typeof AppSSiteIdEditorAreaIdRoute
+  '/s/$siteId/settings/shifts': typeof AppSSiteIdSettingsShiftsRoute
+  '/s/$siteId/settings/tags': typeof AppSSiteIdSettingsTagsRoute
+  '/s/$siteId/settings/viewer': typeof AppSSiteIdSettingsViewerRoute
+  '/s/$siteId/assignment': typeof AppSSiteIdAssignmentIndexRoute
+  '/s/$siteId/editor': typeof AppSSiteIdEditorIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -238,23 +251,24 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/verify-otp': typeof VerifyOtpRoute
   '/_app/account': typeof AppAccountRoute
-  '/_app/assignment': typeof AppAssignmentRouteWithChildren
-  '/_app/editor': typeof AppEditorRouteWithChildren
-  '/_app/employees': typeof AppEmployeesRoute
-  '/_app/history': typeof AppHistoryRoute
-  '/_app/home': typeof AppHomeRoute
-  '/_app/members': typeof AppMembersRoute
-  '/_app/organization-settings': typeof AppOrganizationSettingsRoute
-  '/_app/settings': typeof AppSettingsRouteWithChildren
-  '/_app/sites': typeof AppSitesRoute
-  '/_app/viewer': typeof AppViewerRoute
-  '/_app/assignment/$areaId': typeof AppAssignmentAreaIdRoute
-  '/_app/editor/$areaId': typeof AppEditorAreaIdRoute
-  '/_app/settings/shifts': typeof AppSettingsShiftsRoute
-  '/_app/settings/tags': typeof AppSettingsTagsRoute
-  '/_app/settings/viewer': typeof AppSettingsViewerRoute
-  '/_app/assignment/': typeof AppAssignmentIndexRoute
-  '/_app/editor/': typeof AppEditorIndexRoute
+  '/_app/s/$siteId': typeof AppSSiteIdRouteWithChildren
+  '/_app/s/$siteId/assignment': typeof AppSSiteIdAssignmentRouteWithChildren
+  '/_app/s/$siteId/editor': typeof AppSSiteIdEditorRouteWithChildren
+  '/_app/s/$siteId/employees': typeof AppSSiteIdEmployeesRoute
+  '/_app/s/$siteId/history': typeof AppSSiteIdHistoryRoute
+  '/_app/s/$siteId/home': typeof AppSSiteIdHomeRoute
+  '/_app/s/$siteId/members': typeof AppSSiteIdMembersRoute
+  '/_app/s/$siteId/organization-settings': typeof AppSSiteIdOrganizationSettingsRoute
+  '/_app/s/$siteId/settings': typeof AppSSiteIdSettingsRouteWithChildren
+  '/_app/s/$siteId/sites': typeof AppSSiteIdSitesRoute
+  '/_app/s/$siteId/viewer': typeof AppSSiteIdViewerRoute
+  '/_app/s/$siteId/assignment/$areaId': typeof AppSSiteIdAssignmentAreaIdRoute
+  '/_app/s/$siteId/editor/$areaId': typeof AppSSiteIdEditorAreaIdRoute
+  '/_app/s/$siteId/settings/shifts': typeof AppSSiteIdSettingsShiftsRoute
+  '/_app/s/$siteId/settings/tags': typeof AppSSiteIdSettingsTagsRoute
+  '/_app/s/$siteId/settings/viewer': typeof AppSSiteIdSettingsViewerRoute
+  '/_app/s/$siteId/assignment/': typeof AppSSiteIdAssignmentIndexRoute
+  '/_app/s/$siteId/editor/': typeof AppSSiteIdEditorIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -268,23 +282,24 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-otp'
     | '/account'
-    | '/assignment'
-    | '/editor'
-    | '/employees'
-    | '/history'
-    | '/home'
-    | '/members'
-    | '/organization-settings'
-    | '/settings'
-    | '/sites'
-    | '/viewer'
-    | '/assignment/$areaId'
-    | '/editor/$areaId'
-    | '/settings/shifts'
-    | '/settings/tags'
-    | '/settings/viewer'
-    | '/assignment/'
-    | '/editor/'
+    | '/s/$siteId'
+    | '/s/$siteId/assignment'
+    | '/s/$siteId/editor'
+    | '/s/$siteId/employees'
+    | '/s/$siteId/history'
+    | '/s/$siteId/home'
+    | '/s/$siteId/members'
+    | '/s/$siteId/organization-settings'
+    | '/s/$siteId/settings'
+    | '/s/$siteId/sites'
+    | '/s/$siteId/viewer'
+    | '/s/$siteId/assignment/$areaId'
+    | '/s/$siteId/editor/$areaId'
+    | '/s/$siteId/settings/shifts'
+    | '/s/$siteId/settings/tags'
+    | '/s/$siteId/settings/viewer'
+    | '/s/$siteId/assignment/'
+    | '/s/$siteId/editor/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -296,21 +311,22 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-otp'
     | '/account'
-    | '/employees'
-    | '/history'
-    | '/home'
-    | '/members'
-    | '/organization-settings'
-    | '/settings'
-    | '/sites'
-    | '/viewer'
-    | '/assignment/$areaId'
-    | '/editor/$areaId'
-    | '/settings/shifts'
-    | '/settings/tags'
-    | '/settings/viewer'
-    | '/assignment'
-    | '/editor'
+    | '/s/$siteId'
+    | '/s/$siteId/employees'
+    | '/s/$siteId/history'
+    | '/s/$siteId/home'
+    | '/s/$siteId/members'
+    | '/s/$siteId/organization-settings'
+    | '/s/$siteId/settings'
+    | '/s/$siteId/sites'
+    | '/s/$siteId/viewer'
+    | '/s/$siteId/assignment/$areaId'
+    | '/s/$siteId/editor/$areaId'
+    | '/s/$siteId/settings/shifts'
+    | '/s/$siteId/settings/tags'
+    | '/s/$siteId/settings/viewer'
+    | '/s/$siteId/assignment'
+    | '/s/$siteId/editor'
   id:
     | '__root__'
     | '/'
@@ -323,23 +339,24 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-otp'
     | '/_app/account'
-    | '/_app/assignment'
-    | '/_app/editor'
-    | '/_app/employees'
-    | '/_app/history'
-    | '/_app/home'
-    | '/_app/members'
-    | '/_app/organization-settings'
-    | '/_app/settings'
-    | '/_app/sites'
-    | '/_app/viewer'
-    | '/_app/assignment/$areaId'
-    | '/_app/editor/$areaId'
-    | '/_app/settings/shifts'
-    | '/_app/settings/tags'
-    | '/_app/settings/viewer'
-    | '/_app/assignment/'
-    | '/_app/editor/'
+    | '/_app/s/$siteId'
+    | '/_app/s/$siteId/assignment'
+    | '/_app/s/$siteId/editor'
+    | '/_app/s/$siteId/employees'
+    | '/_app/s/$siteId/history'
+    | '/_app/s/$siteId/home'
+    | '/_app/s/$siteId/members'
+    | '/_app/s/$siteId/organization-settings'
+    | '/_app/s/$siteId/settings'
+    | '/_app/s/$siteId/sites'
+    | '/_app/s/$siteId/viewer'
+    | '/_app/s/$siteId/assignment/$areaId'
+    | '/_app/s/$siteId/editor/$areaId'
+    | '/_app/s/$siteId/settings/shifts'
+    | '/_app/s/$siteId/settings/tags'
+    | '/_app/s/$siteId/settings/viewer'
+    | '/_app/s/$siteId/assignment/'
+    | '/_app/s/$siteId/editor/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -419,76 +436,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/viewer': {
-      id: '/_app/viewer'
-      path: '/viewer'
-      fullPath: '/viewer'
-      preLoaderRoute: typeof AppViewerRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/sites': {
-      id: '/_app/sites'
-      path: '/sites'
-      fullPath: '/sites'
-      preLoaderRoute: typeof AppSitesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/settings': {
-      id: '/_app/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/organization-settings': {
-      id: '/_app/organization-settings'
-      path: '/organization-settings'
-      fullPath: '/organization-settings'
-      preLoaderRoute: typeof AppOrganizationSettingsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/members': {
-      id: '/_app/members'
-      path: '/members'
-      fullPath: '/members'
-      preLoaderRoute: typeof AppMembersRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/home': {
-      id: '/_app/home'
-      path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof AppHomeRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/history': {
-      id: '/_app/history'
-      path: '/history'
-      fullPath: '/history'
-      preLoaderRoute: typeof AppHistoryRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/employees': {
-      id: '/_app/employees'
-      path: '/employees'
-      fullPath: '/employees'
-      preLoaderRoute: typeof AppEmployeesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/editor': {
-      id: '/_app/editor'
-      path: '/editor'
-      fullPath: '/editor'
-      preLoaderRoute: typeof AppEditorRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/assignment': {
-      id: '/_app/assignment'
-      path: '/assignment'
-      fullPath: '/assignment'
-      preLoaderRoute: typeof AppAssignmentRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/account': {
       id: '/_app/account'
       path: '/account'
@@ -496,128 +443,214 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAccountRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/editor/': {
-      id: '/_app/editor/'
-      path: '/'
-      fullPath: '/editor/'
-      preLoaderRoute: typeof AppEditorIndexRouteImport
-      parentRoute: typeof AppEditorRoute
+    '/_app/s/$siteId': {
+      id: '/_app/s/$siteId'
+      path: '/s/$siteId'
+      fullPath: '/s/$siteId'
+      preLoaderRoute: typeof AppSSiteIdRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/_app/assignment/': {
-      id: '/_app/assignment/'
-      path: '/'
-      fullPath: '/assignment/'
-      preLoaderRoute: typeof AppAssignmentIndexRouteImport
-      parentRoute: typeof AppAssignmentRoute
-    }
-    '/_app/settings/viewer': {
-      id: '/_app/settings/viewer'
+    '/_app/s/$siteId/viewer': {
+      id: '/_app/s/$siteId/viewer'
       path: '/viewer'
-      fullPath: '/settings/viewer'
-      preLoaderRoute: typeof AppSettingsViewerRouteImport
-      parentRoute: typeof AppSettingsRoute
+      fullPath: '/s/$siteId/viewer'
+      preLoaderRoute: typeof AppSSiteIdViewerRouteImport
+      parentRoute: typeof AppSSiteIdRoute
     }
-    '/_app/settings/tags': {
-      id: '/_app/settings/tags'
+    '/_app/s/$siteId/sites': {
+      id: '/_app/s/$siteId/sites'
+      path: '/sites'
+      fullPath: '/s/$siteId/sites'
+      preLoaderRoute: typeof AppSSiteIdSitesRouteImport
+      parentRoute: typeof AppSSiteIdRoute
+    }
+    '/_app/s/$siteId/settings': {
+      id: '/_app/s/$siteId/settings'
+      path: '/settings'
+      fullPath: '/s/$siteId/settings'
+      preLoaderRoute: typeof AppSSiteIdSettingsRouteImport
+      parentRoute: typeof AppSSiteIdRoute
+    }
+    '/_app/s/$siteId/organization-settings': {
+      id: '/_app/s/$siteId/organization-settings'
+      path: '/organization-settings'
+      fullPath: '/s/$siteId/organization-settings'
+      preLoaderRoute: typeof AppSSiteIdOrganizationSettingsRouteImport
+      parentRoute: typeof AppSSiteIdRoute
+    }
+    '/_app/s/$siteId/members': {
+      id: '/_app/s/$siteId/members'
+      path: '/members'
+      fullPath: '/s/$siteId/members'
+      preLoaderRoute: typeof AppSSiteIdMembersRouteImport
+      parentRoute: typeof AppSSiteIdRoute
+    }
+    '/_app/s/$siteId/home': {
+      id: '/_app/s/$siteId/home'
+      path: '/home'
+      fullPath: '/s/$siteId/home'
+      preLoaderRoute: typeof AppSSiteIdHomeRouteImport
+      parentRoute: typeof AppSSiteIdRoute
+    }
+    '/_app/s/$siteId/history': {
+      id: '/_app/s/$siteId/history'
+      path: '/history'
+      fullPath: '/s/$siteId/history'
+      preLoaderRoute: typeof AppSSiteIdHistoryRouteImport
+      parentRoute: typeof AppSSiteIdRoute
+    }
+    '/_app/s/$siteId/employees': {
+      id: '/_app/s/$siteId/employees'
+      path: '/employees'
+      fullPath: '/s/$siteId/employees'
+      preLoaderRoute: typeof AppSSiteIdEmployeesRouteImport
+      parentRoute: typeof AppSSiteIdRoute
+    }
+    '/_app/s/$siteId/editor': {
+      id: '/_app/s/$siteId/editor'
+      path: '/editor'
+      fullPath: '/s/$siteId/editor'
+      preLoaderRoute: typeof AppSSiteIdEditorRouteImport
+      parentRoute: typeof AppSSiteIdRoute
+    }
+    '/_app/s/$siteId/assignment': {
+      id: '/_app/s/$siteId/assignment'
+      path: '/assignment'
+      fullPath: '/s/$siteId/assignment'
+      preLoaderRoute: typeof AppSSiteIdAssignmentRouteImport
+      parentRoute: typeof AppSSiteIdRoute
+    }
+    '/_app/s/$siteId/editor/': {
+      id: '/_app/s/$siteId/editor/'
+      path: '/'
+      fullPath: '/s/$siteId/editor/'
+      preLoaderRoute: typeof AppSSiteIdEditorIndexRouteImport
+      parentRoute: typeof AppSSiteIdEditorRoute
+    }
+    '/_app/s/$siteId/assignment/': {
+      id: '/_app/s/$siteId/assignment/'
+      path: '/'
+      fullPath: '/s/$siteId/assignment/'
+      preLoaderRoute: typeof AppSSiteIdAssignmentIndexRouteImport
+      parentRoute: typeof AppSSiteIdAssignmentRoute
+    }
+    '/_app/s/$siteId/settings/viewer': {
+      id: '/_app/s/$siteId/settings/viewer'
+      path: '/viewer'
+      fullPath: '/s/$siteId/settings/viewer'
+      preLoaderRoute: typeof AppSSiteIdSettingsViewerRouteImport
+      parentRoute: typeof AppSSiteIdSettingsRoute
+    }
+    '/_app/s/$siteId/settings/tags': {
+      id: '/_app/s/$siteId/settings/tags'
       path: '/tags'
-      fullPath: '/settings/tags'
-      preLoaderRoute: typeof AppSettingsTagsRouteImport
-      parentRoute: typeof AppSettingsRoute
+      fullPath: '/s/$siteId/settings/tags'
+      preLoaderRoute: typeof AppSSiteIdSettingsTagsRouteImport
+      parentRoute: typeof AppSSiteIdSettingsRoute
     }
-    '/_app/settings/shifts': {
-      id: '/_app/settings/shifts'
+    '/_app/s/$siteId/settings/shifts': {
+      id: '/_app/s/$siteId/settings/shifts'
       path: '/shifts'
-      fullPath: '/settings/shifts'
-      preLoaderRoute: typeof AppSettingsShiftsRouteImport
-      parentRoute: typeof AppSettingsRoute
+      fullPath: '/s/$siteId/settings/shifts'
+      preLoaderRoute: typeof AppSSiteIdSettingsShiftsRouteImport
+      parentRoute: typeof AppSSiteIdSettingsRoute
     }
-    '/_app/editor/$areaId': {
-      id: '/_app/editor/$areaId'
+    '/_app/s/$siteId/editor/$areaId': {
+      id: '/_app/s/$siteId/editor/$areaId'
       path: '/$areaId'
-      fullPath: '/editor/$areaId'
-      preLoaderRoute: typeof AppEditorAreaIdRouteImport
-      parentRoute: typeof AppEditorRoute
+      fullPath: '/s/$siteId/editor/$areaId'
+      preLoaderRoute: typeof AppSSiteIdEditorAreaIdRouteImport
+      parentRoute: typeof AppSSiteIdEditorRoute
     }
-    '/_app/assignment/$areaId': {
-      id: '/_app/assignment/$areaId'
+    '/_app/s/$siteId/assignment/$areaId': {
+      id: '/_app/s/$siteId/assignment/$areaId'
       path: '/$areaId'
-      fullPath: '/assignment/$areaId'
-      preLoaderRoute: typeof AppAssignmentAreaIdRouteImport
-      parentRoute: typeof AppAssignmentRoute
+      fullPath: '/s/$siteId/assignment/$areaId'
+      preLoaderRoute: typeof AppSSiteIdAssignmentAreaIdRouteImport
+      parentRoute: typeof AppSSiteIdAssignmentRoute
     }
   }
 }
 
-interface AppAssignmentRouteChildren {
-  AppAssignmentAreaIdRoute: typeof AppAssignmentAreaIdRoute
-  AppAssignmentIndexRoute: typeof AppAssignmentIndexRoute
+interface AppSSiteIdAssignmentRouteChildren {
+  AppSSiteIdAssignmentAreaIdRoute: typeof AppSSiteIdAssignmentAreaIdRoute
+  AppSSiteIdAssignmentIndexRoute: typeof AppSSiteIdAssignmentIndexRoute
 }
 
-const AppAssignmentRouteChildren: AppAssignmentRouteChildren = {
-  AppAssignmentAreaIdRoute: AppAssignmentAreaIdRoute,
-  AppAssignmentIndexRoute: AppAssignmentIndexRoute,
+const AppSSiteIdAssignmentRouteChildren: AppSSiteIdAssignmentRouteChildren = {
+  AppSSiteIdAssignmentAreaIdRoute: AppSSiteIdAssignmentAreaIdRoute,
+  AppSSiteIdAssignmentIndexRoute: AppSSiteIdAssignmentIndexRoute,
 }
 
-const AppAssignmentRouteWithChildren = AppAssignmentRoute._addFileChildren(
-  AppAssignmentRouteChildren,
-)
+const AppSSiteIdAssignmentRouteWithChildren =
+  AppSSiteIdAssignmentRoute._addFileChildren(AppSSiteIdAssignmentRouteChildren)
 
-interface AppEditorRouteChildren {
-  AppEditorAreaIdRoute: typeof AppEditorAreaIdRoute
-  AppEditorIndexRoute: typeof AppEditorIndexRoute
+interface AppSSiteIdEditorRouteChildren {
+  AppSSiteIdEditorAreaIdRoute: typeof AppSSiteIdEditorAreaIdRoute
+  AppSSiteIdEditorIndexRoute: typeof AppSSiteIdEditorIndexRoute
 }
 
-const AppEditorRouteChildren: AppEditorRouteChildren = {
-  AppEditorAreaIdRoute: AppEditorAreaIdRoute,
-  AppEditorIndexRoute: AppEditorIndexRoute,
+const AppSSiteIdEditorRouteChildren: AppSSiteIdEditorRouteChildren = {
+  AppSSiteIdEditorAreaIdRoute: AppSSiteIdEditorAreaIdRoute,
+  AppSSiteIdEditorIndexRoute: AppSSiteIdEditorIndexRoute,
 }
 
-const AppEditorRouteWithChildren = AppEditorRoute._addFileChildren(
-  AppEditorRouteChildren,
-)
+const AppSSiteIdEditorRouteWithChildren =
+  AppSSiteIdEditorRoute._addFileChildren(AppSSiteIdEditorRouteChildren)
 
-interface AppSettingsRouteChildren {
-  AppSettingsShiftsRoute: typeof AppSettingsShiftsRoute
-  AppSettingsTagsRoute: typeof AppSettingsTagsRoute
-  AppSettingsViewerRoute: typeof AppSettingsViewerRoute
+interface AppSSiteIdSettingsRouteChildren {
+  AppSSiteIdSettingsShiftsRoute: typeof AppSSiteIdSettingsShiftsRoute
+  AppSSiteIdSettingsTagsRoute: typeof AppSSiteIdSettingsTagsRoute
+  AppSSiteIdSettingsViewerRoute: typeof AppSSiteIdSettingsViewerRoute
 }
 
-const AppSettingsRouteChildren: AppSettingsRouteChildren = {
-  AppSettingsShiftsRoute: AppSettingsShiftsRoute,
-  AppSettingsTagsRoute: AppSettingsTagsRoute,
-  AppSettingsViewerRoute: AppSettingsViewerRoute,
+const AppSSiteIdSettingsRouteChildren: AppSSiteIdSettingsRouteChildren = {
+  AppSSiteIdSettingsShiftsRoute: AppSSiteIdSettingsShiftsRoute,
+  AppSSiteIdSettingsTagsRoute: AppSSiteIdSettingsTagsRoute,
+  AppSSiteIdSettingsViewerRoute: AppSSiteIdSettingsViewerRoute,
 }
 
-const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
-  AppSettingsRouteChildren,
+const AppSSiteIdSettingsRouteWithChildren =
+  AppSSiteIdSettingsRoute._addFileChildren(AppSSiteIdSettingsRouteChildren)
+
+interface AppSSiteIdRouteChildren {
+  AppSSiteIdAssignmentRoute: typeof AppSSiteIdAssignmentRouteWithChildren
+  AppSSiteIdEditorRoute: typeof AppSSiteIdEditorRouteWithChildren
+  AppSSiteIdEmployeesRoute: typeof AppSSiteIdEmployeesRoute
+  AppSSiteIdHistoryRoute: typeof AppSSiteIdHistoryRoute
+  AppSSiteIdHomeRoute: typeof AppSSiteIdHomeRoute
+  AppSSiteIdMembersRoute: typeof AppSSiteIdMembersRoute
+  AppSSiteIdOrganizationSettingsRoute: typeof AppSSiteIdOrganizationSettingsRoute
+  AppSSiteIdSettingsRoute: typeof AppSSiteIdSettingsRouteWithChildren
+  AppSSiteIdSitesRoute: typeof AppSSiteIdSitesRoute
+  AppSSiteIdViewerRoute: typeof AppSSiteIdViewerRoute
+}
+
+const AppSSiteIdRouteChildren: AppSSiteIdRouteChildren = {
+  AppSSiteIdAssignmentRoute: AppSSiteIdAssignmentRouteWithChildren,
+  AppSSiteIdEditorRoute: AppSSiteIdEditorRouteWithChildren,
+  AppSSiteIdEmployeesRoute: AppSSiteIdEmployeesRoute,
+  AppSSiteIdHistoryRoute: AppSSiteIdHistoryRoute,
+  AppSSiteIdHomeRoute: AppSSiteIdHomeRoute,
+  AppSSiteIdMembersRoute: AppSSiteIdMembersRoute,
+  AppSSiteIdOrganizationSettingsRoute: AppSSiteIdOrganizationSettingsRoute,
+  AppSSiteIdSettingsRoute: AppSSiteIdSettingsRouteWithChildren,
+  AppSSiteIdSitesRoute: AppSSiteIdSitesRoute,
+  AppSSiteIdViewerRoute: AppSSiteIdViewerRoute,
+}
+
+const AppSSiteIdRouteWithChildren = AppSSiteIdRoute._addFileChildren(
+  AppSSiteIdRouteChildren,
 )
 
 interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
-  AppAssignmentRoute: typeof AppAssignmentRouteWithChildren
-  AppEditorRoute: typeof AppEditorRouteWithChildren
-  AppEmployeesRoute: typeof AppEmployeesRoute
-  AppHistoryRoute: typeof AppHistoryRoute
-  AppHomeRoute: typeof AppHomeRoute
-  AppMembersRoute: typeof AppMembersRoute
-  AppOrganizationSettingsRoute: typeof AppOrganizationSettingsRoute
-  AppSettingsRoute: typeof AppSettingsRouteWithChildren
-  AppSitesRoute: typeof AppSitesRoute
-  AppViewerRoute: typeof AppViewerRoute
+  AppSSiteIdRoute: typeof AppSSiteIdRouteWithChildren
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRoute,
-  AppAssignmentRoute: AppAssignmentRouteWithChildren,
-  AppEditorRoute: AppEditorRouteWithChildren,
-  AppEmployeesRoute: AppEmployeesRoute,
-  AppHistoryRoute: AppHistoryRoute,
-  AppHomeRoute: AppHomeRoute,
-  AppMembersRoute: AppMembersRoute,
-  AppOrganizationSettingsRoute: AppOrganizationSettingsRoute,
-  AppSettingsRoute: AppSettingsRouteWithChildren,
-  AppSitesRoute: AppSitesRoute,
-  AppViewerRoute: AppViewerRoute,
+  AppSSiteIdRoute: AppSSiteIdRouteWithChildren,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

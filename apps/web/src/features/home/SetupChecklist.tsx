@@ -3,7 +3,10 @@ import { Link } from "@tanstack/react-router";
 type Step = {
 	label: string;
 	description: string;
-	to: "/settings/shifts" | "/employees" | "/editor";
+	to:
+		| "/s/$siteId/settings/shifts"
+		| "/s/$siteId/employees"
+		| "/s/$siteId/editor";
 	done: boolean;
 	// データは存在するが完了条件を満たしていない状態（例: エリアが下書きのみで未公開）
 	inProgress?: boolean;
@@ -11,11 +14,13 @@ type Step = {
 };
 
 export function SetupChecklist({
+	siteId,
 	hasShifts,
 	hasEmployees,
 	hasAreas,
 	hasDraftArea,
 }: {
+	siteId: string;
 	hasShifts: boolean;
 	hasEmployees: boolean;
 	hasAreas: boolean;
@@ -25,14 +30,14 @@ export function SetupChecklist({
 		{
 			label: "シフトを登録",
 			description: "拠点の勤務体制（交代制とシフト）を設定します。",
-			to: "/settings/shifts",
+			to: "/s/$siteId/settings/shifts",
 			done: hasShifts,
 			pendingLabel: "未登録",
 		},
 		{
 			label: "従業員を登録",
 			description: "配置する従業員を登録します。",
-			to: "/employees",
+			to: "/s/$siteId/employees",
 			done: hasEmployees,
 			pendingLabel: "未登録",
 		},
@@ -41,7 +46,7 @@ export function SetupChecklist({
 			description: hasDraftArea
 				? "下書きの規格があります。規格を公開すると完了します。"
 				: "フロアマップと配置スポットを作成し、規格を公開します。",
-			to: "/editor",
+			to: "/s/$siteId/editor",
 			done: hasAreas,
 			inProgress: hasDraftArea,
 			pendingLabel: hasDraftArea ? "下書きあり（未公開）" : "未登録",
@@ -114,6 +119,7 @@ export function SetupChecklist({
 							) : (
 								<Link
 									to={step.to}
+									params={{ siteId }}
 									className={`flex items-center gap-4 rounded-lg p-4.5 transition-shadow duration-150 hover:shadow-float ${
 										active
 											? "bg-primary-soft border-2 border-primary shadow-float ring-2 ring-primary-soft"

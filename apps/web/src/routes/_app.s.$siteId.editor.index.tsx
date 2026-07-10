@@ -8,11 +8,12 @@ import { useSnackbar } from "#/contexts/snackbar-context";
 import { useDismiss } from "#/hooks/useDismiss";
 import { areaKeys, createArea, fetchAreas } from "#/lib/api/areas";
 
-export const Route = createFileRoute("/_app/editor/")({
+export const Route = createFileRoute("/_app/s/$siteId/editor/")({
 	component: EditorList,
 });
 
 function EditorList() {
+	const { siteId } = Route.useParams();
 	const queryClient = useQueryClient();
 	const { showSuccess } = useSnackbar();
 	const [addOpen, setAddOpen] = useState(false);
@@ -62,8 +63,8 @@ function EditorList() {
 					{areas.map((area) => (
 						<Link
 							key={area.id}
-							to="/editor/$areaId"
-							params={{ areaId: area.id }}
+							to="/s/$siteId/editor/$areaId"
+							params={{ siteId, areaId: area.id }}
 							className="block text-ink"
 						>
 							<div className="min-h-40 flex flex-col justify-between bg-surface border border-border rounded-lg p-6 shadow-card cursor-pointer transition-[box-shadow,transform] duration-150 hover:shadow-[0_1px_2px_rgba(16,42,67,.06),0_10px_26px_rgba(16,42,67,.09)] hover:-translate-y-px">

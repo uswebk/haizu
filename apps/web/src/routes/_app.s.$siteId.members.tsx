@@ -24,9 +24,9 @@ import {
 import { assertScreen } from "#/lib/guards";
 import { ROLE_LABEL } from "#/lib/roles";
 
-export const Route = createFileRoute("/_app/members")({
-	beforeLoad: ({ context }) => {
-		assertScreen(context.user.role, context.siteRole, "members");
+export const Route = createFileRoute("/_app/s/$siteId/members")({
+	beforeLoad: ({ context, params }) => {
+		assertScreen(context.user.role, context.siteRole, params.siteId, "members");
 	},
 	component: MemberList,
 });

@@ -17,11 +17,12 @@ import {
 
 const PAGE_SIZE = 50;
 
-export const Route = createFileRoute("/_app/settings/tags")({
+export const Route = createFileRoute("/_app/s/$siteId/settings/tags")({
 	component: TagSettings,
 });
 
 function TagSettings() {
+	const { siteId } = Route.useParams();
 	const queryClient = useQueryClient();
 	const { showSuccess } = useSnackbar();
 	const { data: tags = [] } = useQuery({
@@ -119,7 +120,8 @@ function TagSettings() {
 		<div className="p-7 overflow-auto h-full">
 			<div className="max-w-170">
 				<Link
-					to="/settings"
+					to="/s/$siteId/settings"
+					params={{ siteId }}
 					className="text-xs font-semibold text-muted hover:text-ink"
 				>
 					← 設定

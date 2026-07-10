@@ -4,9 +4,14 @@ import { OrganizationNameForm } from "#/features/organization/OrganizationNameFo
 import { OrgEmailChange } from "#/features/organization/OrgEmailChange";
 import { assertScreen } from "#/lib/guards";
 
-export const Route = createFileRoute("/_app/organization-settings")({
-	beforeLoad: ({ context }) => {
-		assertScreen(context.user.role, context.siteRole, "organization-settings");
+export const Route = createFileRoute("/_app/s/$siteId/organization-settings")({
+	beforeLoad: ({ context, params }) => {
+		assertScreen(
+			context.user.role,
+			context.siteRole,
+			params.siteId,
+			"organization-settings",
+		);
 	},
 	component: OrganizationSettingsPage,
 });

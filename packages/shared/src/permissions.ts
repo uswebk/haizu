@@ -106,13 +106,14 @@ export function displayRole(
 	return siteRole;
 }
 
-// ログイン直後・拠点選択後の遷移先。ホームを見られないロールはビュアーへ送る。
+// ログイン直後・拠点選択後の着地画面。ホームを見られないロールはビュアーへ送る。
 // どの拠点にも所属しない member は、拠点データを一切見られないためアカウント設定へ。
+// パスは拠点(siteId)に依存するため、URLの組み立ては呼び出し側で行う。
 export function landingScreen(
 	orgRole: OrgRole,
 	siteRole: SiteRole | null,
-): "/home" | "/viewer" | "/account" {
-	if (canAccessScreen(orgRole, siteRole, "home")) return "/home";
-	if (canAccessScreen(orgRole, siteRole, "viewer")) return "/viewer";
-	return "/account";
+): "home" | "viewer" | "account" {
+	if (canAccessScreen(orgRole, siteRole, "home")) return "home";
+	if (canAccessScreen(orgRole, siteRole, "viewer")) return "viewer";
+	return "account";
 }

@@ -14,11 +14,12 @@ import {
 import { fetchWorkPattern, workPatternKeys } from "#/lib/api/workPatterns";
 import { todayStr } from "#/lib/datetime";
 
-export const Route = createFileRoute("/_app/assignment/")({
+export const Route = createFileRoute("/_app/s/$siteId/assignment/")({
 	component: AssignmentList,
 });
 
 function AssignmentList() {
+	const { siteId } = Route.useParams();
 	const navigate = useNavigate();
 	const search = Route.useSearch();
 	const date = search.date ?? todayStr();
@@ -51,10 +52,15 @@ function AssignmentList() {
 	});
 
 	const setDate = (d: string) =>
-		navigate({ to: "/assignment", search: (prev) => ({ ...prev, date: d }) });
+		navigate({
+			to: "/s/$siteId/assignment",
+			params: { siteId },
+			search: (prev) => ({ ...prev, date: d }),
+		});
 	const setShift = (id: string) =>
 		navigate({
-			to: "/assignment",
+			to: "/s/$siteId/assignment",
+			params: { siteId },
 			search: (prev) => ({ ...prev, shiftId: id }),
 		});
 
@@ -68,7 +74,8 @@ function AssignmentList() {
 							配置決めを始めるには、先に勤務体制（シフト）を登録してください。
 						</div>
 						<Link
-							to="/settings/shifts"
+							to="/s/$siteId/settings/shifts"
+							params={{ siteId }}
 							className="inline-block mt-3.5 text-[13px] font-bold text-primary hover:text-primary-hover"
 						>
 							シフトを登録する →
@@ -102,7 +109,11 @@ function AssignmentList() {
 				{shiftMismatch && (
 					<div className="text-[12.5px] text-muted bg-table-head rounded-md px-3.5 py-2.5 mb-4.5 leading-relaxed">
 						この日には、当時のシフト設定から変更されたデータが含まれています。当時の内容を確認したい場合は
-						<Link to="/history" className="font-bold underline">
+						<Link
+							to="/s/$siteId/history"
+							params={{ siteId }}
+							className="font-bold underline"
+						>
 							履歴
 						</Link>
 						をご覧ください。
@@ -140,8 +151,8 @@ function AssignmentList() {
 								type="button"
 								onClick={() =>
 									navigate({
-										to: "/assignment/$areaId",
-										params: { areaId: area.id },
+										to: "/s/$siteId/assignment/$areaId",
+										params: { siteId, areaId: area.id },
 										search: (prev) => ({ ...prev, date }),
 									})
 								}

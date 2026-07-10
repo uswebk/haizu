@@ -9,10 +9,10 @@ import { fetchSession } from "#/lib/session";
 
 export const Route = createFileRoute("/select-site")({
 	beforeLoad: async () => {
-		const auth = await fetchSession();
-		if (!auth) throw redirect({ to: "/login" });
-		if (!auth.user.emailVerified) throw redirect({ to: "/verify-otp" });
-		return auth;
+		const user = await fetchSession();
+		if (!user) throw redirect({ to: "/login" });
+		if (!user.emailVerified) throw redirect({ to: "/verify-otp" });
+		return { user };
 	},
 	component: SelectSitePage,
 });
@@ -27,20 +27,27 @@ function SelectSitePage() {
 
 function SelectSiteInner() {
 	const navigate = useNavigate();
-	const { activeSites, canAddSite, switchSite, addSite } = useSite();
+	const { activeSites, canAddSite, addSite } = useSite();
 	const [addOpen, setAddOpen] = useState(false);
-	const { user, siteRole } = Route.useRouteContext();
+	const { user } = Route.useRouteContext();
 	const userName = user.name;
-	// 表示は「現在拠点における実効ロール」。拠点未所属なら「その他」相当。
-	const roleLabel = ROLE_LABEL[displayRole(user.role, siteRole) ?? "viewer"];
+	// この画面はまだ拠点が決まっていないため、組織ロールだけで表示する
+	const roleLabel = ROLE_LABEL[displayRole(user.role, null) ?? "viewer"];
 	const initial = userName.charAt(0) || "?";
 
-	// 遷移先は「選択した拠点における実効ロール」で決まる（拠点ごとに権限が異なるため）
+	// 着地画面は「選択した拠点における実効ロール」で決まる（拠点ごとに権限が異なるため）
 	const select = (id: string) => {
 		const target = activeSites.find((s) => s.id === id);
 		if (!target) return;
-		switchSite(id);
-		void navigate({ to: landingScreen(user.role, target.role) });
+		const screen = landingScreen(user.role, target.role);
+		if (screen === "account") {
+			void navigate({ to: "/account" });
+			return;
+		}
+		void navigate({
+			to: screen === "home" ? "/s/$siteId/home" : "/s/$siteId/viewer",
+			params: { siteId: id },
+		});
 	};
 
 	return (
