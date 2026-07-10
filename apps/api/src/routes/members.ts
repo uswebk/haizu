@@ -156,9 +156,10 @@ export const membersRoute = new Hono<AppEnv>()
 		// 拠点管理者には、自分が管理する拠点の割り当てだけを見せる
 		const scopeSiteRoles = (rows: SiteRoleAssignment[]) =>
 			actor.role === "admin" ? rows : rows.filter((r) => visible.has(r.siteId));
-		// 管理者以外は、自分の管理拠点に関係しないメンバーを見られない
+		// 拠点管理者には、自分の管理拠点に属するメンバーだけを見せる。
+		// 管理者は拠点に属さず、かつ拠点管理者は管理者の権限を変更できないため、一覧にも出さない。
 		const isVisibleMember = (m: MemberResponse) =>
-			actor.role === "admin" || m.allSites || m.siteRoles.length > 0;
+			actor.role === "admin" || m.siteRoles.length > 0;
 
 		const members: MemberResponse[] = [
 			...users

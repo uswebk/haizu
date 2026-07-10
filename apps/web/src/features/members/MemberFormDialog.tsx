@@ -20,6 +20,7 @@ export type MemberFormValues = {
 type Props = {
 	open: boolean;
 	mode: "invite" | "edit";
+	canAssignAdmin: boolean;
 	initialValue?: MemberRow;
 	isPending?: boolean;
 	errorMessage?: string | null;
@@ -38,13 +39,14 @@ const SITE_ROLE_ORDER = SITE_ROLES;
 function draftFromProps(
 	mode: "invite" | "edit",
 	initialValue: MemberRow | undefined,
+	canAssignAdmin: boolean,
 ): MemberFormValues {
 	if (mode === "edit" && initialValue) {
 		return {
 			lastName: "",
 			firstName: "",
 			email: initialValue.email,
-			orgRole: initialValue.orgRole,
+			orgRole: canAssignAdmin ? initialValue.orgRole : "member",
 			siteRoles: initialValue.allSites ? [] : [...initialValue.siteRoles],
 			isActive: initialValue.status !== "inactive",
 		};
@@ -62,6 +64,7 @@ function draftFromProps(
 export function MemberFormDialog({
 	open,
 	mode,
+	canAssignAdmin,
 	initialValue,
 	isPending = false,
 	errorMessage,
@@ -72,15 +75,15 @@ export function MemberFormDialog({
 	useDismiss(open, onCancel, contentRef);
 
 	const { activeSites } = useSite();
+	const assignableSites = activeSites.filter((s) => s.role === "site_admin");
 
 	const [draft, setDraft] = useState<MemberFormValues>(() =>
-		draftFromProps(mode, initialValue),
+		draftFromProps(mode, initialValue, canAssignAdmin),
 	);
 
-	// ダイアログを開くたびに対象データへ合わせて下書きを作り直す
 	useEffect(() => {
-		if (open) setDraft(draftFromProps(mode, initialValue));
-	}, [open, mode, initialValue]);
+		if (open) setDraft(draftFromProps(mode, initialValue, canAssignAdmin));
+	}, [open, mode, initialValue, canAssignAdmin]);
 
 	if (!open) return null;
 
@@ -171,23 +174,29 @@ export function MemberFormDialog({
 					</>
 				)}
 
-				<div className="mb-2 text-xs font-semibold text-muted">組織権限</div>
-				<div className="flex flex-col gap-2 mb-4.5">
-					<OptionCard
-						title="管理者"
-						description="全拠点・事業所設定にアクセス"
-						selected={draft.orgRole === "admin"}
-						onClick={() =>
-							setDraft((d) => ({ ...d, orgRole: "admin", siteRoles: [] }))
-						}
-					/>
-					<OptionCard
-						title="メンバー"
-						description="拠点ごとに権限を設定する"
-						selected={draft.orgRole === "member"}
-						onClick={() => setDraft((d) => ({ ...d, orgRole: "member" }))}
-					/>
-				</div>
+				{canAssignAdmin && (
+					<>
+						<div className="mb-2 text-xs font-semibold text-muted">
+							組織権限
+						</div>
+						<div className="flex flex-col gap-2 mb-4.5">
+							<OptionCard
+								title="管理者"
+								description="全拠点・事業所設定にアクセス"
+								selected={draft.orgRole === "admin"}
+								onClick={() =>
+									setDraft((d) => ({ ...d, orgRole: "admin", siteRoles: [] }))
+								}
+							/>
+							<OptionCard
+								title="メンバー"
+								description="拠点ごとに権限を設定する"
+								selected={draft.orgRole === "member"}
+								onClick={() => setDraft((d) => ({ ...d, orgRole: "member" }))}
+							/>
+						</div>
+					</>
+				)}
 
 				{draft.orgRole === "admin" ? (
 					<div className="mb-4.5 px-3.75 py-3.25 border border-border rounded-md bg-app-bg text-[12.5px] text-muted">
@@ -202,7 +211,7 @@ export function MemberFormDialog({
 							</span>
 						</div>
 						<div className="flex flex-col gap-2 mb-4.5">
-							{activeSites.map((site) => {
+							{assignableSites.map((site) => {
 								const assigned = draft.siteRoles.find(
 									(s) => s.siteId === site.id,
 								);

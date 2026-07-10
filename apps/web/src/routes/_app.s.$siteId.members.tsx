@@ -241,6 +241,7 @@ function MemberList() {
 			<MemberFormDialog
 				open={dialogMode !== null}
 				mode={dialogMode ?? "invite"}
+				canAssignAdmin={user.role === "admin"}
 				initialValue={editingMember ?? undefined}
 				isPending={saveMutation.isPending}
 				errorMessage={saveError}
