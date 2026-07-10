@@ -24,6 +24,22 @@ const areaGuard = createMiddleware<AppEnv>(async (c, next) => {
 	await next();
 });
 
+// /:id/versions/:versionId 配下で、対象バージョンがそのエリアに属するかを検証する。
+// areaGuard はエリアが現在拠点に属することしか見ないため、これが無いと
+// 他組織の versionId を渡して公開・更新・削除できてしまう（クロステナントのIDOR）。
+const versionGuard = createMiddleware<AppEnv>(async (c, next) => {
+	const areaId = c.req.param("id");
+	const versionId = c.req.param("versionId");
+	if (!areaId || !versionId) return c.json({ error: "Not found" }, 404);
+	const version = await db.query.layoutSpecVersions.findFirst({
+		where: eq(layoutSpecVersions.id, versionId),
+	});
+	if (!version || version.areaId !== areaId) {
+		return c.json({ error: "Not found" }, 404);
+	}
+	await next();
+});
+
 const LOCKED_MESSAGE =
 	"この規格は配置決めで使用されているため編集できません。新しいバージョンを作成して編集してください。";
 
@@ -77,6 +93,8 @@ export const areasRoute = new Hono<AppEnv>()
 	.use("*", siteScope)
 	.use("*", requireSiteWritePermission("area:write"))
 	.use("/:id/*", areaGuard)
+	.use("/:id/versions/:versionId", versionGuard)
+	.use("/:id/versions/:versionId/*", versionGuard)
 	.get(
 		"/",
 		zValidator("query", z.object({ date: z.string().date().optional() })),
