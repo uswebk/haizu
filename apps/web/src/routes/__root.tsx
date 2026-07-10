@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
+import { SnackbarProvider } from "#/contexts/snackbar-context";
 import appCss from "../styles.css?url";
 
 // QueryClientProvider は setupRouterSsrQueryIntegration がリクエスト単位の
@@ -46,7 +47,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body>
-				{children}
+				<SnackbarProvider>{children}</SnackbarProvider>
 				<TanStackDevtools
 					config={{
 						position: "bottom-right",

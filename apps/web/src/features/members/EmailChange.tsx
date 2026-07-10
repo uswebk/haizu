@@ -3,19 +3,20 @@ import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
+import { useSnackbar } from "#/contexts/snackbar-context";
 import { requestEmailChangeOtp, verifyEmailChangeOtp } from "#/lib/api/account";
 import { memberKeys } from "#/lib/api/members";
 
 export function EmailChange({ currentEmail }: { currentEmail: string }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
+	const { showSuccess } = useSnackbar();
 	const [open, setOpen] = useState(false);
 	const [step, setStep] = useState<"input" | "otp">("input");
 	const [newEmail, setNewEmail] = useState("");
 	const [otp, setOtp] = useState("");
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [done, setDone] = useState(false);
 
 	const reset = () => {
 		setOpen(false);
@@ -45,10 +46,10 @@ export function EmailChange({ currentEmail }: { currentEmail: string }) {
 		try {
 			await verifyEmailChangeOtp(otp.trim());
 			reset();
-			setDone(true);
 			await queryClient.invalidateQueries({ queryKey: memberKeys.all });
 			// ヘッダー等のセッション表示を更新する
 			await router.invalidate();
+			showSuccess("メールアドレスを変更しました");
 		} catch (e) {
 			setError(e instanceof Error ? e.message : "エラーが発生しました");
 		} finally {
@@ -62,20 +63,8 @@ export function EmailChange({ currentEmail }: { currentEmail: string }) {
 				<div>
 					<div className="text-[13px] font-bold">メールアドレス</div>
 					<div className="text-xs text-faint mt-0.5">{currentEmail}</div>
-					{done && (
-						<div className="text-xs font-semibold text-success mt-1">
-							メールアドレスを変更しました。
-						</div>
-					)}
 				</div>
-				<Button
-					variant="secondary"
-					size="sm"
-					onClick={() => {
-						setDone(false);
-						setOpen(true);
-					}}
-				>
+				<Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
 					変更
 				</Button>
 			</div>

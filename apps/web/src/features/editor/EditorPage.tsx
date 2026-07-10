@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type * as React from "react";
 import { useRef, useState } from "react";
 import { Button } from "#/components/ui/Button";
+import { useSnackbar } from "#/contexts/snackbar-context";
 import { API_BASE } from "#/lib/api";
 import {
 	areaKeys,
@@ -37,6 +38,7 @@ type Props = { areaId: string };
 export function EditorPage({ areaId }: Props) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const { showSuccess } = useSnackbar();
 
 	const { data: areaData } = useQuery({
 		queryKey: areaKeys.detail(areaId),
@@ -193,6 +195,7 @@ export function EditorPage({ areaId }: Props) {
 				);
 			}
 			setSaveDialogOpen(false);
+			showSuccess("下書きを保存しました");
 		},
 	});
 
@@ -239,6 +242,7 @@ export function EditorPage({ areaId }: Props) {
 				setCurrentVersionId(versionId);
 			}
 			setPublishDialogOpen(false);
+			showSuccess("規格を公開しました");
 		},
 	});
 
@@ -246,6 +250,7 @@ export function EditorPage({ areaId }: Props) {
 		mutationFn: unpublishVersion,
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
+			showSuccess("公開を取り消しました");
 		},
 	});
 
@@ -309,6 +314,7 @@ export function EditorPage({ areaId }: Props) {
 		mutationFn: deleteArea,
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: areaKeys.all });
+			showSuccess("配置エリアを削除しました");
 			navigate({ to: "/editor" });
 		},
 		onError: (error) => {

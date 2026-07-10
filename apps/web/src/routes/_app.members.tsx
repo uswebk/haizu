@@ -7,6 +7,7 @@ import { Input } from "#/components/ui/Input";
 import { RoleBadge } from "#/components/ui/RoleBadge";
 import { Table, type TableColumn } from "#/components/ui/Table";
 import { useSite } from "#/contexts/site-context";
+import { useSnackbar } from "#/contexts/snackbar-context";
 import {
 	MemberFormDialog,
 	type MemberFormValues,
@@ -38,6 +39,7 @@ const STATUS_META: Record<
 
 function MemberList() {
 	const queryClient = useQueryClient();
+	const { showSuccess } = useSnackbar();
 	const { activeSites } = useSite();
 	const { user } = Route.useRouteContext();
 	const { data: members = [] } = useQuery({
@@ -50,7 +52,10 @@ function MemberList() {
 
 	const updateNameMutation = useMutation({
 		mutationFn: (name: string) => authClient.updateUser({ name }),
-		onSuccess: () => void invalidate(),
+		onSuccess: () => {
+			void invalidate();
+			showSuccess("名前を更新しました");
+		},
 	});
 
 	const [search, setSearch] = useState("");
@@ -79,6 +84,9 @@ function MemberList() {
 		onSuccess: () => {
 			void invalidate();
 			closeDialog();
+			showSuccess(
+				editingMember ? "メンバーを更新しました" : "メンバーを招待しました",
+			);
 		},
 		onError: (error) => {
 			setSaveError(
@@ -89,7 +97,10 @@ function MemberList() {
 
 	const cancelMutation = useMutation({
 		mutationFn: (id: string) => cancelInvitation(id),
-		onSuccess: () => void invalidate(),
+		onSuccess: () => {
+			void invalidate();
+			showSuccess("招待を取り消しました");
+		},
 	});
 
 	const siteName = (id: string) =>

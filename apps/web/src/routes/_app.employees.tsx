@@ -7,6 +7,7 @@ import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { PagerButton } from "#/components/ui/PagerButton";
 import { Table, type TableColumn } from "#/components/ui/Table";
+import { useSnackbar } from "#/contexts/snackbar-context";
 import { employeesToCsv, parseEmployeesCsv } from "#/features/employees/csv";
 import {
 	EmployeeFormDialog,
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/_app/employees")({
 
 function EmployeeList() {
 	const queryClient = useQueryClient();
+	const { showSuccess } = useSnackbar();
 	const { data: employees = [] } = useQuery({
 		queryKey: employeeKeys.all,
 		queryFn: fetchEmployees,
@@ -66,6 +68,9 @@ function EmployeeList() {
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: employeeKeys.all });
 			closeDialog();
+			showSuccess(
+				editingEmployee ? "従業員を更新しました" : "従業員を登録しました",
+			);
 		},
 		onError: (error) => {
 			setSaveError(
@@ -97,6 +102,7 @@ function EmployeeList() {
 			void queryClient.invalidateQueries({ queryKey: employeeKeys.all });
 			void queryClient.invalidateQueries({ queryKey: tagKeys.all });
 			closeImport();
+			showSuccess("従業員を取り込みました");
 		},
 		onError: (error) => {
 			setImportError(

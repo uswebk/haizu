@@ -78,3 +78,18 @@ body {
   background: var(--color-app-bg);
   -webkit-font-smoothing: antialiased;
 }
+
+@keyframes snackbar-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-snackbar-in {
+  animation: snackbar-in 0.15s ease-out;
+}

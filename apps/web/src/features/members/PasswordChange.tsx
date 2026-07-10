@@ -2,16 +2,17 @@ import { MIN_PASSWORD_LENGTH } from "@haizu/shared";
 import { useState } from "react";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
+import { useSnackbar } from "#/contexts/snackbar-context";
 import { authClient } from "#/lib/auth-client";
 
 export function PasswordChange() {
+	const { showSuccess } = useSnackbar();
 	const [open, setOpen] = useState(false);
 	const [current, setCurrent] = useState("");
 	const [next, setNext] = useState("");
 	const [confirm, setConfirm] = useState("");
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [done, setDone] = useState(false);
 
 	const reset = () => {
 		setOpen(false);
@@ -41,7 +42,7 @@ export function PasswordChange() {
 			});
 			if (err) throw new Error(err.message ?? "パスワード変更に失敗しました");
 			reset();
-			setDone(true);
+			showSuccess("パスワードを変更しました");
 		} catch (e) {
 			setError(e instanceof Error ? e.message : "エラーが発生しました");
 		} finally {
@@ -55,20 +56,8 @@ export function PasswordChange() {
 				<div>
 					<div className="text-[13px] font-bold">パスワード</div>
 					<div className="text-xs text-faint mt-0.5">••••••••</div>
-					{done && (
-						<div className="text-xs font-semibold text-success mt-1">
-							パスワードを変更しました。
-						</div>
-					)}
 				</div>
-				<Button
-					variant="secondary"
-					size="sm"
-					onClick={() => {
-						setDone(false);
-						setOpen(true);
-					}}
-				>
+				<Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
 					変更
 				</Button>
 			</div>

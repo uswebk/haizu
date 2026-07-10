@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { OptionCard } from "#/components/ui/OptionCard";
+import { useSnackbar } from "#/contexts/snackbar-context";
 import {
 	fetchWorkPattern,
 	saveWorkPattern,
@@ -35,6 +36,7 @@ function newShift(): DraftShift {
 function ShiftSettings() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const { showSuccess } = useSnackbar();
 	const { data: workPattern, isPending } = useQuery({
 		queryKey: workPatternKeys.detail,
 		queryFn: fetchWorkPattern,
@@ -81,6 +83,7 @@ function ShiftSettings() {
 		onSuccess: () => {
 			setConfirmOpen(false);
 			void queryClient.invalidateQueries({ queryKey: workPatternKeys.detail });
+			showSuccess("シフト設定を保存しました");
 		},
 	});
 

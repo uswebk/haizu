@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Avatar } from "#/components/ui/Avatar";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
+import { useSnackbar } from "#/contexts/snackbar-context";
 import { resolveVersionForDate } from "#/features/assignment/layoutVersion";
 import { ShiftDatePicker } from "#/features/assignment/ShiftDatePicker";
 import {
@@ -38,6 +39,7 @@ function AssignmentDetail() {
 	const search = Route.useSearch();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const { showSuccess } = useSnackbar();
 	const date = search.date ?? todayStr();
 
 	const { data: workPattern } = useQuery({
@@ -200,11 +202,14 @@ function AssignmentDetail() {
 				})),
 			});
 		},
-		onSuccess: () => {
+		onSuccess: (_data, status) => {
 			setConfirmAction(null);
 			void queryClient.invalidateQueries({
 				queryKey: assignmentKeys.byDateShift(date, effective.shiftId),
 			});
+			showSuccess(
+				status === "confirmed" ? "配置を確定しました" : "下書きを保存しました",
+			);
 		},
 	});
 

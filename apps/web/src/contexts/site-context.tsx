@@ -8,6 +8,7 @@ import {
 	useMemo,
 	useState,
 } from "react";
+import { useSnackbar } from "#/contexts/snackbar-context";
 import { getCurrentSiteId, setCurrentSiteId } from "#/lib/api";
 import {
 	createSite,
@@ -56,6 +57,7 @@ const SiteContext = createContext<SiteContextValue | null>(null);
 
 export function SiteProvider({ children }: { children: ReactNode }) {
 	const queryClient = useQueryClient();
+	const { showSuccess } = useSnackbar();
 	// SiteProvider は認証済みエリア(_app / select-site)でのみマウントされる。
 	const { data: rawSites = [], isLoading } = useQuery({
 		queryKey: siteKeys.all,
@@ -85,13 +87,19 @@ export function SiteProvider({ children }: { children: ReactNode }) {
 
 	const addMutation = useMutation({
 		mutationFn: (input: SiteInput) => createSite(input),
-		onSuccess: () => void invalidateSites(),
+		onSuccess: () => {
+			void invalidateSites();
+			showSuccess("拠点を追加しました");
+		},
 	});
 
 	const updateMutation = useMutation({
 		mutationFn: ({ id, input }: { id: string; input: SiteInput }) =>
 			updateSiteApi(id, input),
-		onSuccess: () => void invalidateSites(),
+		onSuccess: () => {
+			void invalidateSites();
+			showSuccess("拠点を更新しました");
+		},
 	});
 
 	const value = useMemo<SiteContextValue>(() => {

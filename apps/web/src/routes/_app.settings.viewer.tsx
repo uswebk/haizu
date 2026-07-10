@@ -4,6 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "#/components/ui/Button";
 import { OptionCard } from "#/components/ui/OptionCard";
+import { useSnackbar } from "#/contexts/snackbar-context";
 import { areaKeys, fetchAreas } from "#/lib/api/areas";
 import { fetchShiftsUsed } from "#/lib/api/assignments";
 import {
@@ -42,6 +43,7 @@ function defaultConfig(areaId: string): ViewerConfig {
 
 function ViewerSettings() {
 	const queryClient = useQueryClient();
+	const { showSuccess } = useSnackbar();
 	const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
 	const [draft, setDraft] = useState<Draft | null>(null);
 
@@ -83,6 +85,7 @@ function ViewerSettings() {
 		},
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: viewerConfigKeys.all });
+			showSuccess("ビュアー設定を保存しました");
 		},
 	});
 

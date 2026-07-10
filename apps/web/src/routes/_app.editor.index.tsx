@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { AddCard } from "#/components/ui/AddCard";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
+import { useSnackbar } from "#/contexts/snackbar-context";
 import { useDismiss } from "#/hooks/useDismiss";
 import { areaKeys, createArea, fetchAreas } from "#/lib/api/areas";
 
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/_app/editor/")({
 
 function EditorList() {
 	const queryClient = useQueryClient();
+	const { showSuccess } = useSnackbar();
 	const [addOpen, setAddOpen] = useState(false);
 	const [newAreaName, setNewAreaName] = useState("");
 	const addDialogRef = useRef<HTMLDivElement>(null);
@@ -29,6 +31,7 @@ function EditorList() {
 			void queryClient.invalidateQueries({ queryKey: areaKeys.all });
 			setAddOpen(false);
 			setNewAreaName("");
+			showSuccess("配置エリアを追加しました");
 		},
 	});
 

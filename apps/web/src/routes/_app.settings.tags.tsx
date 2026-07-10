@@ -6,6 +6,7 @@ import { Button } from "#/components/ui/Button";
 import { EmptyState } from "#/components/ui/EmptyState";
 import { Input } from "#/components/ui/Input";
 import { PagerButton } from "#/components/ui/PagerButton";
+import { useSnackbar } from "#/contexts/snackbar-context";
 import {
 	createTag,
 	deleteTag,
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/_app/settings/tags")({
 
 function TagSettings() {
 	const queryClient = useQueryClient();
+	const { showSuccess } = useSnackbar();
 	const { data: tags = [] } = useQuery({
 		queryKey: tagKeys.all,
 		queryFn: fetchTags,
@@ -45,6 +47,7 @@ function TagSettings() {
 		onSuccess: () => {
 			setNewTagName("");
 			void invalidate();
+			showSuccess("タグを作成しました");
 		},
 	});
 
@@ -54,6 +57,7 @@ function TagSettings() {
 		onSuccess: () => {
 			setEditingId(null);
 			void invalidate();
+			showSuccess("タグを更新しました");
 		},
 	});
 
@@ -62,6 +66,7 @@ function TagSettings() {
 		onSuccess: () => {
 			setDeleteTarget(null);
 			void invalidate();
+			showSuccess("タグを削除しました");
 		},
 	});
 

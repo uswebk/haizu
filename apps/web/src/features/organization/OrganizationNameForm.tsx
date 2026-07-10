@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
+import { useSnackbar } from "#/contexts/snackbar-context";
 import {
 	fetchOrganization,
 	organizationKeys,
@@ -10,6 +11,7 @@ import {
 
 export function OrganizationNameForm() {
 	const queryClient = useQueryClient();
+	const { showSuccess } = useSnackbar();
 	const { data: organization, isPending } = useQuery({
 		queryKey: organizationKeys.detail,
 		queryFn: fetchOrganization,
@@ -24,6 +26,7 @@ export function OrganizationNameForm() {
 		mutationFn: () => updateOrganizationName(name.trim()),
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: organizationKeys.detail });
+			showSuccess("事業所名を更新しました");
 		},
 	});
 
@@ -47,11 +50,6 @@ export function OrganizationNameForm() {
 				{mutation.isError && (
 					<span className="text-xs font-semibold text-danger">
 						{mutation.error.message}
-					</span>
-				)}
-				{mutation.isSuccess && !dirty && (
-					<span className="text-xs font-semibold text-success">
-						保存しました
 					</span>
 				)}
 			</div>

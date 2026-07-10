@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
+import { useSnackbar } from "#/contexts/snackbar-context";
 import {
 	fetchOrganization,
 	organizationKeys,
@@ -11,6 +12,7 @@ import {
 
 export function OrgEmailChange() {
 	const queryClient = useQueryClient();
+	const { showSuccess } = useSnackbar();
 	const { data: organization } = useQuery({
 		queryKey: organizationKeys.detail,
 		queryFn: fetchOrganization,
@@ -22,7 +24,6 @@ export function OrgEmailChange() {
 	const [otp, setOtp] = useState("");
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [done, setDone] = useState(false);
 
 	const reset = () => {
 		setOpen(false);
@@ -52,10 +53,10 @@ export function OrgEmailChange() {
 		try {
 			await verifyOrgEmailOtp(otp.trim());
 			reset();
-			setDone(true);
 			await queryClient.invalidateQueries({
 				queryKey: organizationKeys.detail,
 			});
+			showSuccess("連絡先メールアドレスを変更しました");
 		} catch (e) {
 			setError(e instanceof Error ? e.message : "エラーが発生しました");
 		} finally {
@@ -71,22 +72,8 @@ export function OrgEmailChange() {
 
 			{!open ? (
 				<div className="flex items-center justify-between gap-3">
-					<div>
-						<div className="text-[13px] text-ink">{current}</div>
-						{done && (
-							<div className="text-xs font-semibold text-success mt-1">
-								連絡先メールアドレスを変更しました。
-							</div>
-						)}
-					</div>
-					<Button
-						variant="secondary"
-						size="sm"
-						onClick={() => {
-							setDone(false);
-							setOpen(true);
-						}}
-					>
+					<div className="text-[13px] text-ink">{current}</div>
+					<Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
 						変更
 					</Button>
 				</div>
