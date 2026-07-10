@@ -25,7 +25,7 @@ export function HomeSummary({
 		return options.length > 0 ? options.map((o) => o.id) : [null];
 	}, [workPattern]);
 
-	const { data: assignments = [] } = useQuery({
+	const { data: assignments = [], isPending } = useQuery({
 		queryKey: ["home-assignments", today, shiftIds],
 		queryFn: async () => {
 			const results = await Promise.all(
@@ -34,6 +34,11 @@ export function HomeSummary({
 			return results.flat();
 		},
 	});
+
+	// 配置データが未取得のうちに集計すると全エリアが未配置として一瞬表示される
+	if (isPending) {
+		return <div className="text-muted text-sm">読み込み中...</div>;
+	}
 
 	// 配置に使えるのは規格が公開済みのエリアのみ。これを分母にする
 	const publishedAreas = areas.filter((a) => a.currentStatus === "published");
@@ -83,10 +88,9 @@ export function HomeSummary({
 		<div className="max-w-250">
 			<div className="text-[22px] font-bold">ホーム</div>
 			<div className="text-lg font-bold text-ink mt-2 mb-4.5">
-				{formatDateJp(today)}
-				<span className="text-muted font-medium ml-2">（{shiftText}）</span>
+				{formatDateJp(today)}（{shiftText}）
 				<span className="text-[13px] text-faint font-medium ml-2">
-					時点の配置状況
+					の配置状況
 				</span>
 			</div>
 
