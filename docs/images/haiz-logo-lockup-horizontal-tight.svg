@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
+  <g transform="translate(0,0)">
+  <g transform="rotate(-16 100 105)">
+    <path d="M93 46 Q87 34 76 30" stroke="#14A5A5" stroke-width="5" stroke-linecap="round" fill="none"></path>
+    <path d="M107 46 Q113 34 124 30" stroke="#14A5A5" stroke-width="5" stroke-linecap="round" fill="none"></path>
+    <circle cx="100" cy="58" r="15" fill="#14A5A5"></circle>
+    <ellipse cx="58" cy="72" rx="31" ry="14" fill="#14A5A5" transform="rotate(34 58 72)"></ellipse>
+    <ellipse cx="142" cy="72" rx="31" ry="14" fill="#14A5A5" transform="rotate(-34 142 72)"></ellipse>
+    <path d="M100 84 C130 84 139 106 136 124 C133 148 119 164 100 170 C81 164 67 148 64 124 C61 106 70 84 100 84 Z" fill="#0F7075"></path>
+    <path d="M56 114 H144" stroke="#ffffff" stroke-width="9"></path>
+    <path d="M62 140 H138" stroke="#ffffff" stroke-width="9"></path>
+  </g></g>
+  <text x="190" y="128" font-family="Helvetica Neue, Arial, sans-serif" font-size="88" font-weight="700" fill="#0F7075" letter-spacing="-2">haiz</text>
+</svg>
