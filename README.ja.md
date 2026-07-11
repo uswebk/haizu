@@ -27,7 +27,7 @@
 - 確定した配置を **モニター表示専用のビュアー** に映す
 
 <!-- TODO: 配置エディタとビュアーのスクリーンショット -->
-<img src="docs/images/haizu_demo.gif" width="800">
+<div align="center"><img src="docs/images/haizu_demo.gif" width="800"></div>
 
 ## はじめかた
 

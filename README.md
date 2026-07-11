@@ -28,7 +28,7 @@ On a factory or warehouse floor, someone decides every day which worker stands a
 
 <!-- TODO: screenshots of the placement editor and the viewer -->
 
-<img src="docs/images/haizu_demo.gif" width="800">
+<div align="center"><img src="docs/images/haizu_demo.gif" width="800"></div>
 
 ## Getting started
 
