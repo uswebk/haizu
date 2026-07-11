@@ -88,6 +88,10 @@
 			"saveDraftTitle": "Save draft",
 			"confirmBody": "Confirm the placement for this day and shift. Once confirmed, it appears in the viewer. Proceed?",
 			"saveDraftBody": "Save the placement for this day and shift as a draft. (It won't appear in the viewer)",
+			"dialogDate": "Date",
+			"dialogShift": "Shift",
+			"dialogArea": "Area",
+			"dialogPlaced": "Placed",
 			"confirmed": "Placement confirmed",
 			"draftSaved": "Draft saved"
 		}
