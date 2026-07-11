@@ -4,7 +4,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP } from "better-auth/plugins";
 import { db } from "../db/client";
 import { account, session, user, verification } from "../db/schema";
-import { devSendEmail } from "./dev-email";
+import { emailSender } from "../email";
 import { WEB_ORIGIN } from "./env";
 import { signupContext } from "./signup-context";
 
@@ -19,12 +19,20 @@ export const auth = betterAuth({
 		// MVP では OTP を使わずログイン可能にする（メール確認は次フェーズ）
 		requireEmailVerification: false,
 		sendResetPassword: async ({ user: u, url }) => {
-			devSendEmail(u.email, "パスワードリセット", url);
+			await emailSender.send({
+				to: u.email,
+				subject: "パスワードリセット",
+				body: url,
+			});
 		},
 	},
 	emailVerification: {
 		sendVerificationEmail: async ({ user: u, url }) => {
-			devSendEmail(u.email, "メールアドレスの確認", url);
+			await emailSender.send({
+				to: u.email,
+				subject: "メールアドレスの確認",
+				body: url,
+			});
 		},
 	},
 	user: {
@@ -69,9 +77,12 @@ export const auth = betterAuth({
 	},
 	plugins: [
 		emailOTP({
-			// 開発用: OTPをストアに保持しつつコンソールにも出力する（実メール送信は未実装）
 			async sendVerificationOTP({ email, otp, type }) {
-				devSendEmail(email, `OTP (${type})`, `code: ${otp}`);
+				await emailSender.send({
+					to: email,
+					subject: `OTP (${type})`,
+					body: `code: ${otp}`,
+				});
 			},
 		}),
 	],

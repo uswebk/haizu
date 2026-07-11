@@ -37,7 +37,7 @@ git clone https://github.com/uswebk/haizu.git
 cd haizu
 pnpm install
 
-docker compose up -d                    # PostgreSQL
+docker compose up -d                    # PostgreSQL + Mailpit (dev mail)
 
 cp apps/api/.env.example apps/api/.env  # set BETTER_AUTH_SECRET to 32+ random chars
 
@@ -49,7 +49,20 @@ pnpm dev                                # web: 3000, api: 3001
 Open http://localhost:3000 and create a company from the sign-up screen.
 
 > [!NOTE]
-> Email delivery is not implemented in development. Verification codes, invitation links, and password resets are printed to the API server console, prefixed with `[dev-email]`.
+> Email delivery and file storage are pluggable adapters. By default nothing is sent: verification codes, invitation links, and password resets are printed to the API server console (prefixed `[email:console]`), and uploaded images are stored on local disk (`apps/api/uploads`).
+
+### Seeing real emails (Mailpit)
+
+`docker compose up -d` also starts [Mailpit](https://github.com/axllent/mailpit), a dev mail server. Set `EMAIL_DRIVER=smtp` in `apps/api/.env` and outgoing mail is captured by Mailpit — view it at http://localhost:8025 (nothing leaves your machine).
+
+### Production adapters
+
+| Concern | Env var | Default | Swap for production |
+|---|---|---|---|
+| Email | `EMAIL_DRIVER` | `console` | Set `smtp` and point `SMTP_*` at a real SMTP provider (SendGrid / SES), or implement `EmailSender` and add a case in `src/email/` |
+| File storage | `STORAGE_DRIVER` | `local` (local disk) | Implement `FileStorage` (e.g. S3 / GCS) and add a case in `src/storage/` |
+
+The app runs fully on the defaults. Contributions for production adapters are welcome (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ## Where to go next
 

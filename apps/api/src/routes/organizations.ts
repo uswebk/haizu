@@ -5,7 +5,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
 import { organizations } from "../db/schema";
-import { devSendEmail } from "../lib/dev-email";
+import { emailSender } from "../email";
 import { consumeEmailOtp, storeEmailOtp } from "../lib/email-otp";
 import { requireAuth } from "../middleware/auth";
 import { requireOrgWritePermission } from "../middleware/require-permission";
@@ -60,11 +60,11 @@ export const organizationsRoute = new Hono<AppEnv>()
 			const { newEmail } = c.req.valid("json");
 
 			const otp = await storeEmailOtp(`org-email:${organizationId}`, newEmail);
-			devSendEmail(
-				newEmail,
-				"事業所メールアドレスの確認コード",
-				`code: ${otp}`,
-			);
+			await emailSender.send({
+				to: newEmail,
+				subject: "事業所メールアドレスの確認コード",
+				body: `code: ${otp}`,
+			});
 			return c.json({ ok: true });
 		},
 	)

@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { zValidator } from "@hono/zod-validator";
 import {
 	type OrgRole,
 	OrgRoleSchema,
 	type SiteRole,
 	SiteRoleSchema,
 } from "@haizu/shared";
+import { zValidator } from "@hono/zod-validator";
 import { and, eq, inArray } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -17,7 +17,7 @@ import {
 	sites,
 	user,
 } from "../db/schema";
-import { devSendEmail } from "../lib/dev-email";
+import { emailSender } from "../email";
 import { WEB_ORIGIN } from "../lib/env";
 import {
 	assertSitesManageable,
@@ -221,7 +221,10 @@ export const membersRoute = new Hono<AppEnv>()
 		const siteIds = siteRoles.map((s) => s.siteId);
 
 		if (!(await assertSitesInOrg(organizationId, siteIds))) {
-			return c.json({ error: "この事業所に存在しない拠点が含まれています" }, 400);
+			return c.json(
+				{ error: "この事業所に存在しない拠点が含まれています" },
+				400,
+			);
 		}
 		const manageable = await manageableSiteIds(organizationId, actor);
 		const scopeCheck = assertSitesManageable(manageable, siteIds);
@@ -280,7 +283,11 @@ export const membersRoute = new Hono<AppEnv>()
 		});
 
 		const acceptUrl = `${WEB_ORIGIN}/invite-accept?token=${invitation.token}`;
-		devSendEmail(invitation.email, "メンバー招待", acceptUrl);
+		await emailSender.send({
+			to: invitation.email,
+			subject: "メンバー招待",
+			body: acceptUrl,
+		});
 
 		const member: MemberResponse = {
 			id: invitation.id,
@@ -319,7 +326,10 @@ export const membersRoute = new Hono<AppEnv>()
 		const siteRoles = input.orgRole === "admin" ? [] : input.siteRoles;
 		const siteIds = siteRoles.map((s) => s.siteId);
 		if (!(await assertSitesInOrg(organizationId, siteIds))) {
-			return c.json({ error: "この事業所に存在しない拠点が含まれています" }, 400);
+			return c.json(
+				{ error: "この事業所に存在しない拠点が含まれています" },
+				400,
+			);
 		}
 
 		const manageable = await manageableSiteIds(organizationId, actor);

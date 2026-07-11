@@ -4,7 +4,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
 import { user } from "../db/schema";
-import { devSendEmail } from "../lib/dev-email";
+import { emailSender } from "../email";
 import { consumeEmailOtp, storeEmailOtp } from "../lib/email-otp";
 import { requireAuth } from "../middleware/auth";
 import type { AppEnv } from "../types";
@@ -34,7 +34,11 @@ export const accountRoute = new Hono<AppEnv>()
 		}
 
 		const otp = await storeEmailOtp(`email-change:${userId}`, newEmail);
-		devSendEmail(newEmail, "メールアドレス変更の確認コード", `code: ${otp}`);
+		await emailSender.send({
+			to: newEmail,
+			subject: "メールアドレス変更の確認コード",
+			body: `code: ${otp}`,
+		});
 		return c.json({ ok: true });
 	})
 

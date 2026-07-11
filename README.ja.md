@@ -37,7 +37,7 @@ git clone https://github.com/uswebk/haizu.git
 cd haizu
 pnpm install
 
-docker compose up -d                    # PostgreSQL
+docker compose up -d                    # PostgreSQL + Mailpit（開発用メール）
 
 cp apps/api/.env.example apps/api/.env  # BETTER_AUTH_SECRET をランダムな32文字以上に
 
@@ -49,7 +49,20 @@ pnpm dev                                # web: 3000, api: 3001
 http://localhost:3000 を開き、サインアップから会社（組織）を作成します。
 
 > [!NOTE]
-> 開発環境ではメール送信が未実装です。確認コード・招待リンク・パスワードリセットは、API サーバーのコンソールに `[dev-email]` として出力されます。
+> メール送信とファイル保存はアダプタ差し替え式です。既定では実送信せず、確認コード・招待リンク・パスワードリセットは API サーバーのコンソールに `[email:console]` として出力され、アップロード画像はローカルディスク（`apps/api/uploads`）に保存されます。
+
+### メールを実際に送って確認する（Mailpit）
+
+`docker compose up -d` で開発用メールサーバー [Mailpit](https://github.com/axllent/mailpit) が一緒に起動します。`apps/api/.env` で `EMAIL_DRIVER=smtp` にすると、送信メールが Mailpit に届き、http://localhost:8025 の Web UI で確認できます（外部には送信されません）。
+
+### 本番向けアダプタ
+
+| 機能 | 環境変数 | 既定 | 本番での差し替え |
+|---|---|---|---|
+| メール送信 | `EMAIL_DRIVER` | `console`（コンソール出力） | `smtp` にして `SMTP_*` を実 SMTP（SendGrid / SES 等）へ向ける、または `EmailSender` を実装して `src/email/` の switch に追加 |
+| ファイル保存 | `STORAGE_DRIVER` | `local`（ローカルディスク） | `FileStorage` を実装（例: S3 / GCS）し `src/storage/` の switch に追加 |
+
+既定のままでもアプリは一通り動作します。本番アダプタの実装は歓迎します（[CONTRIBUTING.ja.md](CONTRIBUTING.ja.md) 参照）。
 
 ## 次に読むもの
 
