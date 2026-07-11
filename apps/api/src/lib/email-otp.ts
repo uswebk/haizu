@@ -19,6 +19,34 @@ export async function storeEmailOtp(identifier: string, newEmail: string) {
 	return otp;
 }
 
+export type EmailOtpEvaluation =
+	| { ok: true; newEmail: string; expired?: false }
+	| { ok: false; error: string; expired: boolean };
+
+export function evaluateEmailOtp(params: {
+	value: string;
+	expiresAt: Date;
+	otp: string;
+	now: number;
+}): EmailOtpEvaluation {
+	const { value, expiresAt, otp, now } = params;
+	if (expiresAt.getTime() < now) {
+		return {
+			ok: false,
+			error: "確認コードの有効期限が切れました",
+			expired: true,
+		};
+	}
+	const sep = value.indexOf(":");
+	const savedOtp = value.slice(0, sep);
+	// メールアドレスにコロンは含まれ得ないが、最初のコロンで分割し残り全体をアドレスとする
+	const newEmail = value.slice(sep + 1);
+	if (savedOtp !== otp) {
+		return { ok: false, error: "確認コードが正しくありません", expired: false };
+	}
+	return { ok: true, newEmail };
+}
+
 // 保存済みOTPを検証する。成功時は対象の新アドレスを返し、行は消費（削除）する
 export async function consumeEmailOtp(
 	identifier: string,
@@ -32,17 +60,19 @@ export async function consumeEmailOtp(
 			.limit(1)
 	)[0];
 	if (!row) return { ok: false, error: "確認コードが見つかりません" };
-	if (row.expiresAt.getTime() < Date.now()) {
+
+	const result = evaluateEmailOtp({
+		value: row.value,
+		expiresAt: row.expiresAt,
+		otp,
+		now: Date.now(),
+	});
+	// 期限切れ・照合成功のいずれも行は消費する（不一致のときだけ再試行のため残す）
+	if (result.ok || result.expired) {
 		await db
 			.delete(verification)
 			.where(eq(verification.identifier, identifier));
-		return { ok: false, error: "確認コードの有効期限が切れました" };
 	}
-	const sep = row.value.indexOf(":");
-	const savedOtp = row.value.slice(0, sep);
-	const newEmail = row.value.slice(sep + 1);
-	if (savedOtp !== otp)
-		return { ok: false, error: "確認コードが正しくありません" };
-	await db.delete(verification).where(eq(verification.identifier, identifier));
-	return { ok: true, newEmail };
+	if (!result.ok) return { ok: false, error: result.error };
+	return { ok: true, newEmail: result.newEmail };
 }
