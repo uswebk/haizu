@@ -27,14 +27,11 @@
             - Display x minutes before (after) the shift
             - Forced display
                 - Select date + shift
-        - Announcement settings
-            - Display an announcement as text within a specified time
-                - Content
-                - Start datetime ~ end datetime
 
 ---
 
 # 配置Viewer
+
 ## 用語
 - 自動更新(Phase2対応)
     - 指定した時間ごとに画面をリフレッシュする
@@ -43,11 +40,13 @@
 - サイズ調整
     - ディスプレイのサイズに合うように調整可能(拡大・縮小)
     - ブラウザ全画面表示することも可能
+
 ## ルール
 - 配置ビュアーは閲覧用画面であり、操作はできない
 - 自動更新設定により、自動的に最新の配置を取得するようにできる
 - 自動切り替え設定により複数のエリアを切り替えながら表示することができる
     - モニターが1つしかないケースを想定
+
 ## その他
 - ビュアーに表示する内容をコントロールできる
     - シフトに応じて流動的に変える
@@ -58,7 +57,3 @@
             - シフトのx分前(後)に表示
             - 強制表示
                 - 日付+シフトを選択
-        - アナウンス設定
-            - 指定時間内でアナウスを文字で表示する
-                - 内容
-                - 開始日時~終了日時

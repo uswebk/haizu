@@ -103,6 +103,7 @@ Because permissions differ per site, **the same user sees different screens depe
     - 管理者、拠点管理者、一般、その他 の4つが存在
 - 招待
     - メールアドレスを送信して招待する
+
 ## ルール
 - ログイン
     - メールアドレスを使用して招待->パスワード設定 を完了させることでログイン可能な状態となる

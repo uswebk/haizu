@@ -17,11 +17,6 @@
     - Tags are managed per site (not shared across sites)
     - Multiple tags can be attached to one employee
     - Used for filtering on the assignment screen (narrowing the unplaced pool)
-- Hire date
-    - Optionally registered as yyyy-mm-dd
-    - Used as years of experience
-- Retirement date
-    - Optionally registered as yyyy-mm-dd (sensitive info, visible only to site admins)
 
 ## Rules
 - A shared employee across sites can't be created
@@ -35,6 +30,7 @@
 ---
 
 # 従業員
+
 ## 用語
 - 名前
     - 姓・名を登録する
@@ -50,11 +46,7 @@
     - タグは拠点単位で管理する（他拠点とは共有しない）
     - 1従業員に複数タグを付与可能
     - 配置決め画面でのフィルタリングに使用する（未配置プールの絞り込み）
-- 入社日
-    - yyyy-mm-dd で任意で登録する
-    - 経験年数として使用する
-- 退職日
-    - yyyy-mm-dd で任意で登録する(センシティブ情報のため拠点管理者のみ確認できる状態)
+
 ## ルール
 - 拠点間で共通の従業員は作成できない
     - 同従業員の場合でも拠点ごとに従業員登録が必要

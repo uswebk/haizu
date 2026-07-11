@@ -34,26 +34,10 @@
 - Assign by tapping a placement spot, or by drag & drop
 - Tapping a placement spot shows details of the assigned employee, etc.
 
-# Assignment history
-## Terms
-- Assignment history
-    - A feature to review past confirmed assignment records
-    - Viewed by specifying a date (read-only)
-- Memo
-    - A text memo can be left on an assignment
-    - Used for later review / handover
-- CSV export
-    - Assignment records can be downloaded as CSV
-    - Export by specifying a period
-
-## Rules
-- Only confirmed assignments are viewable as history (drafts excluded)
-- View permission: admin, site admin, general (see member_permission.md)
-- Past assignments can't be changed (tracked as a change log only)
-
 ---
 
 # 配置決め
+
 ## 用語
 - シフト
     - 日付+日勤, 夜勤 などの1日あたりの勤務体制のこと
@@ -65,6 +49,7 @@
     - 確定後も配置の変更は可能
 - 下書き
     - 配置ビュアーには表示されない
+
 ## ルール
 - **公開済みの配置規格**のスポットに対してのみ従業員を割り当てられる（下書きの規格には配置決めできない。layout_spec.md 参照）
     - どのバージョンが対象になるかは、配置決めの対象日と規格の**適用開始日**で決まる（「現在の規格」= 対象日時点で適用開始日がその日以前の公開済みバージョンのうち最新のもの。layout_spec.md 参照）。適用開始日が対象日より後のバージョンでは配置決めできない
@@ -79,24 +64,9 @@
 - 規格以上の人数は配置できない
 - 規格以外の場所に従業員配置できない
     - 規格の変更が必要
+
 ## その他
 - 従業員のタグで絞り込み可能とする
 - 配置スポットをタップして従業員を割り当てるか、D&Dで割り当てる
 - 配置スポットをタップすることで、設定されている従業員の詳細などが表示される
-
-# 配置履歴
-## 用語
-- 配置履歴
-    - 確定済みの過去の配置実績を参照する機能
-    - 日付を指定して閲覧する（読み取り専用）
-- メモ
-    - 配置に対してテキストメモを残すことができる
-    - 後から振り返り・引き継ぎに使用する
-- CSVエクスポート
-    - 配置実績をCSV形式でダウンロードできる
-    - 期間を指定してエクスポート
-
-## ルール
-- 確定状態の配置のみが履歴として参照可能（下書きは対象外）
-- 閲覧権限: 管理者・拠点管理者・一般（member_permission.md 参照）
-- 過去の配置の変更はできない（変更ログとして追跡のみ）
+- 配置1(ユーザーA)を配置2(ユーザーB)にドラッグすると配置されたユーザー同士が入れ替わる

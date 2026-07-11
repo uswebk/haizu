@@ -20,10 +20,6 @@ packages/shared  Zod schemas and the permission matrix (shared by web and api)
 
 Every site-scoped screen is served under `/s/{siteId}/...`. **The URL is the single source of truth for the current site.** It is not stored in a cookie, in `localStorage`, or in React state.
 
-This matters because a site is not a global preference — it is part of the resource you are looking at, the same way a repository is on GitHub. Keeping it in a cookie means two browser tabs cannot show two different sites, and switching in one tab silently changes what the other tab fetches.
-
-Consequences:
-
 - `apiFetch` derives the `x-site-id` header by reading `location.pathname`. Do not reintroduce a module-level variable for it; a variable set in `beforeLoad` is not re-assigned when a server-rendered page hydrates, and the header goes missing.
 - A user's role is resolved per site, so `beforeLoad` on `/_app/s/$siteId` must run before any site-scoped screen renders.
 - Screens that are not site-scoped (`/account`) live outside the site path, because a user with no site membership must still reach them.
