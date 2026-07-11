@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import type { SpotState } from "./types";
 
 const DEFAULT_IMAGE_SCALE = 1;
+const DEFAULT_SPOT_SIZE = 56;
 
 export function useSpotEditor(
 	initialSpots: SpotState[] | undefined,
@@ -40,6 +41,7 @@ export function useSpotEditor(
 		}
 	}
 	const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null);
+	const lastSpotSizeRef = useRef(DEFAULT_SPOT_SIZE);
 
 	const selectedSpot = spots.find((s) => s.id === selectedSpotId) ?? null;
 
@@ -118,6 +120,7 @@ export function useSpotEditor(
 			const newSize = Math.round(
 				Math.max(24, Math.min(120, startSize + delta)),
 			);
+			lastSpotSizeRef.current = newSize;
 			setSpots((prev) =>
 				prev.map((s) => (s.id === spotId ? { ...s, size: newSize } : s)),
 			);
@@ -135,7 +138,7 @@ export function useSpotEditor(
 			label: `${spots.length + 1}`,
 			x: 50,
 			y: 50,
-			size: 56,
+			size: lastSpotSizeRef.current,
 		};
 		setSpots((prev) => [...prev, newSpot]);
 		setSelectedSpotId(newSpot.id);
@@ -154,11 +157,12 @@ export function useSpotEditor(
 
 	const updateSpotSize = (spotId: string, delta: number) => {
 		setSpots((prev) =>
-			prev.map((s) =>
-				s.id === spotId
-					? { ...s, size: Math.max(24, Math.min(120, s.size + delta)) }
-					: s,
-			),
+			prev.map((s) => {
+				if (s.id !== spotId) return s;
+				const size = Math.max(24, Math.min(120, s.size + delta));
+				lastSpotSizeRef.current = size;
+				return { ...s, size };
+			}),
 		);
 	};
 
