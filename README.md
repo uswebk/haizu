@@ -2,7 +2,7 @@
 
 <img src="docs/images/haizu-logo-lockup-horizontal.svg" alt="haizu" width="320">
 
-### Decide who stands where, today, on a floor map
+### Decide who will be assigned where today on a floor map.
 
 Workforce placement management for factories and warehouses.
 

@@ -2,7 +2,7 @@
 
 <img src="docs/images/haizu-logo-lockup-horizontal.svg" alt="haizu" width="320">
 
-### 工場・倉庫の「今日、誰がどこに立つか」を、フロアマップの上で決める
+### 工場・倉庫の「今日、誰をどこに配置するか」を、フロアマップの上で決める
 
 工場・倉庫向けの人員配置管理 SaaS。
 
