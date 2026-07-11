@@ -62,17 +62,17 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<I18nextProvider i18n={i18n}>
 					<SnackbarProvider>{children}</SnackbarProvider>
 				</I18nextProvider>
-				<TanStackDevtools
-					config={{
-						position: "bottom-right",
-					}}
-					plugins={[
-						{
-							name: "Tanstack Router",
-							render: <TanStackRouterDevtoolsPanel />,
-						},
-					]}
-				/>
+				{/*<TanStackDevtools*/}
+				{/*	config={{*/}
+				{/*		position: "bottom-right",*/}
+				{/*	}}*/}
+				{/*	plugins={[*/}
+				{/*		{*/}
+				{/*			name: "Tanstack Router",*/}
+				{/*			render: <TanStackRouterDevtoolsPanel />,*/}
+				{/*		},*/}
+				{/*	]}*/}
+				{/*/>*/}
 				<Scripts />
 			</body>
 		</html>

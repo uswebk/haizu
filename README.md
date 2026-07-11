@@ -28,6 +28,8 @@ On a factory or warehouse floor, someone decides every day which worker stands a
 
 <!-- TODO: screenshots of the placement editor and the viewer -->
 
+<img src="docs/images/haizu_demo.gif" width="400">
+
 ## Getting started
 
 You need Node.js 24.18+ (see [`.nvmrc`](.nvmrc)), pnpm 10+, and Docker.
