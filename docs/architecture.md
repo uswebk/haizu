@@ -60,14 +60,6 @@ Two rules cannot be expressed as a role → permission table and live in `apps/a
 
 When changing permissions, update `permissions.ts` **and** the table in [`docs/domain/member_permission.md`](domain/member_permission.md).
 
-## Placement specs are versioned and, once used, immutable
-
-A placement area holds a series of spec versions. Once a version has been used for a placement, it can no longer be modified, deleted, or unpublished. Editing means duplicating it into a new version.
-
-Placements resolve the version that was in effect on their date. A newly published version therefore never rewrites what a past date looks like. "Who stood where last Monday" stays fixed.
-
-Shifts follow the same principle: they are soft-deleted rather than removed, so a historical placement can still name the shift it belonged to.
-
 ## Tenant isolation
 
 Two independent layers guard every site-scoped request:
