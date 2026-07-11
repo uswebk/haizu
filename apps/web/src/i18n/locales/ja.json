@@ -368,7 +368,8 @@
 			"error": "エラー",
 			"hasErrors": "エラー行があるため取込できません。CSVを修正して再度アップロードしてください。",
 			"importing": "取込中…",
-			"importCount": "{{count}} 件を取込む"
+			"importCount": "{{count}} 件を取込む",
+			"tooManyRows": "CSVの行数が多すぎます。{{max}}件以下のファイルに分割してください。"
 		},
 		"csv": {
 			"colCode": "従業員コード",

@@ -2,6 +2,7 @@ import i18n from "#/i18n/config";
 import type { EmployeeRow } from "./types";
 
 export const MAX_TAGS = 10;
+export const MAX_IMPORT_ROWS = 1000;
 
 const BOM = "﻿";
 

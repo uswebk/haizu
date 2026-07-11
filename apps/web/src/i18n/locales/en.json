@@ -368,7 +368,8 @@
 			"error": "Error",
 			"hasErrors": "There are rows with errors, so importing isn't possible. Fix the CSV and upload again.",
 			"importing": "Importing…",
-			"importCount": "Import {{count}} rows"
+			"importCount": "Import {{count}} rows",
+			"tooManyRows": "The CSV has too many rows. Please split it into files of {{max}} rows or fewer."
 		},
 		"csv": {
 			"colCode": "Employee Code",

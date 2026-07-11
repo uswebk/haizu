@@ -10,7 +10,11 @@ import { PagerButton } from "#/components/ui/PagerButton";
 import { Table, type TableColumn } from "#/components/ui/Table";
 import { useSite } from "#/contexts/site-context";
 import { useSnackbar } from "#/contexts/snackbar-context";
-import { employeesToCsv, parseEmployeesCsv } from "#/features/employees/csv";
+import {
+	employeesToCsv,
+	MAX_IMPORT_ROWS,
+	parseEmployeesCsv,
+} from "#/features/employees/csv";
 import {
 	EmployeeFormDialog,
 	type EmployeeFormValues,
@@ -53,7 +57,7 @@ export const Route = createFileRoute("/_app/s/$siteId/employees")({
 function EmployeeList() {
 	const queryClient = useQueryClient();
 	const { t } = useTranslation(["employees", "common"]);
-	const { showSuccess } = useSnackbar();
+	const { showSuccess, showError } = useSnackbar();
 	const { currentSite } = useSite();
 	const { data: employees = [] } = useQuery({
 		queryKey: employeeKeys.all,
@@ -139,6 +143,10 @@ function EmployeeList() {
 		if (!file) return;
 		const text = await file.text();
 		const parsed = parseEmployeesCsv(text);
+		if (parsed.length > MAX_IMPORT_ROWS) {
+			showError(t("employees:import.tooManyRows", { max: MAX_IMPORT_ROWS }));
+			return;
+		}
 		setImportError(null);
 		setImportFileName(file.name);
 		setImportPreview(validateImport(parsed, employees, tags));
