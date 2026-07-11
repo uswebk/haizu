@@ -1,7 +1,7 @@
 import type { SignUpInput } from "@haizu/shared";
 import { API_BASE } from ".";
 
-// 会社名→組織作成を伴うカスタムサインアップ（Better Auth 標準の signUp ではなく API 側のラッパを叩く）。
+// Custom sign-up that also creates an organization from the company name (calls the API-side wrapper, not Better Auth's standard signUp).
 export async function signUp(input: SignUpInput): Promise<void> {
 	const res = await fetch(`${API_BASE}/auth/sign-up`, {
 		method: "POST",

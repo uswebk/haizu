@@ -12,8 +12,8 @@ import { MyProfileCard } from "#/features/members/MyProfileCard";
 import type { MemberRow } from "#/features/members/types";
 import { authClient } from "#/lib/auth-client";
 
-// アカウント設定はユーザー単位の画面なので、拠点(/s/$siteId)の外に置く。
-// 拠点に所属していないユーザーでも到達できる必要がある。
+// Account settings is a per-user screen, so it lives outside the site (/s/$siteId).
+// It must be reachable even by users who belong to no site.
 type AccountSearch = { site?: string };
 
 export const Route = createFileRoute("/_app/account")({
@@ -32,7 +32,7 @@ function AccountPage() {
 	const { t } = useTranslation(["account", "common"]);
 	const { showSuccess } = useSnackbar();
 
-	// 元いた画面へ戻す。履歴が無ければ来訪元の拠点、それも無ければ拠点選択へ。
+	// Return to the previous screen. If there's no history, go to the originating site, else to site selection.
 	const goBack = () => {
 		if (canGoBack) {
 			router.history.back();
@@ -63,7 +63,7 @@ function AccountPage() {
 		allSites: user.role === "admin",
 		status: user.isActive ? "active" : "inactive",
 	};
-	// 拠点に依らないユーザー単位の画面のため、バッジは組織ロールだけで決める
+	// Since this per-user screen is site-independent, the badge is determined by the org role only
 	const badgeRole = displayRole(user.role, null) ?? "viewer";
 
 	return (

@@ -7,9 +7,9 @@ import {
 } from "@haizu/shared";
 import { redirect } from "@tanstack/react-router";
 
-// 拠点スコープの画面の閲覧権限を検査する。権限が無ければそのロールの着地画面へ送り返す。
-// 権限表は @haizu/shared が単一の情報源で、APIの認可と共有している。
-// 判定は「URLの拠点における実効ロール」で行う（拠点ごとに権限が異なる）。
+// Checks view permission for a site-scoped screen. If not permitted, redirect to that role's landing screen.
+// The permission table's single source of truth is @haizu/shared, shared with the API's authorization.
+// Decisions use "the effective role at the URL's site" (permissions differ per site).
 export function assertScreen(
 	orgRole: OrgRole,
 	siteRole: SiteRole | null,

@@ -39,7 +39,7 @@ export function PasswordChange() {
 			const { error: err } = await authClient.changePassword({
 				currentPassword: current,
 				newPassword: next,
-				// 変更後は他デバイスのセッションを無効化する
+				// Invalidate sessions on other devices after the change
 				revokeOtherSessions: true,
 			});
 			if (err)

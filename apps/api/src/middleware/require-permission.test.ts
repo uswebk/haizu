@@ -24,8 +24,8 @@ describe("isWriteMethod", () => {
 	});
 });
 
-// 判定そのものは permissions.test で網羅済み。ここでは許可/拒否が
-// 期待する結果オブジェクトの形状にマップされることだけ確認する。
+// The decision itself is fully covered by permissions.test. Here we only check that allow/deny
+// maps to the expected result-object shape.
 describe("evaluateOrgPermission", () => {
 	it("許可されるロールは ok を返す", () => {
 		expect(evaluateOrgPermission("admin", "org:write")).toEqual({ ok: true });

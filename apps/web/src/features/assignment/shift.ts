@@ -12,7 +12,7 @@ export function getShiftOptions(
 	return wp.shifts.map((s) => ({ id: s.id, name: s.name }));
 }
 
-// URL の shiftId と勤務体制から、実際に使うシフト（single時は null=終日）を決める
+// Decide the shift actually used from the URL's shiftId and the work pattern (null = all day when single)
 export function resolveEffectiveShift(
 	wp: WorkPattern | null | undefined,
 	searchShiftId: string | undefined,

@@ -49,7 +49,7 @@ export function EmailChange({ currentEmail }: { currentEmail: string }) {
 			await verifyEmailChangeOtp(otp.trim());
 			reset();
 			await queryClient.invalidateQueries({ queryKey: memberKeys.all });
-			// ヘッダー等のセッション表示を更新する
+			// Refresh session-based display such as the header
 			await router.invalidate();
 			showSuccess(t("members:email.changed"));
 		} catch (e) {

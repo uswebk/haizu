@@ -163,7 +163,7 @@ function MemberList() {
 			render: (m) => {
 				if (m.allSites) return <span>{t("members:list.allSites")}</span>;
 				if (m.siteRoles.length === 0) return <span>—</span>;
-				// 拠点ごとに権限が異なりうるため「拠点名: 権限」で並べる
+				// Permissions can differ per site, so list them as "site name: permission"
 				return (
 					<div className="flex flex-wrap gap-1.5">
 						{m.siteRoles.map((sr) => {

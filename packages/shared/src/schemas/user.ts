@@ -22,7 +22,7 @@ export const UserSchema = z.object({
 
 export type User = z.infer<typeof UserSchema>;
 
-// 招待
+// Invitation
 export const InvitationSchema = z.object({
 	id: z.string().uuid(),
 	organizationId: z.string().uuid(),

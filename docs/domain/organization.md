@@ -1,3 +1,31 @@
+# Organization (Company)
+
+*English first; the original Japanese is preserved below the divider.*
+
+## Overview
+The unit of the company/organization registered in haizu. The top-level entity for all data.
+
+## Terms
+- Organization
+    - Created by entering a company name at sign-up
+    - One organization per email address
+- Organization name
+    - The organization's name. Can be changed from the settings screen
+- Organization admin
+    - The user who signs up is automatically set as the first "admin"
+
+## Rules
+- Up to 10 sites can be registered per organization
+- Multiple members (login users) can be invited per organization
+- Organizations are never deleted (only deactivated)
+- The organization name and email can be changed from the "organization info" settings screen
+
+## Related domains
+- Organization 1 : N Sites
+- Organization 1 : N Members (see member_permission.md)
+
+---
+
 # 組織（会社・事業所）
 
 ## 概要

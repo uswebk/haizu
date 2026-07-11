@@ -16,7 +16,7 @@ import {
 
 type DraftShift = {
 	key: string;
-	id?: string; // サーバ既存シフトのID（新規追加分は undefined）
+	id?: string; // ID of an existing server-side shift (undefined for newly added ones)
 	name: string;
 	startTime: string;
 	endTime: string;
@@ -50,10 +50,10 @@ function ShiftSettings() {
 	const [shifts, setShifts] = useState<DraftShift[]>([]);
 	const [confirmOpen, setConfirmOpen] = useState(false);
 	const [deletedNotice, setDeletedNotice] = useState(false);
-	// 取得＆下書き初期化が完了するまでモード選択を出さない（初期 single のちらつき防止）
+	// Don't show the mode selector until fetch + draft init finishes (prevents an initial "single" flicker)
 	const [ready, setReady] = useState(false);
 
-	// 取得データから下書きを初期化する（未登録=null は single 既定で初期化）
+	// Initialize the draft from fetched data (unregistered = null initializes to the single default)
 	useEffect(() => {
 		if (isPending) return;
 		setMode(workPattern?.mode ?? "single");
@@ -129,7 +129,7 @@ function ShiftSettings() {
 			return next;
 		});
 
-	// 開始・終了が完全に同じシフト、または同名シフトは重複登録できない
+	// Shifts with identical start/end times, or with the same name, can't be registered twice
 	const duplicateError = useMemo(() => {
 		if (mode !== "multi") return null;
 		const times = new Set<string>();

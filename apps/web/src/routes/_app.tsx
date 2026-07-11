@@ -1,12 +1,12 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { fetchSession } from "#/lib/session";
 
-// 認証済みエリアの共通ガード。拠点スコープの解決とレイアウトは /_app/s/$siteId が担う。
+// Common guard for authenticated areas. Site-scope resolution and layout are handled by /_app/s/$siteId.
 export const Route = createFileRoute("/_app")({
 	beforeLoad: async () => {
 		const user = await fetchSession();
 		if (!user) throw redirect({ to: "/login" });
-		// メールアドレス未確認ならOTP確認画面へ
+		// If the email isn't verified, go to the OTP verification screen
 		if (!user.emailVerified) throw redirect({ to: "/verify-otp" });
 		return { user };
 	},

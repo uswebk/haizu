@@ -7,8 +7,8 @@ import { organizations } from "../db/schema";
 import { auth } from "../lib/auth";
 import { signupContext } from "../lib/signup-context";
 
-// サインアップは「会社名 → 組織作成」を伴うため、Better Auth 標準の signUp をそのまま
-// 使わずここでラップする。組織を作ってから、その organizationId 付きでユーザーを作成する。
+// Sign-up involves "company name -> create organization", so instead of using Better Auth's standard signUp
+// directly, we wrap it here. Create the organization first, then create the user with that organizationId.
 export const authRoute = new Hono().post(
 	"/sign-up",
 	zValidator("json", SignUpInputSchema),
@@ -28,9 +28,9 @@ export const authRoute = new Hono().post(
 			db.delete(organizations).where(eq(organizations.id, organization.id));
 
 		try {
-			// asResponse で Set-Cookie を含む Response を得て、そのままクライアントへ返す。
-			// メール重複等では例外ではなく非OKの Response が返るため、その場合も組織を戻す。
-			// organizationId / role はボディでは渡さず、signupContext 経由で databaseHooks が設定する。
+			// Use asResponse to get a Response (including Set-Cookie) and return it to the client as-is.
+			// On things like a duplicate email, a non-OK Response is returned rather than thrown, so roll back the organization in that case too.
+			// organizationId / role aren't passed in the body; databaseHooks set them via signupContext.
 			const res = await signupContext.run(
 				{ organizationId: organization.id, role: "admin" },
 				() =>
@@ -43,7 +43,7 @@ export const authRoute = new Hono().post(
 				await rollbackOrg();
 				return res;
 			}
-			// メールアドレス確認のため OTP を送信する
+			// Send an OTP to verify the email address
 			await auth.api.sendVerificationOTP({
 				body: { email, type: "email-verification" },
 			});

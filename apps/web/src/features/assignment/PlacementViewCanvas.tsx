@@ -3,7 +3,7 @@ import type { SpotState } from "#/features/editor/types";
 import type { EmployeeRow } from "#/features/employees/types";
 import { API_BASE } from "#/lib/api";
 
-// 配置決め詳細と同じ基準幅。規格のアスペクト比で高さを決める
+// Same base width as the assignment detail. Height is derived from the spec's aspect ratio
 const BASE_WIDTH = 760;
 
 type Props = {
@@ -15,7 +15,7 @@ type Props = {
 	zoom?: number;
 };
 
-// 確定済み配置を読み取り専用で描画する（配置決め詳細のキャンバスから編集操作を除いたもの）
+// Renders a confirmed placement read-only (the assignment detail canvas minus editing)
 export function PlacementViewCanvas({
 	spots,
 	assignBySpot,

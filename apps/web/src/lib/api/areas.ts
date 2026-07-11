@@ -20,7 +20,7 @@ export const areaKeys = {
 };
 
 export async function fetchAreas(date?: string): Promise<AreaListItem[]> {
-	// 規格バージョンの「当日」判定は端末TZの今日を基準にする（API任せだとUTCになる）。
+	// The spec version's "today" is based on the device-TZ today (leaving it to the API would use UTC).
 	const target = date ?? todayStr();
 	const res = await apiFetch(`${API_BASE}/areas?date=${target}`);
 	const data = await handleResponse<{ areas: AreaListItem[] }>(res);

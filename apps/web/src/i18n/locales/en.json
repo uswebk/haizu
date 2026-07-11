@@ -1,7 +1,7 @@
 {
 	"common": {
 		"appName": "haizu",
-		"appTagline": "PLACEMENT MANAGEMENT SYSTEM",
+		"appTagline": "",
 		"save": "Save",
 		"cancel": "Cancel",
 		"delete": "Delete",

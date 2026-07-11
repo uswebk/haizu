@@ -75,8 +75,8 @@ export const layoutSpecVersions = pgTable(
 		planImageOffsetX: real("plan_image_offset_x").notNull().default(0),
 		planImageOffsetY: real("plan_image_offset_y").notNull().default(0),
 		publishedAt: timestamp("published_at", { withTimezone: true }),
-		// 公開バージョンが配置決めで適用され始める日（配置決めはこの日以降、日付ごとに該当バージョンを解決する）
-		// draft時点では未設定のためデフォルトは十分に過去の日付にしておく
+		// Date the published version starts applying in assignment (assignment resolves the matching version per date from this day onward)
+		// Unset while a draft, so the default is a sufficiently old date
 		effectiveDate: date("effective_date").notNull().default("1000-01-01"),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
@@ -112,7 +112,7 @@ export const employees = pgTable(
 			.notNull()
 			.defaultNow(),
 	},
-	// 従業員コードは拠点内で一意
+	// Employee code is unique within a site
 	(t) => [uniqueIndex("employees_site_id_code_unique").on(t.siteId, t.code)],
 );
 
@@ -128,7 +128,7 @@ export const tags = pgTable(
 			.notNull()
 			.defaultNow(),
 	},
-	// タグ名は拠点内で一意
+	// Tag name is unique within a site
 	(t) => [uniqueIndex("tags_site_id_name_unique").on(t.siteId, t.name)],
 );
 
@@ -167,7 +167,7 @@ export const workPatterns = pgTable(
 			.notNull()
 			.defaultNow(),
 	},
-	// 拠点ごとに1レコード
+	// One record per site
 	(t) => [uniqueIndex("work_patterns_site_id_unique").on(t.siteId)],
 );
 
@@ -217,8 +217,8 @@ export const assignments = pgTable(
 			.notNull()
 			.references(() => layoutSpecVersions.id),
 		date: date("date").notNull(),
-		// null = シフトなし（終日）。シフトは append-only（物理削除しない）なので参照は壊れず、
-		// 参照先のシフト行（soft-delete 含む）が当時のシフト定義＝履歴を保全する
+		// null = no shift (all day). Shifts are append-only (never hard-deleted), so references stay intact,
+		// and the referenced shift row (including soft-deleted ones) preserves the shift definition at the time = history
 		shiftId: uuid("shift_id").references(() => shifts.id, {
 			onDelete: "no action",
 		}),
@@ -264,7 +264,7 @@ export const spotAssignments = pgTable(
 	],
 );
 
-// 大画面ビュアーの表示方法をエリアごとに保持する（manual=強制表示 / auto=働き方に合わせて自動表示）
+// Holds the large-screen viewer display mode per area (manual = forced display / auto = auto display by work style)
 export const viewerConfigs = pgTable(
 	"viewer_configs",
 	{
@@ -275,12 +275,12 @@ export const viewerConfigs = pgTable(
 		mode: text("mode", { enum: ["manual", "auto"] })
 			.notNull()
 			.default("auto"),
-		// manual: 強制表示する日付・シフト（shiftId null = 終日）
+		// manual: the date/shift to force-display (shiftId null = all day)
 		displayDate: date("display_date"),
 		shiftId: uuid("shift_id").references(() => shifts.id, {
 			onDelete: "no action",
 		}),
-		// auto: シフト開始の何分前から次シフトの配置に切り替えるか
+		// auto: how many minutes before a shift start to switch to the next shift's placement
 		leadMinutes: integer("lead_minutes").notNull().default(0),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
@@ -293,8 +293,8 @@ export const viewerConfigs = pgTable(
 );
 
 // --- Better Auth (email/password) ---
-// user/session/account/verification は Better Auth core が要求するテーブル。
-// user には独自フィールド（所属組織・権限・有効状態）を追加している。
+// user/session/account/verification are tables required by Better Auth core.
+// We add custom fields to user (organization, role, active state).
 export const user = pgTable("user", {
 	id: text("id").primaryKey(),
 	name: text("name").notNull(),
@@ -307,11 +307,11 @@ export const user = pgTable("user", {
 	updatedAt: timestamp("updated_at", { withTimezone: true })
 		.notNull()
 		.defaultNow(),
-	// 独自フィールド
+	// Custom fields
 	organizationId: uuid("organization_id")
 		.notNull()
 		.references(() => organizations.id, { onDelete: "cascade" }),
-	// 組織ロール。拠点ごとの権限は member_sites.role が持つ。
+	// Org role. Per-site permissions are held by member_sites.role.
 	role: text("role", { enum: ORG_ROLES }).notNull().default("member"),
 	isActive: boolean("is_active").notNull().default(true),
 });
@@ -372,7 +372,7 @@ export const verification = pgTable("verification", {
 		.defaultNow(),
 });
 
-// メンバー(user)の担当拠点。admin は全拠点扱いのため紐付けを持たない。
+// A member's (user's) assigned sites. Admins are treated as all-sites, so they have no links.
 export const memberSites = pgTable(
 	"member_sites",
 	{
@@ -382,7 +382,7 @@ export const memberSites = pgTable(
 		siteId: uuid("site_id")
 			.notNull()
 			.references(() => sites.id, { onDelete: "cascade" }),
-		// この拠点における権限。拠点ごとに異なってよい（A拠点=拠点管理者, B拠点=一般 など）
+		// Permission at this site. May differ per site (site A = site admin, site B = general, etc.)
 		role: text("role", { enum: SITE_ROLES }).notNull().default("general"),
 	},
 	(t) => [
@@ -390,7 +390,7 @@ export const memberSites = pgTable(
 	],
 );
 
-// 招待。メールで招待し、パスワード設定完了で user 化する（受け入れフローは別途）。
+// Invitations. Invite by email; becomes a user once the password is set (acceptance flow is separate).
 export const invitations = pgTable("invitations", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	organizationId: uuid("organization_id")
@@ -408,7 +408,7 @@ export const invitations = pgTable("invitations", {
 		.defaultNow(),
 });
 
-// 招待の担当拠点。user 化した際に member_sites へ引き継ぐ想定。
+// An invitation's assigned sites. Intended to carry over to member_sites when it becomes a user.
 export const invitationSites = pgTable(
 	"invitation_sites",
 	{

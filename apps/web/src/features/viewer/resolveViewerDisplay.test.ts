@@ -68,18 +68,18 @@ describe("resolveViewerDisplay", () => {
 	});
 
 	it("auto は始業前は日跨ぎで直前のシフト（最後）を採用", () => {
-		// 08:00 は日勤切替(09:00)前 → wrap で最後の夜勤
+		// 08:00 is before the day-shift switch (09:00) -> wraps to the last Night shift
 		expect(resolveViewerDisplay(config({}), two, day(8)).shiftId).toBe("night");
 	});
 
 	it("leadMinutes 正(分前)で早く次シフトへ切り替わる", () => {
-		// 30分前設定: 08:45 は日勤切替(08:30)を過ぎ日勤
+		// 30-min-before setting: 08:45 is past the day-shift switch (08:30), so Day
 		const c = config({ leadMinutes: 30 });
 		expect(resolveViewerDisplay(c, two, day(8, 45)).shiftId).toBe("day");
 	});
 
 	it("leadMinutes 負(分後)で遅く切り替わる", () => {
-		// 30分後設定: 09:15 はまだ日勤切替(09:30)前 → wrap で夜勤のまま
+		// 30-min-after setting: 09:15 is still before the day-shift switch (09:30) -> stays Night via wrap
 		const c = config({ leadMinutes: -30 });
 		expect(resolveViewerDisplay(c, two, day(9, 15)).shiftId).toBe("night");
 	});

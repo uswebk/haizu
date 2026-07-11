@@ -6,15 +6,15 @@ export type RoleAssignmentResult =
 
 type OrgRoleAssignment = {
 	actorOrgRole: OrgRole;
-	// 自分自身への権限変更か。招待（対象が未作成）では常に false。
+	// Whether this is a permission change to oneself. Always false for invitations (target not yet created).
 	isSelf: boolean;
-	// 対象の現在の組織ロール。招待では対象がまだ存在しないため null。
+	// The target's current org role. null for invitations since the target doesn't exist yet.
 	targetOrgRole: OrgRole | null;
 	nextOrgRole: OrgRole;
 };
 
-// 組織ロールを割り当てられるかを判定する（member_permission.md のルール）。
-// 招待（POST /members/invite）と更新（PUT /members/:id）で共有する。
+// Decides whether an org role may be assigned (rules in member_permission.md).
+// Shared by invite (POST /members/invite) and update (PUT /members/:id).
 export function evaluateOrgRoleAssignment({
 	actorOrgRole,
 	isSelf,
@@ -24,7 +24,7 @@ export function evaluateOrgRoleAssignment({
 	if (isSelf && nextOrgRole !== targetOrgRole) {
 		return { ok: false, status: 403, message: "自身の権限は変更できません" };
 	}
-	// 管理者を作れるのは管理者だけ。既存の管理者にも管理者以外は手を出せない（権限昇格の防止）
+	// Only admins can create admins. Non-admins can't touch existing admins either (prevents privilege escalation)
 	if (
 		actorOrgRole !== "admin" &&
 		(targetOrgRole === "admin" || nextOrgRole === "admin")
@@ -38,8 +38,8 @@ export function evaluateOrgRoleAssignment({
 	return { ok: true };
 }
 
-// 拠点ロールを変更してよい拠点かを判定する。
-// 拠点管理者は「自分が拠点管理者である拠点」のメンバーしか触れない（member_permission.md）。
+// Decides whether a site's role may be changed.
+// A site admin can only touch members of sites where they are a site admin (member_permission.md).
 export function assertSitesManageable(
 	manageableSiteIds: readonly string[],
 	targetSiteIds: readonly string[],

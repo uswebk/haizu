@@ -9,8 +9,8 @@ export interface FileStorage {
 	remove(url: string): Promise<void>;
 }
 
-// STORAGE_DRIVER で保存先を切り替える。デフォルトはローカルディスク（開発用）。
-// 本番用（s3 / gcs 等）は FileStorage を実装し、下記 switch に分岐を追加する。
+// Switch the storage backend via STORAGE_DRIVER. The default is local disk (for development).
+// For production (s3 / gcs, etc.), implement FileStorage and add a case to the switch below.
 function createStorage(): FileStorage {
 	const driver = process.env.STORAGE_DRIVER ?? "local";
 	switch (driver) {

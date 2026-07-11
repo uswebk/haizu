@@ -84,7 +84,7 @@ export function MemberFormDialog({
 
 	if (!open) return null;
 
-	// 拠点の割り当てを外す / 既定ロール(一般)で追加する
+	// Remove the site assignment / add it with the default role (general)
 	const toggleSite = (siteId: string) => {
 		setDraft((d) => ({
 			...d,
@@ -94,7 +94,7 @@ export function MemberFormDialog({
 		}));
 	};
 
-	// 拠点ごとに異なるロールを設定できる（A拠点=拠点管理者, B拠点=一般 など）
+	// A different role can be set per site (site A = site admin, site B = general, etc.)
 	const setSiteRole = (siteId: string, role: SiteRole) => {
 		setDraft((d) => ({
 			...d,
@@ -104,7 +104,7 @@ export function MemberFormDialog({
 		}));
 	};
 
-	// メンバーは必ず1つ以上の拠点に所属する（拠点ゼロだとどの画面にも入れない）
+	// A member always belongs to at least one site (with zero sites they can't enter any screen)
 	const hasSite = draft.orgRole === "admin" || draft.siteRoles.length > 0;
 	const canSave =
 		hasSite &&
@@ -221,7 +221,7 @@ export function MemberFormDialog({
 											assigned ? "border-primary" : "border-border"
 										}`}
 									>
-										{/* 拠点の選択はチェックボックス。権限の選択(primary)と色の役割を分ける */}
+										{/* Site selection is a checkbox; keep its color role separate from the permission selection (primary) */}
 										<button
 											type="button"
 											onClick={() => toggleSite(site.id)}

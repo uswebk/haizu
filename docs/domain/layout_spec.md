@@ -1,3 +1,55 @@
+# Layout (spec) editor
+
+*English first; the original Japanese is preserved below the divider.*
+
+## Terms
+- Layout area
+  - One partitioned work area within a site ("Inspection room", "Line A", "Sorting room", etc.)
+- Placement spot
+  - One place within a layout area where one person is placed
+- Version
+  - A spec version. A spec can have multiple versions
+- Floor plan
+  - The area's floor plan. Uploading it makes placement easier to grasp (size adjustable)
+- New version
+  - The action of duplicating the current spec to create a new version
+- Effective date
+  - The date set at publish time. Assignment uses this version for dates on or after it
+- Current spec (as of a given date)
+  - Among published versions, the newest whose effective date is on or before that date (ties broken by the larger version number)
+
+## Version states
+
+A version has two states: "draft" or "published".
+
+| State | What you can do |
+|------|-----------|
+| Draft | Edit/save spots, publish (effective date required) |
+| Published | Edit/save spots, unpublish (not allowed if already used in assignment) |
+
+```
+Draft ──[publish]──▶ Published
+  ▲                     │
+  └────[unpublish]──────┘
+        * can't unpublish if used in assignment
+```
+
+## Rules
+
+- **An effective date is required at publish time.** For each date, assignment references "the newest published version whose effective date is on or before that date" as the current spec (ties broken by the larger version number)
+- By this resolution, past dates keep referencing the version as of when they were published; publishing a new version never affects past assignments
+- Multiple published versions can exist within the same area (because versions used in assignment can't be reverted to draft)
+- A version used in assignment **can't be changed, deleted, or unpublished**. If a change is needed, "duplicate as a new version"
+- "Duplicate current as a new version" does not create a version at the moment of duplication. It is recorded as a new version **only once you save or publish** after editing (nothing remains if you leave without saving)
+- **Deleting a layout area**: if any version in the area has been used in assignment, the area can't be deleted. Deleting it removes the floor plan, all versions, and placement spots (irreversible)
+  - You can't delete only an individual unused version (never used in assignment). However, a draft version isn't used in assignment unless published and remains editable, so an unneeded draft can just be left alone (little need to delete it)
+- Up to 100 placement spots can be added
+- On concurrent edits, last write wins
+- Only admins and site admins can edit. General users can only view; others can't view
+- Changes aren't reflected unless you **save**
+
+---
+
 # 配置(規格)エディタ
 
 ## 用語

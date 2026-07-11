@@ -14,9 +14,9 @@ export function useSpotEditor(
 		initialImageScale ?? DEFAULT_IMAGE_SCALE,
 	);
 
-	// バージョン切り替え時、または初期データの取得完了時に spots / imageScale をリセットする。
-	// useEffect ではなく「レンダー中にstateを調整する」パターンを使うことで、
-	// versionId をリセットのトリガーとして使いつつ exhaustive-deps の抑制を避けている。
+	// Reset spots / imageScale when switching versions or when the initial data finishes loading.
+	// Using the "adjust state during render" pattern instead of useEffect,
+	// we use versionId as the reset trigger while avoiding suppressing exhaustive-deps.
 	// https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
 	const [prevSpotsKey, setPrevSpotsKey] = useState([versionId, initialSpots]);
 	if (versionId !== prevSpotsKey[0] || initialSpots !== prevSpotsKey[1]) {

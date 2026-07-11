@@ -29,7 +29,7 @@ import {
 import { siteScope } from "../middleware/site-scope";
 import type { AppEnv } from "../types";
 
-// 現在拠点に属するエリアIDの一覧。配置は area 経由で拠点にスコープされる。
+// List of area IDs belonging to the current site. Assignments are scoped to a site via the area.
 async function siteAreaIds(siteId: string): Promise<string[]> {
 	const rows = await db
 		.select({ id: areas.id })
@@ -60,7 +60,7 @@ const shiftsUsedQuery = z.object({
 
 type AssignmentRow = typeof assignments.$inferSelect;
 
-// assignmentId ごとにグルーピングした spotAssignments を一括取得する
+// Fetch spotAssignments grouped by assignmentId in one query
 async function loadSpotAssignmentsByAssignmentIds(assignmentIds: string[]) {
 	const grouped = new Map<string, { spotId: string; employeeId: string }[]>();
 	if (assignmentIds.length === 0) return grouped;
@@ -116,8 +116,8 @@ export const assignmentsRoute = new Hono<AppEnv>()
 		return c.json({ mismatched: found.length > 0 });
 	})
 
-	// 指定エリア（・指定日）で確定済み配置に紐づいたことのあるシフト一覧（削除済みシフトも含む）。
-	// 配置ビュアー設定の強制表示で「その日に実際確定していたシフト」を選び直せるようにするため。
+	// List of shifts that have been linked to a confirmed assignment for the given area (and date), including deleted shifts.
+	// So the viewer settings' forced display can re-select "the shift actually confirmed on that day".
 	.get("/shifts-used", zValidator("query", shiftsUsedQuery), async (c) => {
 		const { areaId, date } = c.req.valid("query");
 
@@ -166,7 +166,7 @@ export const assignmentsRoute = new Hono<AppEnv>()
 				.from(assignments)
 				.where(where);
 
-			// shifts は left join（soft-delete 済みでも name は保持されるため当時のシフト名を表示できる）
+			// shifts is a left join (name is kept even when soft-deleted, so the shift name at the time can be shown)
 			const rows = await db
 				.select({
 					id: assignments.id,
@@ -238,7 +238,7 @@ export const assignmentsRoute = new Hono<AppEnv>()
 	.put("/", zValidator("json", AssignmentInputSchema), async (c) => {
 		const input = c.req.valid("json");
 
-		// 勤務体制が未登録の拠点では配置決めできない（シフトが配置の前提）
+		// Assignment isn't possible at a site with no work pattern registered (shifts are a prerequisite)
 		const workPattern = await db.query.workPatterns.findFirst({
 			where: eq(workPatterns.siteId, c.get("siteId")),
 		});
@@ -246,13 +246,13 @@ export const assignmentsRoute = new Hono<AppEnv>()
 			return c.json({ error: "勤務体制が未登録のため配置決めできません" }, 400);
 		}
 
-		// 対象エリアが現在拠点に属することを検証する
+		// Verify the target area belongs to the current site
 		const area = await db.query.areas.findFirst({
 			where: and(eq(areas.id, input.areaId), eq(areas.siteId, c.get("siteId"))),
 		});
 		if (!area) return c.json({ error: "Not found" }, 404);
 
-		// 配置決めは公開済みの規格に対してのみ行える（下書き規格は現場に未反映のため対象外）
+		// Assignment is allowed only against a published spec (draft specs aren't reflected on-site, so they're excluded)
 		const version = await db.query.layoutSpecVersions.findFirst({
 			where: eq(layoutSpecVersions.id, input.layoutSpecVersionId),
 		});

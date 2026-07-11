@@ -3,10 +3,10 @@ import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { verification } from "../db/schema";
 
-// メール変更OTPの有効期限（10分）
+// Expiry for the email-change OTP (10 minutes)
 const EMAIL_OTP_TTL_MS = 10 * 60 * 1000;
 
-// OTPと対象アドレスを verification テーブルに一時保存する（identifier ごとに1件）
+// Temporarily store the OTP and target address in the verification table (one row per identifier)
 export async function storeEmailOtp(identifier: string, newEmail: string) {
 	const otp = String(randomInt(0, 1_000_000)).padStart(6, "0");
 	await db.delete(verification).where(eq(verification.identifier, identifier));
@@ -39,7 +39,7 @@ export function evaluateEmailOtp(params: {
 	}
 	const sep = value.indexOf(":");
 	const savedOtp = value.slice(0, sep);
-	// メールアドレスにコロンは含まれ得ないが、最初のコロンで分割し残り全体をアドレスとする
+	// Email addresses can't contain a colon, but split on the first colon and treat the rest as the address
 	const newEmail = value.slice(sep + 1);
 	if (savedOtp !== otp) {
 		return { ok: false, error: "確認コードが正しくありません", expired: false };
@@ -47,7 +47,7 @@ export function evaluateEmailOtp(params: {
 	return { ok: true, newEmail };
 }
 
-// 保存済みOTPを検証する。成功時は対象の新アドレスを返し、行は消費（削除）する
+// Verify the stored OTP. On success, return the target new address and consume (delete) the row
 export async function consumeEmailOtp(
 	identifier: string,
 	otp: string,
@@ -67,7 +67,7 @@ export async function consumeEmailOtp(
 		otp,
 		now: Date.now(),
 	});
-	// 期限切れ・照合成功のいずれも行は消費する（不一致のときだけ再試行のため残す）
+	// The row is consumed on both expiry and a successful match (kept only on mismatch, for retry)
 	if (result.ok || result.expired) {
 		await db
 			.delete(verification)

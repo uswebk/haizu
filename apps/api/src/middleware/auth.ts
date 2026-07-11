@@ -4,7 +4,7 @@ import { auth } from "../lib/auth";
 import type { AppEnv } from "../types";
 import { evaluateSessionAccess } from "./session-access";
 
-// Better Auth のセッションを検証し、ユーザー・組織をコンテキストへ設定する。
+// Validates the Better Auth session and sets the user/organization on the context.
 export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
 	const session = await auth.api.getSession({ headers: c.req.raw.headers });
 	if (!session) {

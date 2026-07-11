@@ -13,7 +13,7 @@ export type SpotAssignment = z.infer<typeof SpotAssignmentSchema>;
 export const AssignmentSchema = z.object({
 	id: z.string().uuid(),
 	areaId: z.string().uuid(),
-	layoutSpecVersionId: z.string().uuid(), // 使用した規格バージョン
+	layoutSpecVersionId: z.string().uuid(), // The spec version used
 	date: z.string().date(), // yyyy-mm-dd
 	shiftId: z.string().uuid().nullable(),
 	status: AssignmentStatusSchema,

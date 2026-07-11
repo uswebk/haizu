@@ -62,8 +62,8 @@ function isUniqueViolation(error: unknown): boolean {
 	if ("code" in error && (error as { code?: unknown }).code === "23505") {
 		return true;
 	}
-	// drizzle-orm は driver のエラーを DrizzleQueryError でラップし、
-	// 元のPostgresエラー（code含む）は cause に格納される
+	// drizzle-orm wraps driver errors in a DrizzleQueryError,
+	// and the original Postgres error (including code) is stored in cause
 	const cause = (error as { cause?: unknown }).cause;
 	return isUniqueViolation(cause);
 }
@@ -114,7 +114,7 @@ export const employeesRoute = new Hono<AppEnv>()
 			const siteId = c.get("siteId");
 			const { employees: incoming } = c.req.valid("json");
 
-			// 参照される全タグが当該拠点に属することを検証（他拠点タグ混入防止）
+			// Verify that all referenced tags belong to this site (prevents mixing in other sites' tags)
 			const referencedTagIds = [...new Set(incoming.flatMap((e) => e.tagIds))];
 			if (referencedTagIds.length > 0) {
 				const siteTags = await db

@@ -1,3 +1,32 @@
+# Site
+
+*English first; the original Japanese is preserved below the divider.*
+
+## Terms
+- Site
+    - e.g. "Plant A (food)", "Warehouse B (shipping)"
+- Work style
+    - Registered per site
+    - e.g. day / late / night shifts
+    - This setting determines the shifts used in assignment
+- Site selection
+    - A member selects which site to operate on
+    - Visible only to members invited to the site
+
+## Rules
+- Up to 10 sites can be registered per company
+    - Supports companies with multiple sites
+- A company has at least one site
+    - The service can't be used without a site
+- Changing the work style setting
+    - Can be changed later, but past data stays linked to the shifts at that time
+- Sites can't be deleted; they can be deactivated
+- Only "admins" can create/edit sites
+    - Roles below "site admin" can't create or edit sites
+- Access to site-linked data (layout areas, employees, assignments, work patterns, tags, viewer settings, etc.) is, like site selection, limited to "admins" or members invited to that site
+
+---
+
 # 拠点
 ## 用語
 - 拠点

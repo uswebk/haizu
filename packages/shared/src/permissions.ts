@@ -4,9 +4,9 @@ import {
 	type SiteRole,
 } from "./schemas/user";
 
-// 権限の単一の情報源。API の認可ミドルウェアと、フロントの画面・ナビ制御が
-// どちらもこの表を読む（API とUIで権限定義が二重管理になるのを防ぐ）。
-// 組織スコープの操作。拠点をまたぐため OrgRole で判定する。
+// Single source of truth for permissions. Both the API's authorization
+// middleware and the frontend's screen/nav control read this table (avoids duplicating permission definitions across API and UI).
+// Organization-scoped operations. They span sites, so they are decided by OrgRole.
 export const ORG_PERMISSIONS = {
 	"org:write": ["admin"],
 	"site:manage": ["admin"],
@@ -14,7 +14,7 @@ export const ORG_PERMISSIONS = {
 
 export type OrgPermission = keyof typeof ORG_PERMISSIONS;
 
-// 拠点スコープの操作。対象拠点における SiteRole で判定する。
+// Site-scoped operations. Decided by the SiteRole at the target site.
 export const SITE_PERMISSIONS = {
 	"member:manage": ["site_admin"],
 	"employee:write": ["site_admin"],
@@ -24,15 +24,15 @@ export const SITE_PERMISSIONS = {
 	"tag:write": ["site_admin"],
 	"viewer_config:write": ["site_admin"],
 	"assignment_history:read": ["site_admin", "general"],
-	// 拠点データの共通読み取り。ビュアー画面が配置エリア・配置・従業員・シフトを
-	// 必要とするため、viewer を含む全拠点ロールに開く。画面単位の制御は SCREENS で行う。
+	// Common read access to site data. The viewer screen needs layout areas,
+	// assignments, employees, and shifts, so it is open to all site roles including viewer. Per-screen control is done in SCREENS.
 	"site_data:read": SITE_ROLES,
 } as const satisfies Record<string, readonly SiteRole[]>;
 
 export type SitePermission = keyof typeof SITE_PERMISSIONS;
 
-// 管理者は全拠点で拠点管理者として振る舞う。所属(member_sites)を持たなくてもよい。
-// member はその拠点に所属していなければ null（＝拠点データに一切アクセスできない）。
+// Admins act as site admins at every site. They don't need a membership (member_sites).
+// A member without membership at the site gets null (= no access to that site's data at all).
 export function effectiveSiteRole(
 	orgRole: OrgRole,
 	siteRole: SiteRole | null,
@@ -54,8 +54,8 @@ export function canSite(
 	);
 }
 
-// 画面（フロントのルート）に対する権限。サイドナビの出し分けとルートガードが使う。
-// 組織スコープの画面は OrgRole、拠点スコープの画面は実効 SiteRole で判定する。
+// Permissions for screens (frontend routes). Used by sidebar nav visibility and route guards.
+// Organization-scoped screens are decided by OrgRole, site-scoped screens by the effective SiteRole.
 const ORG_SCREENS = {
 	sites: ["admin"],
 	"organization-settings": ["admin"],
@@ -75,7 +75,7 @@ const SITE_SCREENS = {
 export type Screen =
 	| keyof typeof ORG_SCREENS
 	| keyof typeof SITE_SCREENS
-	// 自身の情報変更は全ロールが行えるため、どちらのスコープにも属さない
+	// Editing one's own info is allowed for all roles, so it belongs to neither scope.
 	| "account";
 
 export function canAccessScreen(
@@ -94,8 +94,8 @@ export function canAccessScreen(
 	return (allowed as readonly SiteRole[]).includes(effective);
 }
 
-// 画面表示用のロール。組織ロールと拠点ロールを1つのラベルに落とす。
-// 認可判定には使わないこと（判定は canOrg / canSite）。
+// Role for display purposes. Collapses the org role and site role into a single label.
+// Do not use this for authorization decisions (use canOrg / canSite).
 export type DisplayRole = "admin" | SiteRole;
 
 export function displayRole(
@@ -106,9 +106,9 @@ export function displayRole(
 	return siteRole;
 }
 
-// ログイン直後・拠点選択後の着地画面。ホームを見られないロールはビュアーへ送る。
-// どの拠点にも所属しない member は、拠点データを一切見られないためアカウント設定へ。
-// パスは拠点(siteId)に依存するため、URLの組み立ては呼び出し側で行う。
+// Landing screen right after login / after selecting a site. Roles that can't see Home are sent to the viewer.
+// A member with no site membership can't see any site data, so they go to account settings.
+// The path depends on the site (siteId), so URL assembly is left to the caller.
 export function landingScreen(
 	orgRole: OrgRole,
 	siteRole: SiteRole | null,

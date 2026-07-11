@@ -27,7 +27,7 @@ function LoginPage() {
 			setError(t("login.invalidCredentials"));
 			return;
 		}
-		// メール未確認ならOTP確認画面へ
+		// If the email isn't verified, go to the OTP verification screen
 		void navigate({
 			to: data && !data.user.emailVerified ? "/verify-otp" : "/select-site",
 		});

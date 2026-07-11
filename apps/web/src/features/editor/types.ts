@@ -1,4 +1,4 @@
-// 未公開バージョンの effectiveDate プレースホルダー（DBのデフォルト値と合わせる）
+// effectiveDate placeholder for unpublished versions (matches the DB default value)
 export const UNPUBLISHED_EFFECTIVE_DATE = "1000-01-01";
 
 export type SpotState = {
@@ -13,7 +13,7 @@ export type VersionState = {
 	id: string;
 	label: string;
 	status: "draft" | "published";
-	effectiveDate: string; // 未公開時は "1000-01-01"
+	effectiveDate: string; // "1000-01-01" while unpublished
 	planImageUrl: string | null;
 	planImageName: string | null;
 	planAspectRatio?: number;
@@ -23,7 +23,7 @@ export type VersionState = {
 	hasAssignments: boolean;
 };
 
-// 図面の保存前の変更内容。保存/公開されるまではサーバーに反映されない。
+// Pending floor-plan changes before saving. Not reflected on the server until saved/published.
 export type PendingFloorPlan =
 	| { action: "upload"; file: File; previewUrl: string; aspectRatio: number }
 	| { action: "delete" };

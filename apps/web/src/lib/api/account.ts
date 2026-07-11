@@ -1,6 +1,6 @@
 import { API_BASE, apiFetch, handleResponse } from ".";
 
-// ログインメール変更: 新アドレス宛に確認コード（OTP）を送信する
+// Login email change: send a verification code (OTP) to the new address
 export async function requestEmailChangeOtp(newEmail: string): Promise<void> {
 	const res = await apiFetch(`${API_BASE}/account/email/otp`, {
 		method: "POST",
@@ -10,7 +10,7 @@ export async function requestEmailChangeOtp(newEmail: string): Promise<void> {
 	await handleResponse(res);
 }
 
-// ログインメール変更: 確認コードを検証し確定する
+// Login email change: verify the code and finalize
 export async function verifyEmailChangeOtp(
 	otp: string,
 ): Promise<{ email: string }> {

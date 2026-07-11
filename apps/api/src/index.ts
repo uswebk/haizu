@@ -19,20 +19,20 @@ import { workPatternsRoute } from "./routes/workPatterns";
 
 const app = new Hono();
 
-// セッションCookieをクロスオリジンで送受信するため credentials を許可（許可オリジンは環境変数）
+// Allow credentials so session cookies are sent/received cross-origin (allowed origins come from env vars)
 app.use("*", cors({ origin: WEB_ORIGIN, credentials: true }));
 
 app.get("/health", (c) => c.json({ status: "ok" }));
 app.use("/uploads/*", serveStatic({ root: "./" }));
 
-// Better Auth の標準ハンドラ（ログイン・ログアウト・セッション等）
+// Better Auth's standard handlers (login, logout, session, etc.)
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
-// 会社名→組織作成を伴うカスタムサインアップ
+// Custom sign-up that also creates an organization from the company name
 app.route("/auth", authRoute);
-// 招待の受け入れ（トークン所持のみで認証不要）
+// Accepting an invitation (only requires holding the token; no auth needed)
 app.route("/invitations", invitationsRoute);
 
-// 認証・拠点スコープは各ルート内で requireAuth / siteScope を適用している
+// Auth and site-scoping are applied per route via requireAuth / siteScope
 app.route("/account", accountRoute);
 app.route("/organizations", organizationsRoute);
 app.route("/sites", sitesRoute);

@@ -9,7 +9,7 @@ type Step = {
 		| "/s/$siteId/employees"
 		| "/s/$siteId/editor";
 	done: boolean;
-	// データは存在するが完了条件を満たしていない状態（例: エリアが下書きのみで未公開）
+	// State where data exists but the completion condition isn't met (e.g. an area has only a draft, unpublished)
 	inProgress?: boolean;
 	pendingLabel: string;
 };

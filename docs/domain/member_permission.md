@@ -1,3 +1,97 @@
+# Members & permissions
+
+*English first; the original Japanese is preserved below the divider.*
+
+## Premise
+* A concept distinct from employees
+* Mainly users who log into the system as administrators
+
+## Terms
+- Permission
+    - Four exist: admin, site admin, general, other
+- Invitation
+    - Invite by sending an email address
+
+## Rules
+- Login
+    - Login becomes possible once invited by email and the password is set
+- Permissions
+    - Permissions are set by "admin" and "site admin"
+    - You can't change your own permission
+    - "Admin" can set all permissions
+    - "Site admin" can do everything except setting the permission of an "admin" or "a user belonging to another site". They also can't make a user belonging to their site a site admin of another site.
+    - "General" can't set permissions
+- Sites
+    - Only "admin" can create/edit sites (see [site.md](./site.md) for details)
+    - Viewing/operating site-linked data is limited to "admin" or members invited to that site
+
+## Permission matrix
+
+### Role scopes
+
+Roles are split into two scopes.
+
+- **Org role (OrgRole)** — `admin` / `member`. One per organization.
+- **Site role (SiteRole)** — `site_admin` / `general` / `viewer`. **May differ per site.**
+
+To express "site admin at site A, general at site B", the site role is held per site in the `member_sites` table.
+`admin` is an org-scope concept and acts as a site-admin equivalent at every site (holds no row in `member_sites`).
+There is no such thing as "an admin of only site A".
+
+Summary of each role:
+
+- **Admin** — everything
+- **Site admin** — within their sites, everything except "promoting to / inviting as admin", "changing organization settings", and "creating/editing sites"
+- **General** — only viewing home, assignment history, and the viewer, plus editing their own info
+- **Other** — only viewing the viewer
+
+### Org-scope operations
+
+| Operation | Admin | Member (incl. site admin) |
+|---|:--:|:--:|
+| Change organization settings | ✓ | — |
+| Create/edit sites | ✓ | — |
+| Promote to / invite as admin | ✓ | — |
+
+### Site-scope operations (decided by the site role at the target site)
+
+| Operation | Site admin | General | Other |
+|---|:--:|:--:|:--:|
+| View/invite/change members | ✓ | — | — |
+| Create/edit/delete employees | ✓ | — | — |
+| Edit/publish layout areas (specs) | ✓ | — | — |
+| Create/edit assignments | ✓ | — | — |
+| Edit shifts (work pattern) | ✓ | — | — |
+| Edit tags | ✓ | — | — |
+| Edit viewer settings | ✓ | — | — |
+| View assignment history | ✓ | ✓ | — |
+| View site data (areas, assignments, employees, shifts) | ✓ | ✓ | ✓ |
+
+A site admin can manage members only at **sites where they are a site admin**. They can't touch permissions at other sites.
+
+The last row, "view site data", is allowed for "other" too because the viewer screen depends on this data.
+That "other" can't reach screens beyond the viewer is enforced by screen-level permissions.
+
+### Screens (decided by the effective role at the currently selected site)
+
+| Screen | Admin | Site admin | General | Other |
+|---|:--:|:--:|:--:|:--:|
+| Home | ✓ | ✓ | ✓ | — |
+| Layout areas | ✓ | ✓ | — | — |
+| Assignment | ✓ | ✓ | — | — |
+| Assignment history | ✓ | ✓ | ✓ | — |
+| Viewer | ✓ | ✓ | ✓ | ✓ |
+| Employees | ✓ | ✓ | — | — |
+| Settings (shifts, tags, viewer settings) | ✓ | ✓ | — | — |
+| Members | ✓ | ✓ | — | — |
+| Site management | ✓ | — | — | — |
+| Organization settings | ✓ | — | — | — |
+| Account settings (edit own info) | ✓ | ✓ | ✓ | ✓ |
+
+Because permissions differ per site, **the same user sees different screens depending on the selected site**.
+
+---
+
 # メンバー・権限
 
 ## 前提

@@ -1,3 +1,58 @@
+# Assignment
+
+*English first; the original Japanese is preserved below the divider.*
+
+## Terms
+- Shift
+    - A daily work division like date + Day, Night
+    - Work style is set per site
+        - 10:00-19:00 is Day
+        - 19:00-09:00 is Night
+- Confirm
+    - Confirms the assignment; it appears in the viewer
+    - The placement can still be changed after confirming
+- Draft
+    - Not shown in the viewer
+
+## Rules
+- Employees can be assigned only to spots of a **published spec** (draft specs can't be assigned; see layout_spec.md)
+    - Which version applies is determined by the assignment's target date and the spec's **effective date** ("current spec" = the newest published version whose effective date is on or before the target date; see layout_spec.md). Versions whose effective date is after the target date can't be assigned
+    - Even after publishing a new version, past-date assignments with an earlier effective date keep referencing the original version and remain editable
+- A spec version used in assignment can no longer be **edited (spot/floor-plan changes) or unpublished** (see layout_spec.md). To change the spec, duplicate a new version
+- Shifts follow the site's work pattern (see work_pattern.md). If the work style is "no shifts", assignment is a single per-date (all-day) entry
+    - Because shifts are append-only, changing a shift's name/time after assignment keeps that assignment referencing the pre-change shift definition (see work_pattern.md)
+- There is only one assignment per "layout area × date × shift" combination (draft or confirmed)
+- Confirmed/draft states can be toggled any number of times (confirm -> revert to draft -> confirm again, etc.)
+- Duplicate employees within the same shift are allowed (a warning is shown)
+    - To support employees who move between multiple areas
+- You can't place more people than the spec allows
+- You can't place employees outside the spec's spots
+    - The spec must be changed
+
+## Misc
+- Filtering by employee tags is supported
+- Assign by tapping a placement spot, or by drag & drop
+- Tapping a placement spot shows details of the assigned employee, etc.
+
+# Assignment history
+## Terms
+- Assignment history
+    - A feature to review past confirmed assignment records
+    - Viewed by specifying a date (read-only)
+- Memo
+    - A text memo can be left on an assignment
+    - Used for later review / handover
+- CSV export
+    - Assignment records can be downloaded as CSV
+    - Export by specifying a period
+
+## Rules
+- Only confirmed assignments are viewable as history (drafts excluded)
+- View permission: admin, site admin, general (see member_permission.md)
+- Past assignments can't be changed (tracked as a change log only)
+
+---
+
 # 配置決め
 ## 用語
 - シフト

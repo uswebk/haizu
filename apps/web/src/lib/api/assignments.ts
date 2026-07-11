@@ -36,7 +36,7 @@ export async function fetchShiftMismatch(date: string): Promise<boolean> {
 	return data.mismatched;
 }
 
-// 確定済み配置の履歴1件（一覧テーブル1行分）
+// One confirmed-assignment history entry (one row in the list table)
 export type HistoryEntry = {
 	id: string;
 	areaId: string;
@@ -69,7 +69,7 @@ export async function fetchAssignmentHistory(params: {
 	return handleResponse<HistoryPage>(res);
 }
 
-// エリアで確定済み配置に紐づいたことのあるシフト（削除済み含む）
+// Shifts that have been linked to a confirmed assignment in the area (including deleted ones)
 export type UsedShift = {
 	id: string;
 	name: string;

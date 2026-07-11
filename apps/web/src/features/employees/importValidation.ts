@@ -11,7 +11,7 @@ export type PreviewRow = {
 	tagNames: string[];
 	isActive: boolean;
 	errors: string[];
-	// エラーが無い行のみ確定する。取込送信用の値
+	// Only rows without errors are committed. The value used for the import request
 	input: EmployeeInput | null;
 };
 
@@ -29,7 +29,7 @@ export function validateImport(
 	const existingCodes = new Set(existing.map((e) => e.code));
 	const tagIdByName = new Map(tags.map((t) => [t.name, t.id]));
 
-	// CSV内で重複しているコードを事前集計（該当行すべてをエラーにする）
+	// Pre-count codes duplicated within the CSV (mark all matching rows as errors)
 	const codeCounts = new Map<string, number>();
 	for (const p of parsed) {
 		if (p.code) codeCounts.set(p.code, (codeCounts.get(p.code) ?? 0) + 1);
@@ -38,19 +38,19 @@ export function validateImport(
 	const rows: PreviewRow[] = parsed.map((p) => {
 		const errors: string[] = [];
 
-		if (!p.code) errors.push("社員番号が空です");
-		if (!p.lastName) errors.push("姓が空です");
-		if (!p.firstName) errors.push("名が空です");
+		if (!p.code) errors.push("Employee code is empty");
+		if (!p.lastName) errors.push("Last name is empty");
+		if (!p.firstName) errors.push("First name is empty");
 
 		if (p.code && (codeCounts.get(p.code) ?? 0) > 1) {
-			errors.push("CSV内で社員番号が重複しています");
+			errors.push("Duplicate employee code within the CSV");
 		}
 		if (p.code && existingCodes.has(p.code)) {
-			errors.push("社員番号が既存の従業員と重複しています");
+			errors.push("Employee code duplicates an existing employee");
 		}
 
 		if (p.hasExcessTags || p.tagNames.length > MAX_TAGS) {
-			errors.push(`タグは${MAX_TAGS}個までです`);
+			errors.push(`Up to ${MAX_TAGS} tags allowed`);
 		}
 
 		const tagIds: string[] = [];
@@ -61,7 +61,7 @@ export function validateImport(
 			else unknownTags.push(name);
 		}
 		if (unknownTags.length > 0) {
-			errors.push(`未登録のタグ: ${unknownTags.join("、")}`);
+			errors.push(`Unregistered tags: ${unknownTags.join(", ")}`);
 		}
 
 		const avatarColor = isValidAvatarColor(p.avatarColor)

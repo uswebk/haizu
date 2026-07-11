@@ -1,2 +1,2 @@
-// パスワードの最小文字数。フロントの検証とバックエンドの Better Auth 設定で共用する
+// Minimum password length. Shared by frontend validation and the backend Better Auth config
 export const MIN_PASSWORD_LENGTH = 8;

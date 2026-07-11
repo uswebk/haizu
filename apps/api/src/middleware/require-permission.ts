@@ -25,7 +25,7 @@ const DENIED: PermissionResult = {
 	message: "この操作を行う権限がありません",
 };
 
-// 判定の純粋関数。Hono / DB に依存しないため単体テスト可能。
+// Pure decision function. It doesn't depend on Hono / the DB, so it's unit-testable.
 export function evaluateOrgPermission(
 	orgRole: OrgRole,
 	permission: OrgPermission,
@@ -40,7 +40,7 @@ export function evaluateSitePermission(
 	return canSite(siteRole, permission) ? { ok: true } : DENIED;
 }
 
-// 組織スコープ。requireAuth の後段で使う。
+// Organization scope. Used after requireAuth.
 export function requireOrgPermission(permission: OrgPermission) {
 	return createMiddleware<AppEnv>(async (c, next) => {
 		const result = evaluateOrgPermission(c.get("user").role, permission);
@@ -59,7 +59,7 @@ export function requireOrgWritePermission(permission: OrgPermission) {
 	});
 }
 
-// 拠点スコープ。siteScope の後段でのみ使える（siteRole が解決済みである必要がある）。
+// Site scope. Usable only after siteScope (siteRole must already be resolved).
 export function requireSitePermission(permission: SitePermission) {
 	return createMiddleware<AppEnv>(async (c, next) => {
 		const result = evaluateSitePermission(c.get("siteRole"), permission);
@@ -68,8 +68,8 @@ export function requireSitePermission(permission: SitePermission) {
 	});
 }
 
-// 書き込みメソッドのみ制限し、GET は素通しする。
-// ルートに新しい POST/PUT/DELETE を足しても自動で保護される（認可の付け忘れを防ぐ）。
+// Restrict only write methods; let GET pass through.
+// New POST/PUT/DELETE routes are protected automatically (prevents forgetting to add authorization).
 export function requireSiteWritePermission(permission: SitePermission) {
 	return createMiddleware<AppEnv>(async (c, next) => {
 		if (isWriteMethod(c.req.method)) {

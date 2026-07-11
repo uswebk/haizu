@@ -26,7 +26,7 @@ import { fetchEmployees } from "#/lib/api/employees";
 import { fetchWorkPattern, workPatternKeys } from "#/lib/api/workPatterns";
 import { todayStr } from "#/lib/datetime";
 
-// エディタと同じ基準幅。規格のアスペクト比で高さを決め、スクロール領域に置く
+// Same base width as the editor. Height comes from the spec's aspect ratio, placed in a scroll area
 const BASE_WIDTH = 760;
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2;
@@ -57,7 +57,7 @@ function AssignmentDetail() {
 		queryFn: fetchEmployees,
 	});
 
-	// 配置決めは対象日に適用される公開済み規格を参照する（適用開始日が対象日以前で最新のもの）
+	// Assignment references the published spec applied on the target date (the newest with an effective date on or before it)
 	const activeVersion = area
 		? resolveVersionForDate(area.versions, date)
 		: null;
@@ -83,7 +83,7 @@ function AssignmentDetail() {
 	});
 	const serverAssignment = assignments.find((a) => a.areaId === areaId) ?? null;
 
-	// 下書き state（spotId -> employeeId）
+	// Draft state (spotId -> employeeId)
 	const [assign, setAssign] = useState<Record<string, string>>({});
 	const [selectedSpot, setSelectedSpot] = useState<string | null>(null);
 	const [poolSearch, setPoolSearch] = useState("");
@@ -110,7 +110,7 @@ function AssignmentDetail() {
 			),
 		);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: サーバ取得の再構築時のみ下書きを作り直す
+	// biome-ignore lint/correctness/useExhaustiveDependencies: rebuild the draft only when the server fetch is rebuilt
 	useEffect(() => {
 		const next: Record<string, string> = {};
 		for (const sa of serverAssignment?.spotAssignments ?? []) {
@@ -126,7 +126,7 @@ function AssignmentDetail() {
 		return m;
 	}, [employees]);
 
-	// 従業員が持つタグの一覧（絞り込み用）
+	// List of tags employees have (for filtering)
 	const tagOptions = useMemo(() => {
 		const m = new Map<string, string>();
 		for (const e of employees) {
@@ -236,7 +236,7 @@ function AssignmentDetail() {
 	const selectedEmp = selectedEmpId ? empById.get(selectedEmpId) : undefined;
 	const selectedSpotObj = spots.find((s) => s.id === selectedSpot) ?? null;
 
-	// 規格のアスペクト比を引き継いだキャンバス（ズームで拡縮）
+	// Canvas that inherits the spec's aspect ratio (zoom scales it)
 	const aspect = area?.planAspectRatio ?? 4 / 3;
 	const canvasWidth = Math.round(BASE_WIDTH * zoom);
 	const canvasHeight = Math.round(canvasWidth / aspect);
@@ -390,7 +390,7 @@ function AssignmentDetail() {
 				{/* body */}
 				<div className="flex-1 min-h-0 flex">
 					{/* left: pool */}
-					{/* biome-ignore lint/a11y/noStaticElementInteractions: 未配置プールへのドロップ領域 */}
+					{/* biome-ignore lint/a11y/noStaticElementInteractions: drop area for the unplaced pool */}
 					<div
 						onDragOver={(e) => e.preventDefault()}
 						onDrop={onDropToPool}

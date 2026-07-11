@@ -34,11 +34,11 @@ function SelectSiteInner() {
 	const { t } = useTranslation(["selectSite", "common"]);
 	const roleLabelFor = useRoleLabel();
 	const userName = user.name;
-	// この画面はまだ拠点が決まっていないため、組織ロールだけで表示する
+	// No site is chosen yet on this screen, so display using only the org role
 	const roleLabel = roleLabelFor(displayRole(user.role, null) ?? "viewer");
 	const initial = userName.charAt(0) || "?";
 
-	// 着地画面は「選択した拠点における実効ロール」で決まる（拠点ごとに権限が異なるため）
+	// The landing screen is determined by "the effective role at the selected site" (permissions differ per site)
 	const select = (id: string) => {
 		const target = activeSites.find((s) => s.id === id);
 		if (!target) return;

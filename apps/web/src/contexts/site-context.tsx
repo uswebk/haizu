@@ -15,14 +15,14 @@ export const MAX_SITES = 10;
 
 export type SiteIconColor = { bg: string; color: string };
 
-// API の Site に表示用の icon（iconBg/iconColor をまとめたもの）を付与した型。
+// Type that adds a display icon (iconBg/iconColor bundled) to the API's Site.
 export type SiteView = Site & { icon: SiteIconColor };
 
 function toView(site: Site): SiteView {
 	return { ...site, icon: { bg: site.iconBg, color: site.iconColor } };
 }
 
-// 拠点が1件も無い/ロード中に currentSite を参照しても壊れないためのプレースホルダ。
+// Placeholder so referencing currentSite doesn't break when there are no sites / while loading.
 const PLACEHOLDER: SiteView = {
 	id: "",
 	organizationId: "",
@@ -48,8 +48,8 @@ type SiteContextValue = {
 
 const SiteContext = createContext<SiteContextValue | null>(null);
 
-// 現在の拠点はURL(/s/$siteId)が真実なので、siteId は呼び出し側から受け取る。
-// 拠点未選択の画面（拠点選択画面）では siteId を渡さない。
+// The current site's source of truth is the URL (/s/$siteId), so siteId is passed in by the caller.
+// On screens with no site selected (the site selection screen), siteId isn't passed.
 export function SiteProvider({
 	siteId,
 	children,
@@ -60,7 +60,7 @@ export function SiteProvider({
 	const queryClient = useQueryClient();
 	const { showSuccess } = useSnackbar();
 	const { t } = useTranslation("sites");
-	// SiteProvider は認証済みエリアでのみマウントされる。
+	// SiteProvider is mounted only within authenticated areas.
 	const { data: rawSites = [], isLoading } = useQuery({
 		queryKey: siteKeys.all,
 		queryFn: fetchSites,

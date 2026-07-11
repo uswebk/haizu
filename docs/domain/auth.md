@@ -1,3 +1,37 @@
+# Authentication
+
+*English first; the original Japanese is preserved below the divider.*
+
+## Terms
+- Sign-up
+    - Create a new organization by entering name, company name, email, and password
+    - After registration, a confirmation email (OTP) is sent; completing verification enables login
+- Login
+    - Authenticate with a registered email and password
+- OTP (email verification)
+    - Verifies identity via a one-time password emailed at sign-up
+- Invitation
+    - An existing member (admin/site admin) invites a new member by specifying an email
+    - Setting a password from the link in the invitation email enables login
+    - A permission (role) is specified when inviting (see member_permission.md)
+- Password reset
+    - Entering an email sends a reset link
+- Account settings
+    - Name and email can be changed
+    - Password changes are also done from this screen
+
+## Rules
+- Passwords are at least 8 characters
+- Only invited members can access the organization's data
+- The invitation link's validity period is TBD
+- Sign-up (creating a new organization) is open to anyone. You can't join an existing organization without an invitation
+
+## Flows
+1. Sign-up -> OTP verification -> site registration -> start using the app
+2. Invitation -> receive invite email -> set password -> login -> select site
+
+---
+
 # 認証
 
 ## 用語

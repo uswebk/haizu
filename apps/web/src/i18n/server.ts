@@ -15,8 +15,8 @@ function readCookie(header: string, name: string): string | undefined {
 	return undefined;
 }
 
-// SSR時の初期ロケールを Cookie（ユーザーの切替）→ 環境変数の既定 の順で解決する。
-// クライアントの LanguageDetector と同じ結果になり、ハイドレーション不一致を防ぐ。
+// Resolve the initial SSR locale in order: cookie (user's switch) -> the env-var default.
+// This matches the client's LanguageDetector result and prevents hydration mismatches.
 export const detectLocale = createServerFn({ method: "GET" }).handler(
 	async (): Promise<Locale> => {
 		const cookie = readCookie(

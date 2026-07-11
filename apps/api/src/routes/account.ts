@@ -12,7 +12,7 @@ import type { AppEnv } from "../types";
 const emailRequestSchema = z.object({ newEmail: z.string().email() });
 const emailVerifySchema = z.object({ otp: z.string().min(1) });
 
-// ログインユーザー本人のアカウント設定（メールアドレス変更など）
+// Account settings for the logged-in user themselves (email change, etc.)
 export const accountRoute = new Hono<AppEnv>()
 	.use("*", requireAuth)
 	.post("/email/otp", zValidator("json", emailRequestSchema), async (c) => {

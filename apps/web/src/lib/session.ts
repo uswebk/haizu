@@ -13,10 +13,10 @@ export type SessionUser = {
 	isActive: boolean;
 };
 
-// SSR時も含めてリクエスト単位でセッションを解決する。ブラウザ用シングルトンの
-// authClient をSSRの認可判定に使うと、単一のSSRプロセス上で状態が全ユーザー間で
-// 共有され、別ブラウザの操作で他ユーザーがログアウト扱いになる。ここでは受信リクエストの
-// Cookie を明示的にAPIへ転送して解決するため、その混線が起きない。
+// Resolve the session per request, including during SSR. Using the browser-singleton
+// authClient for SSR authorization would share state across all users on a single SSR process,
+// so another browser's action could log out other users. Here we forward the incoming request's
+// cookie explicitly to the API to resolve it, so that crossover doesn't happen.
 export const fetchSession = createServerFn({ method: "GET" }).handler(
 	async (): Promise<SessionUser | null> => {
 		const cookie = getRequest().headers.get("cookie") ?? "";
@@ -36,8 +36,8 @@ export type AccessibleSite = {
 	isActive: boolean;
 };
 
-// URL の siteId に対する実効ロールを解決する。存在しない・所属していない拠点なら null。
-// /sites は自分がアクセスできる拠点だけを、拠点ごとの実効ロール付きで返す。
+// Resolve the effective role for the URL's siteId. null for a nonexistent site or one you don't belong to.
+// /sites returns only the sites you can access, each with its effective role.
 export const fetchSiteRole = createServerFn({ method: "GET" })
 	.inputValidator((siteId: string) => siteId)
 	.handler(async ({ data: siteId }): Promise<SiteRole | null> => {

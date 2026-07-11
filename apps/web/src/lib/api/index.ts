@@ -1,6 +1,6 @@
 export const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
-// APIレスポンスの共通ハンドラ。エラー時はサーバの { error } メッセージを優先して throw する。
+// Common handler for API responses. On error, throws preferring the server's { error } message.
 export async function handleResponse<T>(res: Response): Promise<T> {
 	if (!res.ok) {
 		const body = await res.json().catch(() => null);
@@ -16,10 +16,10 @@ export async function handleResponse<T>(res: Response): Promise<T> {
 	return res.json() as Promise<T>;
 }
 
-// 現在拠点はURL(/s/$siteId/...)が真実なので、常にURLから読む。
-// beforeLoad で変数へ流し込む方式だと、SSR済みページのハイドレート時に
-// beforeLoad がクライアントで再実行されず、x-site-id が欠落する。
-// SSR中は window が無く、モジュール変数はリクエスト間で共有されるため null を返す。
+// The current site's source of truth is the URL (/s/$siteId/...), so always read it from the URL.
+// Feeding it into a variable in beforeLoad would, when hydrating an SSR'd page,
+// not re-run beforeLoad on the client, so x-site-id would be missing.
+// During SSR there's no window and module variables are shared across requests, so return null.
 const SITE_PATH_PATTERN = /^\/s\/([^/]+)/;
 
 export function getCurrentSiteId(): string | null {
@@ -28,7 +28,7 @@ export function getCurrentSiteId(): string | null {
 	return match?.[1] ?? null;
 }
 
-// 拠点スコープの各APIへ、現在拠点IDを x-site-id ヘッダーとして自動付与する fetch ラッパ。
+// fetch wrapper that automatically adds the current site id as an x-site-id header to each site-scoped API call.
 export function apiFetch(
 	input: string,
 	init: RequestInit = {},

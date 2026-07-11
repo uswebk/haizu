@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// HH:mm 形式
+// HH:mm format
 const TimeSchema = z.string().regex(/^\d{2}:\d{2}$/);
 
 export const ShiftModeSchema = z.enum(["single", "multi"]);
@@ -8,7 +8,7 @@ export type ShiftMode = z.infer<typeof ShiftModeSchema>;
 
 export const ShiftSchema = z.object({
 	id: z.string().uuid(),
-	name: z.string().min(1), // 日勤, 夜勤, 早番 など
+	name: z.string().min(1), // e.g. Day, Night, Early
 	startTime: TimeSchema, // HH:mm
 	endTime: TimeSchema, // HH:mm
 	order: z.number().int().min(0),
@@ -23,7 +23,7 @@ export const WorkPatternSchema = z.object({
 
 export type WorkPattern = z.infer<typeof WorkPatternSchema>;
 
-// 保存（PUT）入力: id を送れば既存シフトを保持（未指定は新規）。order はサーバが採番する
+// Save (PUT) input: sending id keeps the existing shift (omit for new). order is assigned by the server
 export const ShiftInputSchema = z.object({
 	id: z.string().uuid().optional(),
 	name: z.string().min(1),
@@ -40,7 +40,7 @@ export const WorkPatternInputSchema = z
 	})
 	.refine(
 		(v) => {
-			// 開始・終了が完全に同じシフトは重複登録できない
+			// Shifts with identical start and end times can't be registered twice
 			const seen = new Set<string>();
 			for (const s of v.shifts) {
 				const key = `${s.startTime}-${s.endTime}`;
@@ -53,7 +53,7 @@ export const WorkPatternInputSchema = z
 	)
 	.refine(
 		(v) => {
-			// シフト名は重複登録できない
+			// Shift names can't be duplicated
 			const seen = new Set<string>();
 			for (const s of v.shifts) {
 				if (seen.has(s.name)) return false;

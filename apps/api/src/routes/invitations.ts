@@ -78,7 +78,7 @@ export const invitationsRoute = new Hono()
 			return c.json({ error: message }, 400);
 		}
 
-		// 招待リンクを踏めた時点でメール到達性は確認済みとみなし、OTPを挟まず確認済みにする
+		// Reaching the invite link is treated as proof of email deliverability, so mark as verified without an OTP step
 		await db
 			.update(user)
 			.set({ emailVerified: true })

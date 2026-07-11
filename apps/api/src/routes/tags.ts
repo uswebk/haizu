@@ -18,8 +18,8 @@ function isUniqueViolation(error: unknown): boolean {
 	if ("code" in error && (error as { code?: unknown }).code === "23505") {
 		return true;
 	}
-	// drizzle-orm は driver のエラーを DrizzleQueryError でラップし、
-	// 元のPostgresエラー（code含む）は cause に格納される
+	// drizzle-orm wraps driver errors in a DrizzleQueryError,
+	// and the original Postgres error (including code) is stored in cause
 	const cause = (error as { cause?: unknown }).cause;
 	return isUniqueViolation(cause);
 }

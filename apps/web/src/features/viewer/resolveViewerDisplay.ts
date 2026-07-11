@@ -6,9 +6,9 @@ export type ViewerDisplay = { date: string; shiftId: string | null };
 const DAY = 1440;
 const mod = (n: number, m: number) => ((n % m) + m) % m;
 
-// エリアのビュアー設定から、いま表示すべき配置の日付・シフトを解決する。
-// manual=強制表示（固定の日付・シフト）、auto=現在時刻に応じて今日のシフトを選ぶ。
-// leadMinutes は正=分前（シフト開始より前に切替）／負=分後（遅らせて切替）。
+// From an area's viewer settings, resolve the date/shift of the placement to show right now.
+// manual = forced display (fixed date/shift); auto = pick today's shift based on the current time.
+// leadMinutes: positive = minutes before (switch before the shift starts) / negative = minutes after (switch later).
 export function resolveViewerDisplay(
 	config: ViewerConfig,
 	workPattern: WorkPattern | null | undefined,
@@ -29,7 +29,7 @@ export function resolveViewerDisplay(
 	if (shifts.length === 0) return { date, shiftId: null };
 
 	const nowMin = minutesOfDay(now);
-	// 各シフトの切替時刻 = 開始時刻 - leadMinutes（正=前倒し）。24時間で正規化。
+	// Each shift's switch time = start time - leadMinutes (positive = earlier). Normalized over 24 hours.
 	const switches = shifts
 		.map((s) => ({
 			id: s.id,
@@ -37,7 +37,7 @@ export function resolveViewerDisplay(
 		}))
 		.sort((a, b) => a.at - b.at);
 
-	// now 以下で最大の切替を採用。無ければ日跨ぎで最後（最大 at）のシフト。
+	// Take the largest switch time <= now. If none, wrap to the last shift (largest at) across the day boundary.
 	let active = switches[switches.length - 1];
 	for (const s of switches) {
 		if (s.at <= nowMin) active = s;

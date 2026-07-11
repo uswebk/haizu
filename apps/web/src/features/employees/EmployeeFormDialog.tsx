@@ -73,7 +73,7 @@ export function EmployeeFormDialog({
 		draftFromProps(mode, initialValue),
 	);
 
-	// ダイアログを開くたびに対象データへ合わせて下書きを作り直す
+	// Rebuild the draft to match the target data each time the dialog opens
 	useEffect(() => {
 		if (open) setDraft(draftFromProps(mode, initialValue));
 	}, [open, mode, initialValue]);

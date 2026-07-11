@@ -13,7 +13,7 @@ import { siteScope } from "../middleware/site-scope";
 import { storage } from "../storage";
 import type { AppEnv } from "../types";
 
-// /:id 配下のサブルートで、対象エリアが現在拠点に属するかを検証する
+// For subroutes under /:id, verify the target area belongs to the current site
 const areaGuard = createMiddleware<AppEnv>(async (c, next) => {
 	const id = c.req.param("id");
 	if (!id) return c.json({ error: "Not found" }, 404);
@@ -24,9 +24,9 @@ const areaGuard = createMiddleware<AppEnv>(async (c, next) => {
 	await next();
 });
 
-// /:id/versions/:versionId 配下で、対象バージョンがそのエリアに属するかを検証する。
-// areaGuard はエリアが現在拠点に属することしか見ないため、これが無いと
-// 他組織の versionId を渡して公開・更新・削除できてしまう（クロステナントのIDOR）。
+// Under /:id/versions/:versionId, verify the target version belongs to that area.
+// areaGuard only checks that the area belongs to the current site, so without this
+// someone could publish/update/delete by passing another org's versionId (cross-tenant IDOR).
 const versionGuard = createMiddleware<AppEnv>(async (c, next) => {
 	const areaId = c.req.param("id");
 	const versionId = c.req.param("versionId");
@@ -70,8 +70,8 @@ type VersionForResolution = {
 	effectiveDate: string;
 };
 
-// 指定日に配置決めで適用される規格 = 公開済みかつ適用開始日が指定日以前のもののうち、
-// 適用開始日が最も新しいもの（同日ならバージョン番号が大きい方）
+// The spec applied in assignment on the given date = among published versions whose effective date is on or before that date,
+// the one with the newest effective date (ties broken by the larger version number)
 function resolveCurrentVersion<T extends VersionForResolution>(
 	versions: T[],
 	date: string,
@@ -103,7 +103,7 @@ export const areasRoute = new Hono<AppEnv>()
 			const targetDate = date ?? todayDateStr();
 			const siteId = c.get("siteId");
 
-			// LATERAL JOIN でアクティブバージョン（指定日に適用される公開版を優先、次点で最新draft）を特定してスポット数を取得
+			// Use a LATERAL JOIN to pick the active version (prefer the published version applied on the given date, else the latest draft) and get its spot count
 			const rows = await db.execute<{
 				id: string;
 				name: string;
@@ -112,7 +112,7 @@ export const areasRoute = new Hono<AppEnv>()
 				currentVersion: string | null;
 				currentStatus: "draft" | "published" | null;
 			}>(
-				// todo: 生SQLを使用しなくて良い方法を考える
+				// todo: find a way to avoid raw SQL
 				sql`
 				SELECT
 					a.id,
@@ -158,9 +158,9 @@ export const areasRoute = new Hono<AppEnv>()
 			.where(eq(layoutSpecVersions.areaId, id))
 			.orderBy(layoutSpecVersions.version);
 
-		// 現在の規格（本日時点） = 公開済みかつ適用開始日が本日以前のうち最新のもの
+		// The current spec (as of today) = the newest among published versions with an effective date on or before today
 		const currentVersion = resolveCurrentVersion(versions, todayDateStr());
-		// エディタのデフォルト表示 = 現在の規格 or 最新の下書き
+		// Default display in the editor = the current spec or the latest draft
 		const activeVersion = currentVersion ?? versions[versions.length - 1];
 		const lockedVersionIds = await versionIdsWithAssignments(
 			versions.map((v) => v.id),
@@ -187,7 +187,7 @@ export const areasRoute = new Hono<AppEnv>()
 				planImageScale: v.planImageScale ?? 1,
 				isActive: v.id === activeVersion?.id,
 				isCurrent: v.id === currentVersion?.id,
-				// 配置決めで使用済み（スポット編集・図面変更・公開取消不可）
+				// Already used in assignment (can't edit spots, change the floor plan, or unpublish)
 				hasAssignments: lockedVersionIds.has(v.id),
 			})),
 		});
@@ -260,7 +260,7 @@ export const areasRoute = new Hono<AppEnv>()
 				return c.json({ error: LOCKED_MESSAGE }, 409);
 			}
 
-			// todo: トランザクションを張ってatmicを担保する
+			// todo: wrap in a transaction to guarantee atomicity
 			await db.delete(spots).where(eq(spots.layoutSpecVersionId, versionId));
 
 			if (newSpots.length > 0) {
@@ -371,8 +371,8 @@ export const areasRoute = new Hono<AppEnv>()
 			const { id, versionId } = c.req.param();
 			const { effectiveDate } = c.req.valid("json");
 
-			// 指定バージョンを published にするが、他のバージョンはそのままにする
-			// 公開後、すぐに戻したいケースなどがあり、他のバージョンを下書きに戻すと全バージョンが下書き状態となってしまうことを防ぐため
+			// Set the given version to published, but leave the other versions as-is
+			// To avoid a case where reverting other versions to draft would leave every version in draft (e.g. when you want to roll back right after publishing)
 			await db
 				.update(layoutSpecVersions)
 				.set({ status: "published", publishedAt: new Date(), effectiveDate })
@@ -404,8 +404,8 @@ export const areasRoute = new Hono<AppEnv>()
 			const { id, versionId } = c.req.param();
 			const { spots: overrideSpots, imageScale } = c.req.valid("json");
 
-			// todo: select for updateを使用すべきか検討。
-			// 同時に操作された場合、バージョンが重複してしまう可能性がある。
+			// todo: consider whether to use SELECT FOR UPDATE.
+			// Concurrent operations could produce duplicate versions.
 			const source = await db.query.layoutSpecVersions.findFirst({
 				where: eq(layoutSpecVersions.id, versionId),
 			});

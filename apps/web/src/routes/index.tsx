@@ -1,8 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { fetchSession } from "#/lib/session";
 
-// 拠点はURLで表現するため、どの拠点を開くかはここでは決められない。
-// 拠点選択画面へ送り、そこで /s/$siteId/... へ入る。
+// Sites are expressed in the URL, so which site to open can't be decided here.
+// Send to the site selection screen, and enter /s/$siteId/... from there.
 export const Route = createFileRoute("/")({
 	beforeLoad: async () => {
 		const user = await fetchSession();

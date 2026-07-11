@@ -1,3 +1,39 @@
+# Employee
+
+*English first; the original Japanese is preserved below the divider.*
+
+## Terms
+- Name
+    - Register last and first name
+- Employee code
+    - A management code for identifying an employee
+    - Must be unique
+- Avatar
+    - A color code set per employee
+- Management tag
+    - Tags for filtering employees
+    - Tags are created per site and can be attached to employees
+        - Used for identification such as "role" or "task"
+    - Tags are managed per site (not shared across sites)
+    - Multiple tags can be attached to one employee
+    - Used for filtering on the assignment screen (narrowing the unplaced pool)
+- Hire date
+    - Optionally registered as yyyy-mm-dd
+    - Used as years of experience
+- Retirement date
+    - Optionally registered as yyyy-mm-dd (sensitive info, visible only to site admins)
+
+## Rules
+- A shared employee across sites can't be created
+    - Even the same person must be registered per site
+    - A copy-to-site feature is planned
+- Employee codes must be unique within a site; duplicates across sites are OK
+- Deleting employees
+    - An employee linked to no assignment can be deleted
+    - If linked, they become hidden instead
+
+---
+
 # 従業員
 ## 用語
 - 名前

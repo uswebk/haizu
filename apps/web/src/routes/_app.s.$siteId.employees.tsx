@@ -133,7 +133,7 @@ function EmployeeList() {
 
 	const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
-		// 同じファイルを続けて選べるように input をリセット
+		// Reset the input so the same file can be selected again
 		e.target.value = "";
 		if (!file) return;
 		const text = await file.text();

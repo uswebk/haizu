@@ -25,8 +25,8 @@ type Draft = {
 	mode: ViewerMode;
 	displayDate: string;
 	shiftId: string | null;
-	leadMinutes: string; // 大きさ（0–240）。入力中は文字列で保持し、保存時に数値化する
-	leadDir: LeadDir; // before=分前 / after=分後
+	leadMinutes: string; // Magnitude (0-240). Held as a string while typing, converted to a number on save
+	leadDir: LeadDir; // before = minutes before / after = minutes after
 };
 
 function defaultConfig(areaId: string): ViewerConfig {
@@ -61,7 +61,7 @@ function ViewerSettings() {
 
 	const configByArea = new Map(configs.map((c) => [c.areaId, c]));
 
-	// 選択中エリア・表示日で確定実績のあるシフトのみを選択肢にする（終日は常に選べる）
+	// Offer only shifts with a confirmed record for the selected area/date (all day is always selectable)
 	const displayDate = draft?.mode === "manual" ? draft.displayDate : undefined;
 	const { data: shiftChips = [] } = useQuery({
 		queryKey: ["assignments", "shifts-used", selectedAreaId, displayDate],

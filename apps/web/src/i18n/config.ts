@@ -8,8 +8,8 @@ export const SUPPORTED_LOCALES = ["en", "ja"] as const;
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
 export const LOCALE_COOKIE = "i18next";
 
-// デプロイ既定の言語は環境変数 VITE_DEFAULT_LOCALE で設定する（未設定は "en"）。
-// ユーザーは言語切替UIで上書きでき、その選択は Cookie に保存される。
+// The deploy default language is set via the VITE_DEFAULT_LOCALE env var (unset = "en").
+// Users can override it with the language switcher, and their choice is saved to a cookie.
 export const DEFAULT_LOCALE: Locale = toLocale(
 	import.meta.env.VITE_DEFAULT_LOCALE,
 	"en",
@@ -28,7 +28,7 @@ function toLocale(value: string | null | undefined, fallback: Locale): Locale {
 		: fallback;
 }
 
-// 指定文字列を対応ロケールに正規化する（"ja-JP" → "ja"、未対応 → デフォルト）。
+// Normalize a string to a supported locale ("ja-JP" -> "ja"; unsupported -> default).
 export function normalizeLocale(value: string | null | undefined): Locale {
 	return toLocale(value, DEFAULT_LOCALE);
 }
@@ -43,8 +43,8 @@ if (!i18n.isInitialized) {
 			supportedLngs: SUPPORTED_LOCALES as unknown as string[],
 			defaultNS: "common",
 			interpolation: { escapeValue: false },
-			// 既定は環境変数（fallbackLng）。ユーザーが切り替えたら Cookie を優先する。
-			// ブラウザ言語の自動判定は行わず、既定を環境変数で決定的にする。
+			// The default is the env var (fallbackLng). Once the user switches, the cookie takes priority.
+			// No browser-language auto-detection; the default is made deterministic via the env var.
 			detection: {
 				order: ["cookie", "htmlTag"],
 				caches: ["cookie"],

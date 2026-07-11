@@ -2,7 +2,7 @@ import { emailOTPClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { API_BASE } from "#/lib/api";
 
-// Better Auth のクライアント。セッションCookieをクロスオリジンで送るため credentials を含める。
+// Better Auth client. Includes credentials so the session cookie is sent cross-origin.
 export const authClient = createAuthClient({
 	baseURL: `${API_BASE}/api/auth`,
 	fetchOptions: { credentials: "include" },

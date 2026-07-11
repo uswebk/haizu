@@ -35,8 +35,8 @@ const siteRoleInput = z.object({
 	role: SiteRoleSchema,
 });
 
-// 不変条件: メンバーは必ず1つ以上の拠点に所属する（管理者は全拠点アクセスのため割り当てを持たない）。
-// これを破ると、どの画面にも入れないユーザーが生まれる。
+// Invariant: a member always belongs to at least one site (admins have all-site access, so they hold no assignments).
+// Breaking this would create a user who can't enter any screen.
 const NO_SITE_MESSAGE = "担当拠点を1つ以上選択してください";
 
 const inviteInput = z
@@ -67,12 +67,12 @@ type MemberResponse = {
 	email: string;
 	orgRole: OrgRole;
 	siteRoles: SiteRoleAssignment[];
-	// 管理者は全拠点にアクセスできるため siteRoles を持たない
+	// Admins can access all sites, so they have no siteRoles
 	allSites: boolean;
 	status: "active" | "inactive" | "invited";
 };
 
-// 操作者が拠点ロールを設定できる拠点。管理者は組織の全拠点
+// Sites where the operator can set site roles. Admins get all sites in the org
 async function manageableSiteIds(
 	organizationId: string,
 	actor: { id: string; role: OrgRole },
@@ -93,7 +93,7 @@ async function manageableSiteIds(
 	return rows.map((r) => r.siteId);
 }
 
-// 指定した拠点idがすべて組織に属することを確認する（他組織の拠点混入を防ぐ）
+// Verify all given site ids belong to the organization (prevents mixing in other orgs' sites)
 async function assertSitesInOrg(organizationId: string, siteIds: string[]) {
 	if (siteIds.length === 0) return true;
 	const rows = await db
@@ -105,8 +105,8 @@ async function assertSitesInOrg(organizationId: string, siteIds: string[]) {
 	return rows.length === siteIds.length;
 }
 
-// メンバー管理は「現在拠点の拠点管理者」のみが行う（管理者は全拠点で拠点管理者相当）。
-// 一覧も他メンバーのメールアドレスを含むため、閲覧ごと制限する。
+// Member management is done only by the "current site's site admin" (admins count as site admins at every site).
+// The list includes other members' email addresses too, so restrict viewing as well.
 export const membersRoute = new Hono<AppEnv>()
 	.use("*", requireAuth)
 	.use("*", siteScope)
@@ -153,11 +153,11 @@ export const membersRoute = new Hono<AppEnv>()
 					)
 			: [];
 
-		// 拠点管理者には、自分が管理する拠点の割り当てだけを見せる
+		// Show a site admin only the assignments for the sites they manage
 		const scopeSiteRoles = (rows: SiteRoleAssignment[]) =>
 			actor.role === "admin" ? rows : rows.filter((r) => visible.has(r.siteId));
-		// 拠点管理者には、自分の管理拠点に属するメンバーだけを見せる。
-		// 管理者は拠点に属さず、かつ拠点管理者は管理者の権限を変更できないため、一覧にも出さない。
+		// Show a site admin only the members belonging to the sites they manage.
+		// Admins don't belong to sites, and a site admin can't change an admin's permissions, so admins aren't listed either.
 		const isVisibleMember = (m: MemberResponse) =>
 			actor.role === "admin" || m.siteRoles.length > 0;
 
@@ -205,7 +205,7 @@ export const membersRoute = new Hono<AppEnv>()
 		const actor = c.get("user");
 		const input = c.req.valid("json");
 
-		// 招待経由での権限昇格を防ぐ。PUT /:id と同じルールを適用する。
+		// Prevent privilege escalation via invitations. Apply the same rules as PUT /:id.
 		const orgAssignment = evaluateOrgRoleAssignment({
 			actorOrgRole: actor.role,
 			isSelf: false,
@@ -216,7 +216,7 @@ export const membersRoute = new Hono<AppEnv>()
 			return c.json({ error: orgAssignment.message }, orgAssignment.status);
 		}
 
-		// 管理者は全拠点にアクセスできるため、拠点ごとの割り当ては持たせない
+		// Admins can access all sites, so don't give them per-site assignments
 		const siteRoles = input.orgRole === "admin" ? [] : input.siteRoles;
 		const siteIds = siteRoles.map((s) => s.siteId);
 
@@ -232,7 +232,7 @@ export const membersRoute = new Hono<AppEnv>()
 			return c.json({ error: scopeCheck.message }, scopeCheck.status);
 		}
 
-		// 同一組織で既にメンバー登録済み / 招待中のメールは弾く
+		// Reject emails already registered as a member / pending an invitation in the same organization
 		const existingUser = await db.query.user.findFirst({
 			where: and(
 				eq(user.organizationId, organizationId),
@@ -338,7 +338,7 @@ export const membersRoute = new Hono<AppEnv>()
 			return c.json({ error: scopeCheck.message }, scopeCheck.status);
 		}
 
-		// 拠点管理者は自分の管理拠点しか置き換えないため、管理外に残る所属も数に入れる。
+		// A site admin only replaces their managed sites, so count memberships remaining outside their control too.
 		if (input.orgRole === "member") {
 			const manageableSet = new Set(manageable);
 			const existing = await db
@@ -362,13 +362,13 @@ export const membersRoute = new Hono<AppEnv>()
 				.where(eq(user.id, id));
 
 			if (input.orgRole === "admin") {
-				// 管理者は全拠点アクセスのため拠点割り当てを持たない
+				// Admins have all-site access, so they hold no site assignments
 				await tx.delete(memberSites).where(eq(memberSites.userId, id));
 				return;
 			}
 
-			// 拠点管理者は自分の管理外拠点の割り当てを見られない。まとめて削除すると
-			// 他拠点の割り当てを消してしまうため、管理できる拠点の行だけを置き換える。
+			// A site admin can't see assignments for sites outside their control. Deleting them all
+			// would wipe other sites' assignments, so replace only the rows for sites they can manage.
 			if (manageable.length > 0) {
 				await tx
 					.delete(memberSites)

@@ -21,9 +21,9 @@ describe("employeesToCsv", () => {
 		expect(csv.charCodeAt(0)).toBe(0xfeff);
 		const lines = csv.slice(1).split("\r\n");
 		expect(lines[0]).toBe(
-			"社員番号,姓,名,アバターカラー,状態,タグ1,タグ2,タグ3,タグ4,タグ5,タグ6,タグ7,タグ8,タグ9,タグ10",
+			"Employee Code,Last Name,First Name,Avatar Color,Status,Tag1,Tag2,Tag3,Tag4,Tag5,Tag6,Tag7,Tag8,Tag9,Tag10",
 		);
-		expect(lines[1].startsWith("EMP-001,山田,太郎,#2f8fd6,有効,")).toBe(true);
+		expect(lines[1].startsWith("EMP-001,山田,太郎,#2f8fd6,Active,")).toBe(true);
 	});
 
 	it("タグは先頭10個まで出力する", () => {
@@ -43,7 +43,7 @@ describe("employeesToCsv", () => {
 
 	it("無効な従業員は状態を無効として出力する", () => {
 		const csv = employeesToCsv([emp({ isActive: false })]);
-		expect(csv).toContain(",無効,");
+		expect(csv).toContain(",Inactive,");
 	});
 });
 

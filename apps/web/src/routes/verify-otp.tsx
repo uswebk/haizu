@@ -9,7 +9,7 @@ import { fetchSession } from "#/lib/session";
 export const Route = createFileRoute("/verify-otp")({
 	beforeLoad: async () => {
 		const user = await fetchSession();
-		// 未ログインならログインへ。確認済みならアプリへ。
+		// If not logged in, go to login. If already verified, go to the app.
 		if (!user) throw redirect({ to: "/login" });
 		if (user.emailVerified) throw redirect({ to: "/select-site" });
 		return { email: user.email };

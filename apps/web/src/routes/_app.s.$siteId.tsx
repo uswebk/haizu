@@ -18,18 +18,18 @@ import { formatDateLabel, todayStr } from "#/lib/datetime";
 import { useRoleLabel } from "#/lib/roles";
 import { fetchSiteRole } from "#/lib/session";
 
-// 直前に表示していた拠点。拠点をまたいだ遷移の検出だけに使う（クライアント限定）。
+// The previously shown site. Used only to detect cross-site navigation (client-only).
 let lastSiteId: string | null = null;
 
-// 現在の拠点はURLが真実。ここで所属と実効ロールを検証し、子ルートへ渡す。
+// The current site's source of truth is the URL. Here we verify membership and the effective role and pass them to child routes.
 export const Route = createFileRoute("/_app/s/$siteId")({
 	beforeLoad: async ({ params, context }) => {
 		const siteRole = await fetchSiteRole({ data: params.siteId });
-		// 存在しない・非アクティブ・所属していない拠点は拠点選択へ戻す
+		// Send nonexistent / inactive / non-member sites back to site selection
 		if (!siteRole) throw redirect({ to: "/select-site" });
 
-		// 拠点が変わった直後に前拠点のキャッシュが残ると一瞬前データが見えるため破棄する。
-		// 拠点一覧(["sites"])は組織スコープなので除外する。
+		// Right after switching sites, leftover cache from the previous site briefly shows old data, so discard it.
+		// The site list (["sites"]) is organization-scoped, so exclude it.
 		if (typeof window !== "undefined") {
 			if (lastSiteId !== null && lastSiteId !== params.siteId) {
 				context.queryClient.removeQueries({
@@ -45,7 +45,7 @@ export const Route = createFileRoute("/_app/s/$siteId")({
 
 function SiteLayout() {
 	const { siteId } = Route.useParams();
-	// 拠点が変わると key が変わり、拠点スコープの状態が持ち越されない
+	// When the site changes, the key changes so site-scoped state doesn't carry over
 	return (
 		<SiteProvider key={siteId} siteId={siteId}>
 			<SiteLayoutInner />
@@ -81,7 +81,7 @@ function SiteLayoutInner() {
 	const roleLabelFor = useRoleLabel();
 	const userName = user.name;
 	const userEmail = user.email;
-	// 表示は「現在拠点における実効ロール」
+	// Display uses "the effective role at the current site"
 	const roleLabel = roleLabelFor(displayRole(user.role, siteRole) ?? "viewer");
 	const initial = userName.charAt(0) || "?";
 

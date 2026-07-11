@@ -152,8 +152,8 @@ async function seed() {
 	if (!siteA) throw new Error("Failed to create sites");
 	console.log(`  Created org + ${insertedSites.length} sites`);
 
-	// ログイン確認用のデモ管理者（Better Auth 経由でパスワードをハッシュ化して作成）。
-	// organizationId / role は signupContext 経由で databaseHooks が設定する。
+	// Demo admin for login testing (created via Better Auth with a hashed password).
+	// organizationId / role are set by databaseHooks via signupContext.
 	await signupContext.run(
 		{ organizationId: organization.id, role: "admin" },
 		() =>
@@ -165,14 +165,14 @@ async function seed() {
 				},
 			}),
 	);
-	// デモユーザーはOTP確認を省略できるよう検証済みにする
+	// Mark the demo user as verified so it can skip OTP confirmation
 	await db
 		.update(user)
 		.set({ emailVerified: true })
 		.where(eq(user.email, "admin@haizu.co.jp"));
 	console.log("  Created demo user admin@haizu.co.jp / password123");
 
-	// 既存の従業員・タグ・エリア・働き方はすべて先頭拠点(A工場)に紐付ける
+	// Link all existing employees, tags, areas, and work patterns to the first site (Plant A)
 	const siteId = siteA.id;
 
 	const insertedTags = await db
@@ -214,7 +214,7 @@ async function seed() {
 		.returning();
 	console.log(`  Created ${insertedEmployees.length} employees`);
 
-	// 各従業員に主タグ（＋3人ごとに「リーダー」）を紐付ける
+	// Attach a primary tag to each employee (plus "Leader" every third person)
 	const leaderTag = insertedTags.find((t) => t.name === "リーダー");
 	const empTagLinks: { employeeId: string; tagId: string }[] = [];
 	for (const [i, emp] of insertedEmployees.entries()) {
@@ -267,7 +267,7 @@ async function seed() {
 
 	console.log("Done.");
 	await client.end();
-	// auth 用の db クライアント（別接続）が開いたままだと exit しないため明示終了する
+	// The auth db client (a separate connection) keeps the process from exiting if left open, so close it explicitly
 	process.exit(0);
 }
 

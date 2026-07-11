@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { LOCALE_LABEL, type Locale, SUPPORTED_LOCALES } from "#/i18n/config";
 
-// 言語切替。i18next の LanguageDetector が cookie にキャッシュするため選択は永続化される。
+// Language switcher. i18next's LanguageDetector caches to a cookie, so the choice persists.
 export function LanguageSwitcher({ className }: { className?: string }) {
 	const { i18n } = useTranslation();
 	const current = (i18n.resolvedLanguage ?? i18n.language) as Locale;

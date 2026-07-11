@@ -14,7 +14,7 @@ import type { AppEnv } from "../types";
 const emailRequestSchema = z.object({ newEmail: z.string().email() });
 const emailVerifySchema = z.object({ otp: z.string().min(1) });
 
-// 事業所情報の閲覧は全ロール、変更は「管理者」のみ。
+// Viewing organization info is for all roles; changing it is admins only.
 export const organizationsRoute = new Hono<AppEnv>()
 	.use("*", requireAuth)
 	.use("*", requireOrgWritePermission("org:write"))
@@ -51,7 +51,7 @@ export const organizationsRoute = new Hono<AppEnv>()
 		});
 	})
 
-	// 事業所の連絡先メール変更: 新アドレス宛のOTPで受信可否を確認する。
+	// Change the organization's contact email: confirm deliverability with an OTP to the new address.
 	.post(
 		"/contact-email/otp",
 		zValidator("json", emailRequestSchema),

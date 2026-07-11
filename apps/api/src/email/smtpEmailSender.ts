@@ -18,7 +18,7 @@ export class SmtpEmailSender implements EmailSender {
 		this.transporter = nodemailer.createTransport({
 			host,
 			port,
-			// 465 のみ implicit TLS。587/1025(Mailpit) は STARTTLS もしくは平文。
+			// Only 465 uses implicit TLS. 587/1025 (Mailpit) use STARTTLS or plaintext.
 			secure: port === 465,
 			auth: user && pass ? { user, pass } : undefined,
 		});

@@ -22,9 +22,9 @@ import { formatClock, formatDateLabel, toDateStr } from "#/lib/datetime";
 
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 6;
-// PlacementViewCanvas の基準幅。フィット計算に使う
+// Base width of PlacementViewCanvas. Used for the fit calculation
 const BASE_WIDTH = 760;
-// ボード周囲の余白（PlacementViewCanvas の内側 p-4＋見切れ防止マージン）
+// Margin around the board (PlacementViewCanvas's inner p-4 + a clipping-prevention margin)
 const BOARD_PADDING = 56;
 
 type ViewerSearch = { area?: string };
@@ -198,7 +198,7 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 	const [now, setNow] = useState(() => new Date());
 	const boardRef = useRef<HTMLDivElement>(null);
 
-	// 現在日時を毎秒更新（auto の現在シフト解決にも使う）
+	// Update the current time every second (also used for auto's current-shift resolution)
 	useEffect(() => {
 		const t = setInterval(() => setNow(new Date()), 1000);
 		return () => clearInterval(t);
@@ -220,7 +220,7 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 	const shiftEnd = shift?.endTime ?? config.shiftEndTime;
 	const shiftTime =
 		shiftId && shiftStart && shiftEnd ? `${shiftStart}–${shiftEnd}` : null;
-	// 現在日（時計）と表示対象日が異なるときだけ対象日を出す（同日での日付二重表示を避ける）
+	// Show the target date only when it differs from the current (clock) date (avoids showing the date twice on the same day)
 	const showTargetDate = !!date && date !== toDateStr(now);
 
 	const { data: area } = useQuery({
@@ -242,7 +242,7 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 	const serverAssignment =
 		assignments.find((a) => a.areaId === areaId && a.status === "confirmed") ??
 		null;
-	// 確定配置があればその版、無ければ現在の公開版でレイアウトのみ表示
+	// Use the version of a confirmed placement if any; otherwise show only the layout of the current published version
 	const currentVersionId = area?.versions.find((v) => v.isCurrent)?.id ?? null;
 	const versionId = serverAssignment?.layoutSpecVersionId ?? currentVersionId;
 
@@ -277,7 +277,7 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 	const totalCount = spots.length;
 	const aspect = area?.planAspectRatio ?? 4 / 3;
 
-	// 配置済みメンバー（スポット順）
+	// Placed members (in spot order)
 	const members = spots
 		.map((s) => ({ spot: s, emp: assignBySpot.get(s.id) }))
 		.filter((m): m is { spot: (typeof spots)[number]; emp: EmployeeRow } =>
@@ -285,7 +285,7 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 		);
 	const clock = formatClock(now);
 
-	// ボードの表示領域いっぱいにフロアマップを収めるズーム倍率を算出して適用する
+	// Compute and apply the zoom that fits the floor plan within the board's display area
 	const fitToScreen = useCallback(() => {
 		const el = boardRef.current;
 		if (!el) return;
@@ -296,13 +296,13 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 		setZoom(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(z * 100) / 100)));
 	}, [aspect]);
 
-	// スポット読込・アスペクト比確定時に画面いっぱいへ自動{t("viewer:fit")}
+	// Auto-fit to fill the screen when spots load and the aspect ratio is set
 	useEffect(() => {
 		if (totalCount > 0) fitToScreen();
 	}, [fitToScreen, totalCount]);
 
-	// ボードの表示領域が変わったら（ウィンドウリサイズ・パネル開閉）再{t("viewer:fit")}
-	// レイアウト確定後に測るため次フレームで実行する
+	// Re-fit when the board's display area changes (window resize, panel open/close)
+	// Run on the next frame to measure after layout settles
 	useEffect(() => {
 		const el = boardRef.current;
 		if (!el) return;
@@ -314,7 +314,7 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 	}, [fitToScreen]);
 
 	return (
-		// 表示に集中するためアプリのサイドバー・ヘッダーを覆う全画面オーバーレイ
+		// Full-screen overlay covering the app's sidebar/header to focus on the display
 		<div className="fixed inset-0 z-50 flex flex-col bg-app-bg">
 			<div className="shrink-0 flex items-center justify-between gap-4 px-5 py-3 border-b border-border bg-surface">
 				<div className="flex items-center gap-3 min-w-0">

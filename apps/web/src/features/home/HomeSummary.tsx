@@ -23,7 +23,7 @@ export function HomeSummary({
 	workPattern: WorkPattern;
 }) {
 	const { t } = useTranslation(["home", "common"]);
-	// single=終日(null)、multi=各シフトを対象に今日の配置を集計する
+	// single = all day (null), multi = aggregate today's placement across each shift
 	const shiftIds = useMemo<(string | null)[]>(() => {
 		const options = getShiftOptions(workPattern);
 		return options.length > 0 ? options.map((o) => o.id) : [null];
@@ -39,17 +39,17 @@ export function HomeSummary({
 		},
 	});
 
-	// 配置データが未取得のうちに集計すると全エリアが未配置として一瞬表示される
+	// Aggregating before placement data loads would briefly show every area as unplaced
 	if (isPending) {
 		return <div className="text-muted text-sm">{t("common:loading")}</div>;
 	}
 
-	// 配置に使えるのは規格が公開済みのエリアのみ。これを分母にする
+	// Only areas with a published spec can be assigned; use these as the denominator
 	const publishedAreas = areas.filter((a) => a.currentStatus === "published");
 	const publishedCount = publishedAreas.length;
 	const publishedIds = new Set(publishedAreas.map((a) => a.id));
 
-	// 今日の配置が確定(confirmed)しているエリアを「配置済み」とする（下書き配置は未配置扱い）
+	// Areas whose placement is confirmed today count as "placed" (draft placements count as unplaced)
 	const confirmed = assignments.filter(
 		(a) => a.status === "confirmed" && publishedIds.has(a.areaId),
 	);
@@ -70,7 +70,7 @@ export function HomeSummary({
 	const totalSpots = publishedAreas.reduce((sum, a) => sum + a.spotCount, 0);
 	const openSpots = Math.max(totalSpots - assignedCount, 0);
 
-	// 未配置（今日 confirmed でない公開エリア）と、その下書き有無
+	// Unplaced areas (published areas not confirmed today) and whether they have a draft
 	const draftAreaIds = new Set(
 		assignments
 			.filter((a) => a.status === "draft" && publishedIds.has(a.areaId))
@@ -80,7 +80,7 @@ export function HomeSummary({
 		(a) => !confirmedAreaIds.has(a.id),
 	);
 
-	// 配置済みエリアが「いつ・どのシフトの分か」を示すラベル
+	// Label showing "for when / which shift" the placed areas are
 	const shiftText =
 		workPattern.mode === "single"
 			? t("home:allDay")

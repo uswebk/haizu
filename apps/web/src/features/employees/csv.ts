@@ -4,22 +4,22 @@ export const MAX_TAGS = 10;
 
 const BOM = "﻿";
 
-const TAG_HEADERS = Array.from({ length: MAX_TAGS }, (_, i) => `タグ${i + 1}`);
+const TAG_HEADERS = Array.from({ length: MAX_TAGS }, (_, i) => `Tag${i + 1}`);
 
 export const CSV_HEADERS = [
-	"社員番号",
-	"姓",
-	"名",
-	"アバターカラー",
-	"状態",
+	"Employee Code",
+	"Last Name",
+	"First Name",
+	"Avatar Color",
+	"Status",
 	...TAG_HEADERS,
 ] as const;
 
-export const ACTIVE_LABEL = "有効";
-export const INACTIVE_LABEL = "無効";
+export const ACTIVE_LABEL = "Active";
+export const INACTIVE_LABEL = "Inactive";
 
 export type ParsedEmployeeRow = {
-	// 元のCSV行番号（ヘッダーを除いた1始まり）。プレビューのエラー表示に使う
+	// Original CSV row number (1-based, excluding the header). Used for preview error display
 	line: number;
 	code: string;
 	lastName: string;
@@ -27,7 +27,7 @@ export type ParsedEmployeeRow = {
 	avatarColor: string;
 	isActive: boolean;
 	tagNames: string[];
-	// タグ列(11列目以降)に値がある場合の超過フラグ
+	// Overflow flag for when the tag columns (11th onward) have values
 	hasExcessTags: boolean;
 };
 
@@ -55,7 +55,7 @@ export function employeesToCsv(rows: EmployeeRow[]): string {
 	return BOM + lines.join("\r\n");
 }
 
-// RFC4180準拠の最小パーサ。クォート内のカンマ・改行・"" を正しく扱う。
+// Minimal RFC4180-compliant parser. Correctly handles commas, newlines, and "" inside quotes.
 function parseCsv(text: string): string[][] {
 	const rows: string[][] = [];
 	let row: string[] = [];
@@ -63,7 +63,7 @@ function parseCsv(text: string): string[][] {
 	let inQuotes = false;
 	let i = 0;
 
-	// 先頭のBOMを除去
+	// Strip a leading BOM
 	if (text.charCodeAt(0) === 0xfeff) i = 1;
 
 	const pushCell = () => {
@@ -98,7 +98,7 @@ function parseCsv(text: string): string[][] {
 			pushCell();
 			i += 1;
 		} else if (ch === "\r") {
-			// \r\n / \r どちらも改行として扱う
+			// Treat both \r\n and \r as a line break
 			pushRow();
 			i += text[i + 1] === "\n" ? 2 : 1;
 		} else if (ch === "\n") {
@@ -109,7 +109,7 @@ function parseCsv(text: string): string[][] {
 			i += 1;
 		}
 	}
-	// 末尾セル。完全な空行（末尾改行由来）は捨てる
+	// Final cell. Drop fully empty rows (from a trailing newline)
 	if (cell.length > 0 || row.length > 0) pushRow();
 
 	return rows;
@@ -119,7 +119,7 @@ export function parseEmployeesCsv(text: string): ParsedEmployeeRow[] {
 	const table = parseCsv(text).filter((r) => r.some((c) => c.trim() !== ""));
 	if (table.length === 0) return [];
 
-	// ヘッダー行はラベルの並びに依存せず固定列インデックスで読む
+	// Read the header row by fixed column index, not by label order
 	const body = table.slice(1);
 
 	return body.map((cells, idx) => {

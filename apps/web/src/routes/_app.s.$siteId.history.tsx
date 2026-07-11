@@ -75,7 +75,7 @@ function HistoryList() {
 	const { siteId } = Route.useParams();
 	const { t } = useTranslation(["history", "assignment", "common"]);
 	const navigate = useNavigate();
-	// 日付は必須。未指定時は前日をデフォルトにする（全件検索を防ぐため）
+	// Date is required. Defaults to the previous day when unspecified (to avoid an all-records search)
 	const filterDate = search.date ?? yesterdayStr();
 	const page = search.page ?? 1;
 	const empById = useEmployeeMap();
@@ -94,7 +94,7 @@ function HistoryList() {
 	const total = data?.total ?? 0;
 	const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-	// 日付フィルタを変えたらページを1に戻す
+	// Reset to page 1 when the date filter changes
 	const setDate = (date: string) =>
 		navigate({
 			to: "/s/$siteId/history",

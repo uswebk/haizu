@@ -55,9 +55,9 @@ describe("validateImport", () => {
 			[],
 			tags,
 		);
-		expect(res.rows[0].errors).toContain("社員番号が空です");
-		expect(res.rows[0].errors).toContain("姓が空です");
-		expect(res.rows[0].errors).toContain("名が空です");
+		expect(res.rows[0].errors).toContain("Employee code is empty");
+		expect(res.rows[0].errors).toContain("Last name is empty");
+		expect(res.rows[0].errors).toContain("First name is empty");
 		expect(res.rows[0].input).toBeNull();
 	});
 
@@ -69,14 +69,14 @@ describe("validateImport", () => {
 		);
 		expect(res.errorCount).toBe(2);
 		for (const r of res.rows) {
-			expect(r.errors).toContain("CSV内で社員番号が重複しています");
+			expect(r.errors).toContain("Duplicate employee code within the CSV");
 		}
 	});
 
 	it("既存従業員との重複をエラーにする", () => {
 		const res = validateImport([parsed({ code: "EXIST" })], existing, tags);
 		expect(res.rows[0].errors).toContain(
-			"社員番号が既存の従業員と重複しています",
+			"Employee code duplicates an existing employee",
 		);
 	});
 
@@ -86,7 +86,7 @@ describe("validateImport", () => {
 			existing,
 			tags,
 		);
-		expect(res.rows[0].errors[0]).toContain("未登録のタグ");
+		expect(res.rows[0].errors[0]).toContain("Unregistered tags");
 	});
 
 	it("タグ超過をエラーにする", () => {
@@ -95,7 +95,7 @@ describe("validateImport", () => {
 			existing,
 			tags,
 		);
-		expect(res.rows[0].errors).toContain("タグは10個までです");
+		expect(res.rows[0].errors).toContain("Up to 10 tags allowed");
 	});
 
 	it("不正なアバターカラーは既定色へ補完する", () => {

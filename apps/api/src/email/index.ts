@@ -11,9 +11,9 @@ export interface EmailSender {
 	send(message: EmailMessage): Promise<void>;
 }
 
-// EMAIL_DRIVER で送信アダプタを切り替える。
-//   console: コンソール出力（既定、ゼロ依存）
-//   smtp:    SMTP 送信（ローカルは Mailpit、本番は実 SMTP）
+// Switch the send adapter via EMAIL_DRIVER.
+//   console: console output (default, zero dependencies)
+//   smtp:    SMTP send (Mailpit locally, real SMTP in production)
 function createEmailSender(): EmailSender {
 	const driver = process.env.EMAIL_DRIVER ?? "console";
 	switch (driver) {

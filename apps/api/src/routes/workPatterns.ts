@@ -27,7 +27,7 @@ export const workPatternsRoute = new Hono<AppEnv>()
 		const workPattern = await db.query.workPatterns.findFirst({
 			where: eq(workPatterns.siteId, c.get("siteId")),
 		});
-		// 拠点作成時に勤務体制は自動生成しない。未登録なら null を返す
+		// A work pattern isn't auto-created when a site is created. Returns null if none is registered
 		if (!workPattern) return c.json(null);
 		const rows = await loadShifts(workPattern.id);
 
@@ -48,7 +48,7 @@ export const workPatternsRoute = new Hono<AppEnv>()
 		const existingPattern = await db.query.workPatterns.findFirst({
 			where: eq(workPatterns.siteId, c.get("siteId")),
 		});
-		// 未登録拠点でも保存で作成する（勤務体制はユーザーが明示登録する）
+		// Even for a site with none registered, saving creates it (the user registers the work pattern explicitly)
 		const workPattern =
 			existingPattern ??
 			(
@@ -77,11 +77,11 @@ export const workPatternsRoute = new Hono<AppEnv>()
 					),
 				);
 			const existingById = new Map(existing.map((r) => [r.id, r]));
-			// 名前は現行シフト内で一意。id が古く/欠けていても名前で既存行を照合し、
-			// 未変更行を誤って soft-delete + 再挿入しないようにする
-			// fixme: 例えば夜勤レコードを削除して新たに夜勤レコードを作成した場合、消されないと思ったがそんなことなかった。時間も同じなら消されない？
-			//        この辺り複雑さを増す原因となっているため、シンプルな設計にできないか検討する
-			//        同じ名前であってもレコードが削除された時点で、削除し新しいレコードを追加するなど
+			// Names are unique within the current shifts. Even if the id is stale/missing, match existing rows by name
+			// so unchanged rows aren't mistakenly soft-deleted + re-inserted
+			// fixme: e.g. when a Night record is deleted and a new Night record is created, I thought it wouldn't be removed but it was. Maybe it's not removed if the time is also the same?
+			// this area adds complexity, so consider whether the design can be simplified
+			// e.g. even with the same name, once a record is deleted, delete it and add a new record
 			const existingByName = new Map(existing.map((r) => [r.name, r]));
 
 			const handled = new Set<string>();
@@ -129,7 +129,7 @@ export const workPatternsRoute = new Hono<AppEnv>()
 				if (!handled.has(id)) softDelete.add(id);
 			}
 
-			// 先に soft-delete して部分unique の枠を空けてから insert する
+			// Soft-delete first to free up the partial-unique slot, then insert
 			if (softDelete.size > 0) {
 				await tx
 					.update(shifts)

@@ -10,7 +10,7 @@ import type { AppEnv } from "../types";
 
 const MAX_SITES = 10;
 
-// 拠点アイコンの配色パレット（プロトタイプ準拠）。追加時に採番する。
+// Color palette for site icons (matches the prototype). Numbered as sites are added.
 const ICON_PALETTE = [
 	{ bg: "#dcf2f0", color: "#0ea5a4" },
 	{ bg: "#e3eefe", color: "#2f6df0" },
@@ -26,9 +26,9 @@ export const sitesRoute = new Hono<AppEnv>()
 		const organizationId = c.get("organizationId");
 		const actor = c.get("user");
 
-		// ドメイン: 拠点は招待されているメンバーのみ閲覧可能（管理者は全拠点）
+		// Domain: a site is visible only to invited members (admins see all sites)
 		let allowedSiteIds: string[] | null = null;
-		// 拠点ごとの実効ロール。フロントの画面・ナビ制御がこれを使う。
+		// Effective role per site. Used by the frontend's screen/nav control.
 		const roleBySite = new Map<string, SiteRole>();
 		if (actor.role !== "admin") {
 			const links = await db
@@ -70,7 +70,7 @@ export const sitesRoute = new Hono<AppEnv>()
 
 		const withRole = rows.map((row) => ({
 			...row,
-			// 管理者は全拠点で拠点管理者相当。member は member_sites の割り当てに従う。
+			// Admins are equivalent to site admins at every site. Members follow their member_sites assignments.
 			role: effectiveSiteRole(actor.role, roleBySite.get(row.id) ?? null),
 		}));
 		return c.json({ sites: withRole });
@@ -123,7 +123,7 @@ export const sitesRoute = new Hono<AppEnv>()
 		});
 		if (!target) return c.json({ error: "Not found" }, 404);
 
-		// ドメイン: 拠点は削除不可・非アクティブ化のみ。最後のアクティブ拠点は無効化できない。
+		// Domain: sites can't be deleted, only deactivated. The last active site can't be deactivated.
 		if (target.isActive && !isActive) {
 			const others = await db
 				.select({ value: count() })

@@ -80,7 +80,7 @@ Set them in `apps/web/.env`. There is no per-user timezone setting: the app assu
 | | |
 |---|---|
 | [docs/architecture.md](docs/architecture.md) | Design decisions you will break if you don't know them |
-| [docs/domain/](docs/domain/) | Domain knowledge, one file per concept *(Japanese)* |
+| [docs/domain/](docs/domain/) | Domain knowledge, one file per concept *(English + Japanese)* |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Development commands, conventions, and how to open a PR |
 
 ## License

@@ -1,12 +1,12 @@
-// セッションユーザーがデータAPIへアクセス可能かを判定する純粋関数。
-// requireAuth ミドルウェアから呼び出す。Better Auth / DB に依存しないため単体テスト可能。
+// Pure function that decides whether a session user may access the data API.
+// Called from the requireAuth middleware. It doesn't depend on Better Auth / the DB, so it's unit-testable.
 type SessionUser = { isActive: boolean; emailVerified: boolean };
 
 export type AccessResult =
 	| { ok: true }
 	| { ok: false; status: 403; message: string };
 
-// isActive を emailVerified より先に評価する（無効化アカウントは確認状態に関わらず遮断）。
+// Evaluate isActive before emailVerified (deactivated accounts are blocked regardless of verification state).
 export function evaluateSessionAccess(user: SessionUser): AccessResult {
 	if (!user.isActive) {
 		return { ok: false, status: 403, message: "このアカウントは無効です" };

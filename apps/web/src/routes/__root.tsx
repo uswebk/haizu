@@ -14,8 +14,8 @@ import i18n, { DEFAULT_LOCALE, type Locale } from "#/i18n/config";
 import { detectLocale } from "#/i18n/server";
 import appCss from "../styles.css?url";
 
-// QueryClientProvider は setupRouterSsrQueryIntegration がリクエスト単位の
-// QueryClient で自動的に差し込む（ここで手動ラップ＋シングルトンにしない）。
+// setupRouterSsrQueryIntegration injects the QueryClientProvider automatically with a per-request
+// QueryClient (don't wrap manually + make a singleton here).
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 	{
 		component: () => <Outlet />,

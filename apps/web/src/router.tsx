@@ -4,8 +4,8 @@ import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query
 import { routeTree } from "./routeTree.gen";
 
 export function getRouter() {
-	// QueryClient はリクエストごとに生成する。モジュールスコープで共有すると、
-	// 単一のSSRプロセス上でキャッシュが全ユーザー間で混線する。
+	// Create the QueryClient per request. Sharing it at module scope would
+	// mix the cache across all users on a single SSR process.
 	const queryClient = new QueryClient();
 
 	const router = createTanStackRouter({

@@ -16,7 +16,7 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 		minPasswordLength: MIN_PASSWORD_LENGTH,
-		// MVP では OTP を使わずログイン可能にする（メール確認は次フェーズ）
+		// For the MVP, allow login without OTP (email verification is a later phase)
 		requireEmailVerification: false,
 		sendResetPassword: async ({ user: u, url }) => {
 			await emailSender.send({
@@ -36,11 +36,11 @@ export const auth = betterAuth({
 		},
 	},
 	user: {
-		// organizationId / role はクライアントから注入できないよう input:false とし、
-		// サインアップ時に databaseHooks 経由でサーバー側からのみ設定する（テナント越境防止）。
+		// Set input:false on organizationId / role so the client can't inject them,
+		// and set them only server-side via databaseHooks at sign-up (prevents tenant crossover).
 		additionalFields: {
 			organizationId: { type: "string", required: false, input: false },
-			// 組織ロール。拠点ごとの権限は member_sites.role が持つ。
+			// Org role. Per-site permissions are held by member_sites.role.
 			role: {
 				type: "string",
 				required: false,
@@ -59,9 +59,9 @@ export const auth = betterAuth({
 		user: {
 			create: {
 				before: async (userData) => {
-					// カスタムサインアップ(signup-context 内)からのみ組織・権限が渡る。
-					// コンテキスト外（標準 /api/auth/sign-up/email 等）では organizationId が
-					// 付与されず NOT NULL 制約で作成が失敗する = 公開サインアップは実質無効。
+					// Organization/role are passed only from the custom sign-up (inside signup-context).
+					// Outside that context (e.g. the standard /api/auth/sign-up/email), organizationId is
+					// not set and creation fails on the NOT NULL constraint = public sign-up is effectively disabled.
 					const ctx = signupContext.getStore();
 					if (!ctx) return;
 					return {

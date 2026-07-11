@@ -50,12 +50,12 @@ function Home() {
 
 	const hasShifts = !!workPattern;
 	const hasEmployees = employees.length > 0;
-	// 下書きのみでは配置に使えないため、公開済みの規格を持つエリアがあって初めて完了扱いにする
+	// A draft-only area can't be assigned, so it counts as done only once an area has a published spec
 	const hasAreas = areas.some((a) => a.currentStatus === "published");
-	// エリアは存在するが未公開（下書きのみ）の状態
+	// State where an area exists but is unpublished (draft only)
 	const hasDraftArea = !hasAreas && areas.length > 0;
 	const setupComplete = hasShifts && hasEmployees && hasAreas;
-	// 初期セットアップはシフト・従業員・配置エリアの作成を促すもの。書き込み権限が無ければ出さない。
+	// Initial setup prompts creating shifts, employees, and layout areas. Not shown without write permission.
 	const canSetup = canSite(siteRole, "area:write");
 
 	return (

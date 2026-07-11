@@ -1,6 +1,6 @@
 import type { OrgRole, SiteRole } from "@haizu/shared";
 
-// 認証・拠点スコープ middleware が解決した現在のユーザー・組織・拠点を各ハンドラへ渡す型。
+// Type that passes the current user, organization, and site resolved by the auth/site-scope middleware to each handler.
 export type AppEnv = {
 	Variables: {
 		user: { id: string; organizationId: string; role: OrgRole };

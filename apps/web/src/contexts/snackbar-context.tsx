@@ -30,7 +30,7 @@ type SnackbarContextValue = {
 
 const SnackbarContext = createContext<SnackbarContextValue | null>(null);
 
-// 表示時間（ミリ秒）
+// Display duration (milliseconds)
 const AUTO_DISMISS_MS = 4000;
 
 const VARIANT_DOT: Record<SnackbarVariant, string> = {
@@ -40,7 +40,7 @@ const VARIANT_DOT: Record<SnackbarVariant, string> = {
 	error: "var(--color-danger)",
 };
 
-// 成功・情報は本文と同じ色にして、注意を引く必要があるものだけ色を持たせる
+// Give success/info the same color as the body text; only ones that need attention get a color
 const VARIANT_ACTION: Record<SnackbarVariant, string> = {
 	success: "var(--color-ink)",
 	info: "var(--color-ink)",

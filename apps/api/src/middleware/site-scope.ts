@@ -5,10 +5,10 @@ import { db } from "../db/client";
 import { memberSites, sites } from "../db/schema";
 import type { AppEnv } from "../types";
 
-// requireAuth の後段で使う。x-site-id で選択された拠点が、セッションユーザーの組織に
-// 属し、かつ（管理者以外は）その拠点に招待されたメンバーであることを検証する
-// （他組織の拠点や、自分が招待されていない拠点へのなりすましアクセスを防ぐ）。
-// あわせて、その拠点における実効ロールを解決して siteRole に載せる。
+// Used after requireAuth. Verifies that the site selected via x-site-id belongs to the
+// session user's organization, and (for non-admins) that they are a member invited to that site
+// (prevents spoofed access to other orgs' sites or sites the user wasn't invited to).
+// It also resolves the effective role at that site and puts it on siteRole.
 export const siteScope = createMiddleware<AppEnv>(async (c, next) => {
 	const siteId = c.req.header("x-site-id");
 	if (!siteId) {

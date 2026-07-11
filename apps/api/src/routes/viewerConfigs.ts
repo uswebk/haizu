@@ -36,8 +36,8 @@ export const viewerConfigsRoute = new Hono<AppEnv>()
 	.use("*", siteScope)
 	.use("*", requireSiteWritePermission("viewer_config:write"))
 	.get("/", async (c) => {
-		// shifts は left join（ソフト削除済みでも name/時刻は保持されるため表示に使える）
-		// エリア経由で現在拠点に絞り込む
+		// shifts is a left join (name/times are kept even when soft-deleted, so they're usable for display)
+		// Narrow to the current site via the area
 		const rows = await db
 			.select({
 				config: viewerConfigs,
@@ -68,7 +68,7 @@ export const viewerConfigsRoute = new Hono<AppEnv>()
 			const { areaId } = c.req.valid("param");
 			const input = c.req.valid("json");
 
-			// 対象エリアが現在拠点に属することを検証する
+			// Verify the target area belongs to the current site
 			const area = await db.query.areas.findFirst({
 				where: and(eq(areas.id, areaId), eq(areas.siteId, c.get("siteId"))),
 			});

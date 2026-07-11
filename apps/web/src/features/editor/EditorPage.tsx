@@ -48,8 +48,8 @@ export function EditorPage({ siteId, areaId }: Props) {
 	});
 
 	const [areaName, setAreaName] = useState<string | null>(null);
-	// 選択中バージョンは id のみ保持し、常に areaData（最新の取得結果）から解決する。
-	// VersionState のスナップショットを保持すると再取得後も古い状態のまま表示され続けてしまう。
+	// Keep only the selected version's id and always resolve from areaData (the latest fetch).
+	// Holding a VersionState snapshot would keep showing stale state even after a refetch.
 	const [currentVersionId, setCurrentVersionId] = useState<string | null>(null);
 	const [pendingDuplicate, setPendingDuplicate] = useState<{
 		sourceVersionId: string;

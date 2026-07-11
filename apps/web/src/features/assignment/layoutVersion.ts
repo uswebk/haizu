@@ -1,7 +1,7 @@
 import type { VersionState } from "#/features/editor/types";
 
-// 対象日に配置決めで適用される規格 = 公開済みかつ適用開始日が対象日以前のもののうち、
-// 適用開始日が最も新しいもの（同日ならバージョン番号が大きい方が優先）
+// The spec applied in assignment on the target date = among published versions with an effective date on or before the target date,
+// the one with the newest effective date (ties broken by the larger version number)
 export function resolveVersionForDate(
 	versions: VersionState[],
 	date: string,

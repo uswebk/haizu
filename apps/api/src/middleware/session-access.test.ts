@@ -25,7 +25,7 @@ describe("evaluateSessionAccess", () => {
 	});
 
 	it("無効化を未確認より優先して判定する", () => {
-		// 無効化アカウントは確認状態に関わらず「無効です」を返す
+		// A deactivated account returns "inactive" regardless of verification state
 		expect(
 			evaluateSessionAccess({ isActive: false, emailVerified: false }),
 		).toEqual({ ok: false, status: 403, message: "このアカウントは無効です" });
