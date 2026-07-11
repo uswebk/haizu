@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useDismiss } from "#/hooks/useDismiss";
 import type { ShiftOption } from "./shift";
 
@@ -19,6 +20,7 @@ export function ShiftDatePicker({
 	options,
 	onShiftChange,
 }: Props) {
+	const { t } = useTranslation("assignment");
 	const [open, setOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
 	useDismiss(open, () => setOpen(false), menuRef);
@@ -46,7 +48,7 @@ export function ShiftDatePicker({
 				{open && (
 					<div className="absolute top-10 right-0 w-37.5 bg-surface border border-border rounded-lg shadow-float p-1.5 z-30">
 						<div className="text-[10px] font-bold tracking-wide text-faint px-2.25 pt-1.25 pb-1.75">
-							交代
+							{t("rotation")}
 						</div>
 						{options.map((o) => (
 							<button

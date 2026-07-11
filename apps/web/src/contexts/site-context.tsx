@@ -1,6 +1,7 @@
 import type { SiteInput } from "@haizu/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useSnackbar } from "#/contexts/snackbar-context";
 import {
 	createSite,
@@ -58,6 +59,7 @@ export function SiteProvider({
 }) {
 	const queryClient = useQueryClient();
 	const { showSuccess } = useSnackbar();
+	const { t } = useTranslation("sites");
 	// SiteProvider は認証済みエリアでのみマウントされる。
 	const { data: rawSites = [], isLoading } = useQuery({
 		queryKey: siteKeys.all,
@@ -74,7 +76,7 @@ export function SiteProvider({
 		mutationFn: (input: SiteInput) => createSite(input),
 		onSuccess: () => {
 			void invalidateSites();
-			showSuccess("拠点を追加しました");
+			showSuccess(t("siteAdded"));
 		},
 	});
 
@@ -83,7 +85,7 @@ export function SiteProvider({
 			updateSiteApi(id, input),
 		onSuccess: () => {
 			void invalidateSites();
-			showSuccess("拠点を更新しました");
+			showSuccess(t("siteUpdated"));
 		},
 	});
 

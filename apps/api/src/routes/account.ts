@@ -36,7 +36,7 @@ export const accountRoute = new Hono<AppEnv>()
 		const otp = await storeEmailOtp(`email-change:${userId}`, newEmail);
 		await emailSender.send({
 			to: newEmail,
-			subject: "メールアドレス変更の確認コード",
+			subject: "Email change verification code",
 			body: `code: ${otp}`,
 		});
 		return c.json({ ok: true });

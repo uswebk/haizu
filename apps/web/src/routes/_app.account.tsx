@@ -6,6 +6,7 @@ import {
 	useNavigate,
 	useRouter,
 } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { useSnackbar } from "#/contexts/snackbar-context";
 import { MyProfileCard } from "#/features/members/MyProfileCard";
 import type { MemberRow } from "#/features/members/types";
@@ -28,6 +29,7 @@ function AccountPage() {
 	const router = useRouter();
 	const navigate = useNavigate();
 	const canGoBack = useCanGoBack();
+	const { t } = useTranslation(["account", "common"]);
 	const { showSuccess } = useSnackbar();
 
 	// 元いた画面へ戻す。履歴が無ければ来訪元の拠点、それも無ければ拠点選択へ。
@@ -47,7 +49,7 @@ function AccountPage() {
 		mutationFn: (name: string) => authClient.updateUser({ name }),
 		onSuccess: async () => {
 			await router.invalidate();
-			showSuccess("名前を更新しました");
+			showSuccess(t("account:nameUpdated"));
 		},
 	});
 
@@ -85,12 +87,12 @@ function AccountPage() {
 						className="flex items-center gap-1.5 text-[13px] font-semibold text-muted hover:text-ink cursor-pointer border-none bg-transparent p-0 mb-4"
 					>
 						<span aria-hidden="true">←</span>
-						戻る
+						{t("common:back")}
 					</button>
 
-					<div className="text-[22px] font-bold">アカウント設定</div>
+					<div className="text-[22px] font-bold">{t("account:title")}</div>
 					<div className="text-[13.5px] text-muted mt-1.25 mb-4.5">
-						名前・メールアドレス・パスワードを変更します。
+						{t("account:subtitle")}
 					</div>
 
 					<MyProfileCard

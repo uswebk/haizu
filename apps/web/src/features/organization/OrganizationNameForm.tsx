@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { useSnackbar } from "#/contexts/snackbar-context";
@@ -11,6 +12,7 @@ import {
 
 export function OrganizationNameForm() {
 	const queryClient = useQueryClient();
+	const { t } = useTranslation(["orgSettings", "members", "common"]);
 	const { showSuccess } = useSnackbar();
 	const { data: organization, isPending } = useQuery({
 		queryKey: organizationKeys.detail,
@@ -26,7 +28,7 @@ export function OrganizationNameForm() {
 		mutationFn: () => updateOrganizationName(name.trim()),
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: organizationKeys.detail });
-			showSuccess("事業所名を更新しました");
+			showSuccess(t("orgSettings:nameUpdated"));
 		},
 	});
 
@@ -35,9 +37,11 @@ export function OrganizationNameForm() {
 
 	return (
 		<section className="bg-surface border border-border rounded-lg p-5.5 shadow-card">
-			<div className="font-bold text-[15px] mb-3.5">事業所名</div>
+			<div className="font-bold text-[15px] mb-3.5">
+				{t("orgSettings:orgName")}
+			</div>
 			<Input
-				label="事業所名"
+				label={t("orgSettings:orgName")}
 				value={name}
 				onChange={(e) => setName(e.target.value)}
 				width={360}
@@ -45,7 +49,9 @@ export function OrganizationNameForm() {
 			/>
 			<div className="flex items-center gap-3.5 mt-4">
 				<Button onClick={() => mutation.mutate()} disabled={!canSave}>
-					{mutation.isPending ? "保存中…" : "保存する"}
+					{mutation.isPending
+						? t("members:form.saving")
+						: t("members:form.save")}
 				</Button>
 				{mutation.isError && (
 					<span className="text-xs font-semibold text-danger">

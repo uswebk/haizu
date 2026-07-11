@@ -1,10 +1,11 @@
 import { displayRole, landingScreen } from "@haizu/shared";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { SiteProvider, useSite } from "#/contexts/site-context";
 import { SiteEditDialog } from "#/features/sites/SiteEditDialog";
 import { SiteIcon } from "#/features/sites/SiteIcon";
-import { ROLE_LABEL } from "#/lib/roles";
+import { useRoleLabel } from "#/lib/roles";
 import { fetchSession } from "#/lib/session";
 
 export const Route = createFileRoute("/select-site")({
@@ -30,9 +31,11 @@ function SelectSiteInner() {
 	const { activeSites, canAddSite, addSite } = useSite();
 	const [addOpen, setAddOpen] = useState(false);
 	const { user } = Route.useRouteContext();
+	const { t } = useTranslation(["selectSite", "common"]);
+	const roleLabelFor = useRoleLabel();
 	const userName = user.name;
 	// この画面はまだ拠点が決まっていないため、組織ロールだけで表示する
-	const roleLabel = ROLE_LABEL[displayRole(user.role, null) ?? "viewer"];
+	const roleLabel = roleLabelFor(displayRole(user.role, null) ?? "viewer");
 	const initial = userName.charAt(0) || "?";
 
 	// 着地画面は「選択した拠点における実効ロール」で決まる（拠点ごとに権限が異なるため）
@@ -61,14 +64,14 @@ function SelectSiteInner() {
 				<div>
 					<div className="font-bold text-2xl leading-none text-ink">haizu</div>
 					<div className="font-mono text-[9.5px] tracking-[.14em] text-faint mt-1">
-						配置管理SYSTEM
+						{t("common:appTagline")}
 					</div>
 				</div>
 			</div>
 
-			<div className="text-[22px] font-bold">拠点を選択</div>
+			<div className="text-[22px] font-bold">{t("selectSite:title")}</div>
 			<div className="text-[13.5px] text-muted mt-1.5">
-				操作する拠点を選んでください。選んだ拠点を基準に従業員・配置を管理します。
+				{t("selectSite:subtitle")}
 			</div>
 
 			<div className="flex flex-wrap justify-center gap-4.5 max-w-190 mt-7">
@@ -89,12 +92,12 @@ function SelectSiteInner() {
 						<div className="h-px bg-hairline my-3.5" />
 						<div className="flex items-center justify-between">
 							<span className="text-[12.5px] text-muted">
-								従業員{" "}
+								{t("selectSite:employeeCountPrefix")}{" "}
 								<span className="font-bold text-ink">{site.employeeCount}</span>{" "}
-								名
+								{t("selectSite:employeeCountSuffix")}
 							</span>
 							<span className="text-[12.5px] font-bold text-primary">
-								選択 →
+								{t("selectSite:select")}
 							</span>
 						</div>
 					</button>
@@ -109,8 +112,12 @@ function SelectSiteInner() {
 					<span className="w-11 h-11 rounded-full bg-primary-soft text-primary flex items-center justify-center text-xl">
 						＋
 					</span>
-					<span className="text-[14px] font-bold text-ink">拠点を追加</span>
-					<span className="text-[12px] text-faint">管理者のみ</span>
+					<span className="text-[14px] font-bold text-ink">
+						{t("selectSite:addSite")}
+					</span>
+					<span className="text-[12px] text-faint">
+						{t("selectSite:adminOnly")}
+					</span>
 				</button>
 			</div>
 

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AddCard } from "#/components/ui/AddCard";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/_app/s/$siteId/editor/")({
 
 function EditorList() {
 	const { siteId } = Route.useParams();
+	const { t } = useTranslation(["editor", "common"]);
 	const queryClient = useQueryClient();
 	const { showSuccess } = useSnackbar();
 	const [addOpen, setAddOpen] = useState(false);
@@ -32,7 +34,7 @@ function EditorList() {
 			void queryClient.invalidateQueries({ queryKey: areaKeys.all });
 			setAddOpen(false);
 			setNewAreaName("");
-			showSuccess("配置エリアを追加しました");
+			showSuccess(t("editor:areaAdded"));
 		},
 	});
 
@@ -46,12 +48,14 @@ function EditorList() {
 			<div className="max-w-245">
 				<div className="flex items-end justify-between gap-5 mb-5.5 flex-wrap">
 					<div>
-						<div className="text-[22px] font-bold">配置エリア一覧</div>
+						<div className="text-[22px] font-bold">{t("editor:listTitle")}</div>
 						<div className="text-[13.5px] text-muted mt-1.25">
-							エリアを選んで、図面と配置スポットを設定します。
+							{t("editor:listSubtitle")}
 						</div>
 					</div>
-					<Button onClick={() => setAddOpen(true)}>＋ エリアを追加</Button>
+					<Button onClick={() => setAddOpen(true)}>
+						{t("editor:addArea")}
+					</Button>
 				</div>
 
 				<div
@@ -73,18 +77,18 @@ function EditorList() {
 										{area.name}
 									</div>
 									{area.floorPlanName ? (
-										<Badge tone="success">図面あり</Badge>
+										<Badge tone="success">{t("editor:hasPlan")}</Badge>
 									) : (
-										<Badge tone="warning">図面なし</Badge>
+										<Badge tone="warning">{t("editor:noPlan")}</Badge>
 									)}
 								</div>
 								<div>
 									<div className="h-px bg-hairline mt-3.5" />
 									<div className="flex items-center justify-between mt-3.5">
 										<div className="text-[13px] text-muted">
-											スポット{" "}
+											{t("editor:spotCountPrefix")}{" "}
 											<b className="text-ink font-bold">{area.spotCount}</b>{" "}
-											箇所
+											{t("editor:spotCountSuffix")}
 										</div>
 										<div className="flex items-center gap-1.5">
 											{area.currentVersion && (
@@ -93,9 +97,9 @@ function EditorList() {
 												</span>
 											)}
 											{area.currentStatus === "published" ? (
-												<Badge tone="success">公開中</Badge>
+												<Badge tone="success">{t("editor:published")}</Badge>
 											) : area.currentStatus === "draft" ? (
-												<Badge tone="draft">下書き</Badge>
+												<Badge tone="draft">{t("editor:draft")}</Badge>
 											) : null}
 										</div>
 									</div>
@@ -103,7 +107,10 @@ function EditorList() {
 							</div>
 						</Link>
 					))}
-					<AddCard label="エリアを追加" onClick={() => setAddOpen(true)} />
+					<AddCard
+						label={t("editor:addArea2")}
+						onClick={() => setAddOpen(true)}
+					/>
 				</div>
 			</div>
 
@@ -114,7 +121,7 @@ function EditorList() {
 						className="w-115 max-w-full bg-surface rounded-section shadow-[0_24px_60px_rgba(16,42,67,.3)]"
 					>
 						<div className="flex items-center justify-between px-5.5 py-4.5 border-b border-hairline">
-							<div className="text-base font-bold">エリアを追加</div>
+							<div className="text-base font-bold">{t("editor:addArea2")}</div>
 							<button
 								type="button"
 								onClick={() => setAddOpen(false)}
@@ -128,14 +135,14 @@ function EditorList() {
 								htmlFor="new-area-name"
 								className="block text-xs font-semibold text-muted mb-1.5"
 							>
-								エリア名
+								{t("editor:areaName")}
 							</label>
 							<input
 								id="new-area-name"
 								value={newAreaName}
 								onChange={(e) => setNewAreaName(e.target.value)}
 								onKeyDown={(e) => e.key === "Enter" && handleAddArea()}
-								placeholder="荷捌き場"
+								placeholder={t("editor:areaNamePlaceholder")}
 								className="w-full font-sans text-sm px-3 py-2.5 rounded-[9px] border border-border bg-surface text-ink outline-none focus:border-primary"
 							/>
 							<div className="flex justify-end gap-2.5 mt-6">
@@ -146,13 +153,13 @@ function EditorList() {
 										setNewAreaName("");
 									}}
 								>
-									キャンセル
+									{t("common:cancel")}
 								</Button>
 								<Button
 									onClick={handleAddArea}
 									disabled={addMutation.isPending}
 								>
-									{addMutation.isPending ? "追加中…" : "追加する"}
+									{addMutation.isPending ? t("editor:adding") : t("editor:add")}
 								</Button>
 							</div>
 						</div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { SpotState } from "#/features/editor/types";
 import type { EmployeeRow } from "#/features/employees/types";
 import { API_BASE } from "#/lib/api";
@@ -23,10 +24,11 @@ export function PlacementViewCanvas({
 	aspect,
 	zoom = 1,
 }: Props) {
+	const { t } = useTranslation("assignment");
 	if (spots.length === 0) {
 		return (
 			<div className="flex-1 rounded-md border-[1.6px] border-dashed border-dash bg-empty-bg flex items-center justify-center text-[13px] font-semibold text-faint">
-				この記録の図面はありません
+				{t("noPlanForRecord")}
 			</div>
 		);
 	}

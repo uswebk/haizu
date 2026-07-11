@@ -1,11 +1,12 @@
 import { type OrgRole, SITE_ROLES, type SiteRole } from "@haizu/shared";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { OptionCard } from "#/components/ui/OptionCard";
 import { useSite } from "#/contexts/site-context";
 import { useDismiss } from "#/hooks/useDismiss";
-import { ROLE_LABEL } from "#/lib/roles";
+import { useRoleLabel } from "#/lib/roles";
 import type { MemberRow, SiteRoleAssignment } from "./types";
 
 export type MemberFormValues = {
@@ -26,12 +27,6 @@ type Props = {
 	errorMessage?: string | null;
 	onSubmit: (data: MemberFormValues) => void;
 	onCancel: () => void;
-};
-
-const SITE_ROLE_DESCRIPTIONS: Record<SiteRole, string> = {
-	site_admin: "この拠点の編集が可能",
-	general: "ホーム・配置履歴・ビュアーの閲覧のみ",
-	viewer: "ビュアー閲覧のみ",
 };
 
 const SITE_ROLE_ORDER = SITE_ROLES;
@@ -74,6 +69,8 @@ export function MemberFormDialog({
 	const contentRef = useRef<HTMLDivElement>(null);
 	useDismiss(open, onCancel, contentRef);
 
+	const { t } = useTranslation(["members", "common"]);
+	const roleLabelFor = useRoleLabel();
 	const { activeSites } = useSite();
 	const assignableSites = activeSites.filter((s) => s.role === "site_admin");
 
@@ -132,11 +129,13 @@ export function MemberFormDialog({
 			>
 				<div className="mb-6">
 					<div className="text-lg font-bold">
-						{mode === "invite" ? "メンバーを招待" : "メンバーを編集"}
+						{mode === "invite"
+							? t("members:form.inviteTitle")
+							: t("members:form.editTitle")}
 					</div>
 					<div className="text-xs text-faint mt-0.75">
 						{mode === "invite"
-							? "メールアドレスに招待を送り、権限と担当拠点を設定します"
+							? t("members:form.inviteSubtitle")
 							: `${initialValue?.name ?? ""}（${initialValue?.email ?? ""}）`}
 					</div>
 				</div>
@@ -145,25 +144,25 @@ export function MemberFormDialog({
 					<>
 						<div className="grid grid-cols-2 gap-3 mb-4.5">
 							<Input
-								label="姓"
+								label={t("members:form.lastName")}
 								value={draft.lastName}
 								onChange={(e) =>
 									setDraft((d) => ({ ...d, lastName: e.target.value }))
 								}
-								placeholder="山田"
+								placeholder={t("members:form.lastNamePlaceholder")}
 							/>
 							<Input
-								label="名"
+								label={t("members:form.firstName")}
 								value={draft.firstName}
 								onChange={(e) =>
 									setDraft((d) => ({ ...d, firstName: e.target.value }))
 								}
-								placeholder="健一"
+								placeholder={t("members:form.firstNamePlaceholder")}
 							/>
 						</div>
 
 						<Input
-							label="メールアドレス"
+							label={t("common:email")}
 							value={draft.email}
 							onChange={(e) =>
 								setDraft((d) => ({ ...d, email: e.target.value }))
@@ -177,20 +176,20 @@ export function MemberFormDialog({
 				{canAssignAdmin && (
 					<>
 						<div className="mb-2 text-xs font-semibold text-muted">
-							組織権限
+							{t("members:form.orgRole")}
 						</div>
 						<div className="flex flex-col gap-2 mb-4.5">
 							<OptionCard
-								title="管理者"
-								description="全拠点・事業所設定にアクセス"
+								title={t("members:form.orgRoleAdmin")}
+								description={t("members:form.orgRoleAdminDesc")}
 								selected={draft.orgRole === "admin"}
 								onClick={() =>
 									setDraft((d) => ({ ...d, orgRole: "admin", siteRoles: [] }))
 								}
 							/>
 							<OptionCard
-								title="メンバー"
-								description="拠点ごとに権限を設定する"
+								title={t("members:form.orgRoleMember")}
+								description={t("members:form.orgRoleMemberDesc")}
 								selected={draft.orgRole === "member"}
 								onClick={() => setDraft((d) => ({ ...d, orgRole: "member" }))}
 							/>
@@ -200,14 +199,14 @@ export function MemberFormDialog({
 
 				{draft.orgRole === "admin" ? (
 					<div className="mb-4.5 px-3.75 py-3.25 border border-border rounded-md bg-app-bg text-[12.5px] text-muted">
-						全拠点にアクセスできます
+						{t("members:form.allSitesAccess")}
 					</div>
 				) : (
 					<>
 						<div className="mb-2 text-xs font-semibold text-muted">
-							担当拠点と権限
+							{t("members:form.siteRolesLabel")}
 							<span className="text-faint font-medium">
-								（拠点ごとに異なる権限を設定できます）
+								{t("members:form.siteRolesHint")}
 							</span>
 						</div>
 						<div className="flex flex-col gap-2 mb-4.5">
@@ -255,7 +254,7 @@ export function MemberFormDialog({
 													<button
 														key={role}
 														type="button"
-														title={SITE_ROLE_DESCRIPTIONS[role]}
+														title={t(`members:siteRoleDesc.${role}`)}
 														onClick={() => setSiteRole(site.id, role)}
 														className={`text-[12px] px-2.5 py-1.5 rounded-sm border cursor-pointer whitespace-nowrap ${
 															assigned.role === role
@@ -263,7 +262,7 @@ export function MemberFormDialog({
 																: "font-semibold border-border text-muted bg-surface"
 														}`}
 													>
-														{ROLE_LABEL[role]}
+														{roleLabelFor(role)}
 													</button>
 												))}
 											</div>
@@ -275,7 +274,7 @@ export function MemberFormDialog({
 
 						{!hasSite && (
 							<div className="-mt-2.5 mb-4.5 text-[12px] text-warning">
-								担当拠点を1つ以上選択してください
+								{t("members:form.selectAtLeastOneSite")}
 							</div>
 						)}
 					</>
@@ -289,10 +288,10 @@ export function MemberFormDialog({
 					>
 						<div>
 							<div className="text-[13.5px] font-semibold">
-								このメンバーを有効にする
+								{t("members:form.activateMember")}
 							</div>
 							<div className="text-[11.5px] text-faint">
-								停止中のメンバーはログインできません
+								{t("members:form.suspendedCantLogin")}
 							</div>
 						</div>
 						<div
@@ -319,14 +318,14 @@ export function MemberFormDialog({
 
 				<div className="flex justify-end gap-2.5">
 					<Button variant="secondary" onClick={onCancel} disabled={isPending}>
-						キャンセル
+						{t("common:cancel")}
 					</Button>
 					<Button onClick={handleSave} disabled={!canSave || isPending}>
 						{isPending
-							? "保存中…"
+							? t("members:form.saving")
 							: mode === "invite"
-								? "招待する"
-								: "保存する"}
+								? t("members:form.invite")
+								: t("members:form.save")}
 					</Button>
 				</div>
 			</div>

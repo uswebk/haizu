@@ -1,6 +1,9 @@
 import type { WorkPattern } from "@haizu/shared";
+import i18n from "#/i18n/config";
 
 export type ShiftOption = { id: string; name: string };
+
+const allDayLabel = () => i18n.t("assignment:allDay");
 
 export function getShiftOptions(
 	wp: WorkPattern | null | undefined,
@@ -14,7 +17,8 @@ export function resolveEffectiveShift(
 	wp: WorkPattern | null | undefined,
 	searchShiftId: string | undefined,
 ): { shiftId: string | null; label: string } {
-	if (!wp || wp.mode === "single") return { shiftId: null, label: "終日" };
+	if (!wp || wp.mode === "single")
+		return { shiftId: null, label: allDayLabel() };
 	const options = wp.shifts;
 	const selected =
 		options.find((s) => s.id === searchShiftId) ?? options[0] ?? null;

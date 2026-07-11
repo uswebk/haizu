@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Input } from "#/components/ui/Input";
 import type { SpotState } from "./types";
 
@@ -38,22 +39,23 @@ export function EditorSidebar({
 	onDeleteAreaClick,
 	canDeleteArea = true,
 }: Props) {
+	const { t } = useTranslation("editor");
 	return (
 		<div className="w-60 shrink-0 border-l border-border p-4 overflow-auto">
 			{selectedSpot ? (
 				<>
 					<div className="text-[10.5px] font-bold tracking-widest text-faint mb-2.5">
-						配置スポットの設定
+						{t("editor:spotSettings")}
 					</div>
 					<Input
-						label="ラベル"
+						label={t("editor:spotLabel")}
 						value={selectedSpot.label}
 						onChange={(e) => onUpdateSpotLabel(selectedSpot.id, e.target.value)}
 						disabled={readOnly}
 					/>
 					<div className="mt-4">
 						<div className="block text-xs font-semibold text-muted mb-1.5">
-							大きさ
+							{t("editor:size")}
 						</div>
 						<div className="flex items-center gap-3">
 							<button
@@ -77,12 +79,12 @@ export function EditorSidebar({
 							</button>
 						</div>
 						<div className="text-[11px] text-faint mt-1.75 leading-relaxed">
-							スポット右下のハンドルをドラッグでも変更できます
+							{t("editor:spotResizeHint")}
 						</div>
 					</div>
 					<div className="mt-4">
 						<div className="block text-xs font-semibold text-muted mb-1.5">
-							所属エリア
+							{t("editor:belongingArea")}
 						</div>
 						<div className="text-[13px] font-semibold text-ink border border-border rounded-sm px-2.75 py-2.25 bg-table-head">
 							{areaName}
@@ -94,22 +96,22 @@ export function EditorSidebar({
 						disabled={readOnly}
 						className="w-full mt-5 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft disabled:opacity-40 disabled:cursor-not-allowed"
 					>
-						スポットを削除
+						{t("editor:deleteSpot")}
 					</button>
 				</>
 			) : (
 				<>
 					<div className="text-[10.5px] font-bold tracking-widest text-faint mb-2.5">
-						エリアの設定
+						{t("editor:areaSettings")}
 					</div>
 					<Input
-						label="エリア名"
+						label={t("editor:areaName")}
 						value={areaName}
 						onChange={(e) => onAreaNameChange(e.target.value)}
 					/>
 					<div className="mt-4 p-2.75 border border-border rounded-[9px]">
 						<div className="text-[10.5px] font-bold tracking-widest text-faint mb-2.5">
-							図面
+							{t("editor:plan")}
 						</div>
 						{hasFloorPlan ? (
 							<>
@@ -121,7 +123,7 @@ export function EditorSidebar({
 								</div>
 								<div className="mt-3">
 									<div className="block text-xs font-semibold text-muted mb-1.5">
-										サイズ
+										{t("editor:planSize")}
 									</div>
 									<div className="flex items-center gap-3">
 										<button
@@ -151,7 +153,7 @@ export function EditorSidebar({
 									disabled={readOnly}
 									className="w-full mt-3 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-border bg-surface text-ink cursor-pointer hover:bg-hairline disabled:opacity-40 disabled:cursor-not-allowed"
 								>
-									画像を変更
+									{t("editor:changeImage")}
 								</button>
 								<button
 									type="button"
@@ -159,13 +161,13 @@ export function EditorSidebar({
 									disabled={readOnly}
 									className="w-full mt-2 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft disabled:opacity-40 disabled:cursor-not-allowed"
 								>
-									図面を削除
+									{t("editor:deletePlan")}
 								</button>
 							</>
 						) : (
 							<>
 								<div className="text-xs text-faint border-[1.4px] border-dashed border-slot-border rounded-[9px] px-2.75 py-2.75 text-center bg-empty-bg">
-									図面が未アップロードです
+									{t("editor:noPlanUploaded")}
 								</div>
 								<button
 									type="button"
@@ -173,30 +175,28 @@ export function EditorSidebar({
 									disabled={readOnly}
 									className="w-full mt-3 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border-none bg-primary-soft text-primary cursor-pointer hover:brightness-95 disabled:opacity-40 disabled:cursor-not-allowed"
 								>
-									画像をアップロード
+									{t("editor:uploadImage")}
 								</button>
 							</>
 						)}
 					</div>
 					<div className="mt-3.5 p-2.75 border border-border rounded-[9px] bg-table-head">
-						<div className="text-[11px] text-faint">配置スポット</div>
+						<div className="text-[11px] text-faint">{t("editor:spots")}</div>
 						<div className="text-xl font-bold text-ink mt-0.5">
 							{spotCount}{" "}
-							<span className="text-xs text-faint font-semibold">箇所</span>
+							<span className="text-xs text-faint font-semibold">
+								{t("editor:spotCountSuffix")}
+							</span>
 						</div>
 					</div>
 					<button
 						type="button"
 						onClick={onDeleteAreaClick}
 						disabled={!canDeleteArea}
-						title={
-							canDeleteArea
-								? undefined
-								: "配置決めで使用されているため削除できません"
-						}
+						title={canDeleteArea ? undefined : t("editor:cantDeleteLocked")}
 						className="w-full mt-5 font-sans text-[12.5px] font-semibold px-2.25 py-2.25 rounded-[9px] border border-danger-line bg-surface text-danger cursor-pointer hover:bg-danger-soft disabled:opacity-40 disabled:cursor-not-allowed"
 					>
-						エリアを削除
+						{t("editor:deleteArea")}
 					</button>
 				</>
 			)}

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { getShiftOptions } from "#/features/assignment/shift";
 import type { AreaListItem } from "#/lib/api/areas";
 import { fetchAssignments } from "#/lib/api/assignments";
@@ -21,6 +22,7 @@ export function HomeSummary({
 	activeEmployeeCount: number;
 	workPattern: WorkPattern;
 }) {
+	const { t } = useTranslation(["home", "common"]);
 	// single=終日(null)、multi=各シフトを対象に今日の配置を集計する
 	const shiftIds = useMemo<(string | null)[]>(() => {
 		const options = getShiftOptions(workPattern);
@@ -39,7 +41,7 @@ export function HomeSummary({
 
 	// 配置データが未取得のうちに集計すると全エリアが未配置として一瞬表示される
 	if (isPending) {
-		return <div className="text-muted text-sm">読み込み中...</div>;
+		return <div className="text-muted text-sm">{t("common:loading")}</div>;
 	}
 
 	// 配置に使えるのは規格が公開済みのエリアのみ。これを分母にする
@@ -81,33 +83,33 @@ export function HomeSummary({
 	// 配置済みエリアが「いつ・どのシフトの分か」を示すラベル
 	const shiftText =
 		workPattern.mode === "single"
-			? "終日"
+			? t("home:allDay")
 			: workPattern.shifts
 					.map((s) => `${s.name} ${s.startTime}〜${s.endTime}`)
 					.join(" / ");
 
 	return (
 		<div className="max-w-250">
-			<div className="text-[22px] font-bold">ホーム</div>
+			<div className="text-[22px] font-bold">{t("home:title")}</div>
 			<div className="text-lg font-bold text-ink mt-2 mb-4.5">
 				{formatDateJp(today)}（{shiftText}）
 				<span className="text-[13px] text-faint font-medium ml-2">
-					の配置状況
+					{t("home:placementStatus")}
 				</span>
 			</div>
 
 			<div className="grid grid-cols-5 gap-4">
 				<StatCard
 					className="col-span-2"
-					label="配置済みエリア"
+					label={t("home:placedAreas")}
 					value={`${placedAreaCount} / ${publishedCount}`}
-					unit="エリア"
+					unit={t("home:areaUnit")}
 					valueColor={
 						placementPct < 100 ? "var(--color-warning)" : "var(--color-success)"
 					}
 					progressPct={placementPct}
 					progressFull={unplacedAreaCount === 0 && publishedCount > 0}
-					progressLabel={`配置率 ${placementPct}%`}
+					progressLabel={t("home:placementRate", { pct: placementPct })}
 					sub={
 						unplacedAreaCount > 0 ? (
 							<Link
@@ -115,27 +117,27 @@ export function HomeSummary({
 								params={{ siteId }}
 								className="text-[13px] font-bold text-primary hover:text-primary-hover"
 							>
-								未配置 {unplacedAreaCount} エリアを配置 →
+								{t("home:placeUnplaced", { count: unplacedAreaCount })}
 							</Link>
 						) : (
-							"本日の配置は完了"
+							t("home:allPlacedToday")
 						)
 					}
 				/>
 				<StatCard
-					label="配置済み人数"
+					label={t("home:placedPeople")}
 					value={String(assignedCount)}
-					unit="名"
+					unit={t("home:personUnit")}
 				/>
 				<StatCard
-					label="在籍従業員数"
+					label={t("home:activeEmployees")}
 					value={String(activeEmployeeCount)}
-					unit="名"
+					unit={t("home:personUnit")}
 				/>
 				<StatCard
-					label="未配置スポット数"
+					label={t("home:openSpots")}
 					value={String(openSpots)}
-					sub={`全 ${totalSpots} スポット`}
+					sub={t("home:totalSpots", { count: totalSpots })}
 				/>
 			</div>
 
@@ -143,7 +145,7 @@ export function HomeSummary({
 				<div className="mt-6 bg-surface border border-border rounded-lg shadow-card overflow-hidden">
 					<div className="flex items-center justify-between px-4.5 py-3.5 border-b border-border">
 						<div className="font-bold text-[15px]">
-							未配置のエリア（{unplacedAreas.length}）
+							{t("home:unplacedAreas", { count: unplacedAreas.length })}
 						</div>
 					</div>
 					<ul>
@@ -170,10 +172,10 @@ export function HomeSummary({
 													: "text-faint bg-empty-bg"
 											}`}
 										>
-											{isDraft ? "下書きあり" : "未着手"}
+											{isDraft ? t("home:hasDraft") : t("home:notStarted")}
 										</span>
 										<span className="ml-auto flex-none text-[13px] font-bold text-primary">
-											配置する →
+											{t("home:place")}
 										</span>
 									</Link>
 								</li>

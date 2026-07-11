@@ -64,6 +64,17 @@ Open http://localhost:3000 and create a company from the sign-up screen.
 
 The app runs fully on the defaults. Contributions for production adapters are welcome (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
+### Language and timezone
+
+The web app (`apps/web`) reads two deploy-time defaults from its environment (Vite bakes `VITE_`-prefixed vars in at build time):
+
+| Concern | Env var | Default | Notes |
+|---|---|---|---|
+| Language | `VITE_DEFAULT_LOCALE` | `en` | `en` or `ja`. The deploy-wide default. Users can switch language from the in-app switcher (sidebar user menu / account settings); their choice is remembered in a cookie and overrides this default. |
+| Timezone | `VITE_DEFAULT_TIMEZONE` | *(runtime TZ)* | An IANA name such as `Asia/Tokyo`. Used to decide "today" and shift times. If unset, it falls back to the runtime timezone (the server's `TZ` on SSR, the browser's timezone on the client). |
+
+Set them in `apps/web/.env`. There is no per-user timezone setting: the app assumes a single site/timezone per deployment. Running one instance across multiple timezones would need a site-level timezone setting (not implemented).
+
 ## Where to go next
 
 | | |

@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import { useTranslation } from "react-i18next";
 import { SpotItem } from "./SpotItem";
 import type { SpotState } from "./types";
 
@@ -53,13 +54,14 @@ export function FloorPlanCanvas({
 	areaName,
 	spotCount,
 }: Props) {
+	const { t } = useTranslation("editor");
 	return (
 		<div className="flex-1 min-w-120 p-4.5 bg-app-bg flex flex-col">
 			<div className="flex items-center justify-between mb-2.5 shrink-0">
 				<div className="text-[13px] font-bold text-ink">
 					{areaName}{" "}
 					<span className="text-[11.5px] font-semibold text-faint">
-						／ {spotCount} 箇所
+						{t("editor:planSpotCount", { count: spotCount })}
 					</span>
 				</div>
 				<div className="flex items-center gap-1 border border-border rounded-sm bg-surface px-1 py-0.5 shrink-0">
@@ -140,10 +142,10 @@ export function FloorPlanCanvas({
 						) : (
 							<div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none">
 								<div className="text-xs font-bold text-faint">
-									図面が未設定です
+									{t("editor:planNotSet")}
 								</div>
 								<div className="text-[11px] text-faint">
-									図面は任意です。右のパネルからアップロードできます
+									{t("editor:planOptional")}
 								</div>
 							</div>
 						)}

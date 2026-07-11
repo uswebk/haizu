@@ -1,5 +1,6 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { authClient } from "#/lib/auth-client";
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/verify-otp")({
 });
 
 function VerifyOtpPage() {
+	const { t } = useTranslation(["auth", "common"]);
 	const navigate = useNavigate();
 	const { email } = Route.useRouteContext();
 
@@ -31,7 +33,7 @@ function VerifyOtpPage() {
 		const { error } = await authClient.emailOtp.verifyEmail({ email, otp });
 		setSubmitting(false);
 		if (error) {
-			setError("確認コードが正しくありません");
+			setError(t("verify.otpInvalid"));
 			return;
 		}
 		void navigate({ to: "/select-site" });
@@ -48,15 +50,15 @@ function VerifyOtpPage() {
 				<div>
 					<div className="font-bold text-2xl leading-none text-ink">haizu</div>
 					<div className="font-mono text-[9.5px] tracking-[.14em] text-faint mt-1">
-						配置管理SYSTEM
+						{t("common:appTagline")}
 					</div>
 				</div>
 			</div>
 
 			<div className="w-90 max-w-full bg-surface border border-border rounded-section p-6.5">
-				<div className="text-lg font-bold">メールアドレスの確認</div>
+				<div className="text-lg font-bold">{t("verify.title")}</div>
 				<div className="text-[13px] text-muted mt-1">
-					{email} に送信した確認コードを入力してください。
+					{t("verify.subtitle", { email })}
 				</div>
 
 				<form
@@ -67,7 +69,7 @@ function VerifyOtpPage() {
 					}}
 				>
 					<Input
-						label="確認コード"
+						label={t("verify.otpLabel")}
 						value={otp}
 						onChange={(e) => setOtp(e.target.value.trim())}
 						placeholder="123456"
@@ -81,7 +83,7 @@ function VerifyOtpPage() {
 						className="w-full mt-1"
 						disabled={!otp || submitting}
 					>
-						{submitting ? "確認中…" : "確認する"}
+						{submitting ? t("verify.verifying") : t("verify.verify")}
 					</Button>
 				</form>
 			</div>

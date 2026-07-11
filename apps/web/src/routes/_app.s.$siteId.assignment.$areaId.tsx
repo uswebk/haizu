@@ -2,6 +2,7 @@ import type { AssignmentStatus } from "@haizu/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Avatar } from "#/components/ui/Avatar";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
@@ -38,6 +39,7 @@ function AssignmentDetail() {
 	const { siteId, areaId } = Route.useParams();
 	const search = Route.useSearch();
 	const navigate = useNavigate();
+	const { t } = useTranslation(["assignment", "editor", "common"]);
 	const queryClient = useQueryClient();
 	const { showSuccess } = useSnackbar();
 	const date = search.date ?? todayStr();
@@ -208,7 +210,9 @@ function AssignmentDetail() {
 				queryKey: assignmentKeys.byDateShift(date, effective.shiftId),
 			});
 			showSuccess(
-				status === "confirmed" ? "配置を確定しました" : "下書きを保存しました",
+				status === "confirmed"
+					? t("assignment:detail.confirmed")
+					: t("assignment:detail.draftSaved"),
 			);
 		},
 	});
@@ -259,22 +263,22 @@ function AssignmentDetail() {
 								})
 							}
 						>
-							← 配置決め一覧
+							{t("assignment:detail.backToList")}
 						</Button>
 					</div>
 					<div className="flex-1 flex flex-col items-center justify-center gap-2.5">
 						<div className="text-sm font-bold">
-							勤務体制（シフト）が未登録です
+							{t("assignment:detail.noShift")}
 						</div>
 						<div className="text-xs text-faint">
-							先にシフトを登録すると、この画面から配置決めができます
+							{t("assignment:detail.noShiftHint")}
 						</div>
 						<Link
 							to="/s/$siteId/settings/shifts"
 							params={{ siteId }}
 							className="mt-1 text-[13px] font-bold text-primary hover:text-primary-hover"
 						>
-							シフトを登録する →
+							{t("assignment:registerShift")}
 						</Link>
 					</div>
 				</div>
@@ -298,17 +302,17 @@ function AssignmentDetail() {
 								})
 							}
 						>
-							← 配置決め一覧
+							{t("assignment:detail.backToList")}
 						</Button>
 						<div className="w-px h-4.5 bg-border" />
 						<div className="text-sm font-bold">{area?.name ?? ""}</div>
 					</div>
 					<div className="flex-1 flex flex-col items-center justify-center gap-2.5">
 						<div className="text-sm font-bold">
-							この日付に適用される規格がありません
+							{t("assignment:detail.noSpec")}
 						</div>
 						<div className="text-xs text-faint">
-							配置エディタで規格を公開し、適用開始日をこの日付以前に設定すると、この画面から配置決めができます
+							{t("assignment:detail.noSpecHint")}
 						</div>
 					</div>
 				</div>
@@ -333,7 +337,7 @@ function AssignmentDetail() {
 								})
 							}
 						>
-							← 配置決め一覧
+							{t("assignment:detail.backToList")}
 						</Button>
 						<div className="w-px h-4.5 bg-border" />
 						<div className="text-sm font-bold whitespace-nowrap overflow-hidden text-ellipsis">
@@ -341,12 +345,14 @@ function AssignmentDetail() {
 						</div>
 						{activeVersion && (
 							<span className="text-[10.5px] font-bold text-primary-hover bg-primary-soft px-2.5 py-1 rounded-pill shrink-0">
-								規格 {activeVersion.label}（使用中）
+								{t("assignment:detail.specInUse", {
+									version: activeVersion.label,
+								})}
 							</span>
 						)}
 						{serverAssignment?.status === "confirmed" && (
 							<span className="text-[10.5px] font-bold text-success bg-success/10 px-2.5 py-1 rounded-pill shrink-0">
-								確定済み
+								{t("assignment:detail.confirmedBadge")}
 							</span>
 						)}
 					</div>
@@ -366,8 +372,8 @@ function AssignmentDetail() {
 							disabled={saveMutation.isPending || !versionId}
 						>
 							{serverAssignment?.status === "confirmed"
-								? "下書きに戻す"
-								: "下書き保存"}
+								? t("assignment:detail.revertToDraft")
+								: t("editor:saveDraft")}
 						</Button>
 						<Button
 							size="sm"
@@ -375,8 +381,8 @@ function AssignmentDetail() {
 							disabled={saveMutation.isPending || !versionId}
 						>
 							{serverAssignment?.status === "confirmed"
-								? "更新する"
-								: "確定する"}
+								? t("assignment:detail.update")
+								: t("assignment:detail.confirm")}
 						</Button>
 					</div>
 				</div>
@@ -391,7 +397,9 @@ function AssignmentDetail() {
 						className="w-53.5 shrink-0 flex flex-col border-r border-border p-3.5"
 					>
 						<div className="flex items-baseline justify-between mb-2.5">
-							<div className="text-[13px] font-bold">未配置の従業員</div>
+							<div className="text-[13px] font-bold">
+								{t("assignment:detail.unplacedEmployees")}
+							</div>
 							<div className="text-[10.5px] font-bold text-warning bg-warning-soft px-2 py-0.75 rounded-pill">
 								{pool.length}
 							</div>
@@ -399,7 +407,7 @@ function AssignmentDetail() {
 						<input
 							value={poolSearch}
 							onChange={(e) => setPoolSearch(e.target.value)}
-							placeholder="名前で検索"
+							placeholder={t("assignment:detail.searchByName")}
 							className="w-full font-sans text-xs px-2.75 py-2 rounded-sm border border-border bg-surface outline-none"
 						/>
 						{tagOptions.length > 0 && (
@@ -410,7 +418,7 @@ function AssignmentDetail() {
 									className="w-full flex items-center justify-between gap-1.5 border border-border rounded-sm px-2.75 py-2 bg-surface text-xs font-bold text-ink cursor-pointer hover:bg-hairline"
 								>
 									<span>
-										タグで絞り込み
+										{t("assignment:detail.filterByTag")}
 										{tagFilter.size > 0 && (
 											<span className="text-primary-hover ml-1">
 												（{tagFilter.size}）
@@ -424,13 +432,13 @@ function AssignmentDetail() {
 										<input
 											value={tagSearch}
 											onChange={(e) => setTagSearch(e.target.value)}
-											placeholder="タグ名で検索"
+											placeholder={t("assignment:detail.searchTagName")}
 											className="w-full font-sans text-xs px-2.25 py-1.75 rounded-sm border border-border bg-surface outline-none mb-1.25"
 										/>
 										<div className="max-h-48 overflow-auto flex flex-col gap-0.5">
 											{filteredTagOptions.length === 0 ? (
 												<div className="text-[11.5px] text-faint text-center py-2.5">
-													該当するタグがありません
+													{t("assignment:detail.noMatchingTags")}
 												</div>
 											) : (
 												filteredTagOptions.map((t) => {
@@ -509,9 +517,9 @@ function AssignmentDetail() {
 							))}
 						</div>
 						<div className="mt-2.5 text-[10.5px] text-faint leading-relaxed text-center">
-							ここへドラッグで
+							{t("assignment:detail.dragHere1")}
 							<br />
-							未配置に戻せます
+							{t("assignment:detail.dragHere2")}
 						</div>
 					</div>
 
@@ -521,7 +529,10 @@ function AssignmentDetail() {
 							<div className="text-[13px] font-bold">
 								{area?.name ?? ""}{" "}
 								<span className="text-[11.5px] font-semibold text-faint">
-									／ 配置済み {assignedCount} / {totalCount}
+									{t("assignment:detail.placedOf", {
+										assigned: assignedCount,
+										total: totalCount,
+									})}
 								</span>
 							</div>
 							{versionId && totalCount > 0 && (
@@ -570,7 +581,7 @@ function AssignmentDetail() {
 									>
 										<button
 											type="button"
-											aria-label="選択を解除"
+											aria-label={t("assignment:detail.deselect")}
 											onClick={() => setSelectedSpot(null)}
 											className="absolute inset-0 w-full h-full cursor-default border-none bg-transparent p-0"
 										/>
@@ -662,10 +673,10 @@ function AssignmentDetail() {
 						) : (
 							<div className="flex-1 rounded-md border-[1.6px] border-dashed border-dash bg-empty-bg flex flex-col items-center justify-center gap-2.5">
 								<div className="text-sm font-bold">
-									このエリアの規格スポットがありません
+									{t("assignment:detail.noSpots")}
 								</div>
 								<div className="text-xs text-faint">
-									配置エディタで図面とスポットを設定してください
+									{t("assignment:detail.noSpotsHint")}
 								</div>
 							</div>
 						)}
@@ -677,12 +688,14 @@ function AssignmentDetail() {
 							<div>
 								<div className="flex items-center justify-between mb-2.5">
 									<div className="text-[10.5px] font-bold tracking-widest text-faint">
-										スポット {selectedSpotObj.label}
+										{t("assignment:detail.spot", {
+											label: selectedSpotObj.label,
+										})}
 									</div>
 									<button
 										type="button"
 										onClick={() => setSelectedSpot(null)}
-										title="選択解除"
+										title={t("assignment:detail.deselectShort")}
 										className="w-5.5 h-5.5 rounded-[6px] bg-app-bg text-faint flex items-center justify-center text-sm cursor-pointer"
 									>
 										×
@@ -720,16 +733,16 @@ function AssignmentDetail() {
 											className="w-full mt-3.5"
 											onClick={() => unassignSpot(selectedSpotObj.id)}
 										>
-											配置を解除
+											{t("assignment:detail.unassign")}
 										</Button>
 									</div>
 								) : (
 									<div className="border-[1.4px] border-dashed border-primary-soft-bd rounded-lg p-4 text-center bg-primary-soft/30">
 										<div className="text-[13px] font-bold text-primary-hover">
-											未配置のスポット
+											{t("assignment:detail.unassignedSpot")}
 										</div>
 										<div className="text-[11.5px] text-muted mt-1.5 leading-relaxed">
-											左の未配置リストから従業員をタップ、またはドラッグで配置します。
+											{t("assignment:detail.unassignedSpotHint")}
 										</div>
 									</div>
 								)}
@@ -738,7 +751,7 @@ function AssignmentDetail() {
 							<>
 								<div>
 									<div className="text-[10.5px] font-bold tracking-widest text-faint mb-2.25">
-										配置状況
+										{t("assignment:placementStatus")}
 									</div>
 									<div className="border border-border rounded-lg p-3.25">
 										<div className="flex items-baseline gap-1.5">
@@ -746,12 +759,16 @@ function AssignmentDetail() {
 												{assignedCount}
 											</div>
 											<div className="text-[13px] font-semibold text-faint">
-												/ {totalCount} 名
+												{t("assignment:detail.ofTotal", { total: totalCount })}
 											</div>
 										</div>
 										<div className="text-[11.5px] text-faint mt-1">
-											{activeVersion ? `規格 ${activeVersion.label} ` : ""}
-											のスポット数
+											{activeVersion
+												? t("assignment:detail.specLabel", {
+														version: activeVersion.label,
+													})
+												: ""}
+											{t("assignment:detail.spotCount")}
 										</div>
 										{effectiveShift && (
 											<div className="text-[11.5px] font-semibold text-primary-hover mt-1">
@@ -762,7 +779,7 @@ function AssignmentDetail() {
 									</div>
 								</div>
 								<div className="text-[11.5px] text-muted leading-relaxed border border-border rounded-lg p-3 bg-table-head">
-									スポットをタップすると、配置されている従業員の詳細や解除ができます。割り当てはタップまたはドラッグで行えます。
+									{t("assignment:detail.help")}
 								</div>
 							</>
 						)}
@@ -774,12 +791,14 @@ function AssignmentDetail() {
 				<div className="fixed inset-0 bg-[rgba(16,28,44,.42)] flex items-center justify-center p-6 z-60">
 					<div className="w-105 max-w-full bg-surface rounded-section shadow-[0_24px_60px_rgba(16,42,67,.3)] p-5.5">
 						<div className="text-base font-bold mb-2">
-							{confirmAction === "confirmed" ? "配置を確定" : "下書きを保存"}
+							{confirmAction === "confirmed"
+								? t("assignment:detail.confirmTitle")
+								: t("assignment:detail.saveDraftTitle")}
 						</div>
 						<div className="text-[13.5px] text-muted leading-relaxed">
 							{confirmAction === "confirmed"
-								? "この日・シフトの配置を確定します。確定すると配置ビュアーに表示されます。よろしいですか？"
-								: "この日・シフトの配置を下書きとして保存します。（配置ビュアーには表示されません）"}
+								? t("assignment:detail.confirmBody")
+								: t("assignment:detail.saveDraftBody")}
 						</div>
 						<div className="flex justify-end gap-2.5 mt-6">
 							<Button
@@ -787,17 +806,17 @@ function AssignmentDetail() {
 								onClick={() => setConfirmAction(null)}
 								disabled={saveMutation.isPending}
 							>
-								キャンセル
+								{t("common:cancel")}
 							</Button>
 							<Button
 								onClick={() => saveMutation.mutate(confirmAction)}
 								disabled={saveMutation.isPending}
 							>
 								{saveMutation.isPending
-									? "保存中…"
+									? t("editor:saving")
 									: confirmAction === "confirmed"
-										? "確定する"
-										: "保存する"}
+										? t("assignment:detail.confirm")
+										: t("common:save")}
 							</Button>
 						</div>
 					</div>

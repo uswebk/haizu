@@ -7,8 +7,11 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { I18nextProvider } from "react-i18next";
 
 import { SnackbarProvider } from "#/contexts/snackbar-context";
+import i18n, { DEFAULT_LOCALE, type Locale } from "#/i18n/config";
+import { detectLocale } from "#/i18n/server";
 import appCss from "../styles.css?url";
 
 // QueryClientProvider は setupRouterSsrQueryIntegration がリクエスト単位の
@@ -16,6 +19,14 @@ import appCss from "../styles.css?url";
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 	{
 		component: () => <Outlet />,
+		loader: async (): Promise<{ locale: Locale }> => {
+			if (import.meta.env.SSR) {
+				const locale = await detectLocale();
+				await i18n.changeLanguage(locale);
+				return { locale };
+			}
+			return { locale: (i18n.language as Locale) ?? DEFAULT_LOCALE };
+		},
 		head: () => ({
 			meta: [
 				{
@@ -41,13 +52,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 );
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+	const { locale } = Route.useLoaderData();
 	return (
-		<html lang="en">
+		<html lang={locale}>
 			<head>
 				<HeadContent />
 			</head>
 			<body>
-				<SnackbarProvider>{children}</SnackbarProvider>
+				<I18nextProvider i18n={i18n}>
+					<SnackbarProvider>{children}</SnackbarProvider>
+				</I18nextProvider>
 				<TanStackDevtools
 					config={{
 						position: "bottom-right",

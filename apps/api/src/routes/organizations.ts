@@ -62,7 +62,7 @@ export const organizationsRoute = new Hono<AppEnv>()
 			const otp = await storeEmailOtp(`org-email:${organizationId}`, newEmail);
 			await emailSender.send({
 				to: newEmail,
-				subject: "事業所メールアドレスの確認コード",
+				subject: "Contact email verification code",
 				body: `code: ${otp}`,
 			});
 			return c.json({ ok: true });

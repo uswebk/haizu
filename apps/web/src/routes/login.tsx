@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { authClient } from "#/lib/auth-client";
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
+	const { t } = useTranslation(["auth", "common"]);
 	const navigate = useNavigate();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -22,7 +24,7 @@ function LoginPage() {
 		const { data, error } = await authClient.signIn.email({ email, password });
 		setSubmitting(false);
 		if (error) {
-			setError("メールアドレスまたはパスワードが正しくありません");
+			setError(t("login.invalidCredentials"));
 			return;
 		}
 		// メール未確認ならOTP確認画面へ
@@ -42,16 +44,14 @@ function LoginPage() {
 				<div>
 					<div className="font-bold text-2xl leading-none text-ink">haizu</div>
 					<div className="font-mono text-[9.5px] tracking-[.14em] text-faint mt-1">
-						配置管理SYSTEM
+						{t("common:appTagline")}
 					</div>
 				</div>
 			</div>
 
 			<div className="w-90 max-w-full bg-surface border border-border rounded-section p-6.5">
-				<div className="text-lg font-bold">ログイン</div>
-				<div className="text-[13px] text-muted mt-1">
-					メールアドレスとパスワードでログインします。
-				</div>
+				<div className="text-lg font-bold">{t("login.title")}</div>
+				<div className="text-[13px] text-muted mt-1">{t("login.subtitle")}</div>
 
 				<form
 					className="flex flex-col gap-3.5 mt-5"
@@ -61,7 +61,7 @@ function LoginPage() {
 					}}
 				>
 					<Input
-						label="メールアドレス"
+						label={t("common:email")}
 						type="email"
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
@@ -69,7 +69,7 @@ function LoginPage() {
 						autoComplete="email"
 					/>
 					<Input
-						label="パスワード"
+						label={t("common:password")}
 						type="password"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
@@ -82,20 +82,20 @@ function LoginPage() {
 						className="w-full mt-1"
 						disabled={!email || !password || submitting}
 					>
-						{submitting ? "ログイン中…" : "ログイン"}
+						{submitting ? t("login.submitting") : t("login.submit")}
 					</Button>
 				</form>
 
 				<div className="text-[12.5px] text-center mt-4">
 					<Link to="/forgot-password" className="text-primary font-semibold">
-						パスワードを忘れた方
+						{t("login.forgotPassword")}
 					</Link>
 				</div>
 
 				<div className="text-[12.5px] text-muted mt-2 text-center">
-					アカウントをお持ちでない方は{" "}
+					{t("login.noAccount")}{" "}
 					<Link to="/signup" className="text-primary font-semibold">
-						新規登録
+						{t("login.signup")}
 					</Link>
 				</div>
 			</div>

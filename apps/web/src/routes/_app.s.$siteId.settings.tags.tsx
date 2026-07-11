@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
 import { EmptyState } from "#/components/ui/EmptyState";
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/_app/s/$siteId/settings/tags")({
 
 function TagSettings() {
 	const { siteId } = Route.useParams();
+	const { t } = useTranslation(["tags", "common", "settings"]);
 	const queryClient = useQueryClient();
 	const { showSuccess } = useSnackbar();
 	const { data: tags = [] } = useQuery({
@@ -48,7 +50,7 @@ function TagSettings() {
 		onSuccess: () => {
 			setNewTagName("");
 			void invalidate();
-			showSuccess("タグを作成しました");
+			showSuccess(t("tags:created"));
 		},
 	});
 
@@ -58,7 +60,7 @@ function TagSettings() {
 		onSuccess: () => {
 			setEditingId(null);
 			void invalidate();
-			showSuccess("タグを更新しました");
+			showSuccess(t("tags:updated"));
 		},
 	});
 
@@ -67,7 +69,7 @@ function TagSettings() {
 		onSuccess: () => {
 			setDeleteTarget(null);
 			void invalidate();
-			showSuccess("タグを削除しました");
+			showSuccess(t("tags:deleted"));
 		},
 	});
 
@@ -102,7 +104,7 @@ function TagSettings() {
 				onClick={() => setPage((p) => Math.max(1, p - 1))}
 				disabled={currentPage <= 1}
 			>
-				前へ
+				{t("common:prev")}
 			</PagerButton>
 			<span className="text-xs font-semibold text-ink px-1.5">
 				{currentPage} / {pageCount}
@@ -111,7 +113,7 @@ function TagSettings() {
 				onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
 				disabled={currentPage >= pageCount}
 			>
-				次へ
+				{t("common:next")}
 			</PagerButton>
 		</div>
 	);
@@ -124,13 +126,13 @@ function TagSettings() {
 					params={{ siteId }}
 					className="text-xs font-semibold text-muted hover:text-ink"
 				>
-					← 設定
+					{t("tags:backToSettings")}
 				</Link>
 				<div className="text-[22px] font-bold mt-2">
-					タグ管理 （{tags.length}）
+					{t("tags:title", { count: tags.length })}
 				</div>
 				<div className="text-[13.5px] text-muted mt-1.25">
-					従業員に付けられるタグです。削除すると各従業員からも外れます。
+					{t("tags:subtitle")}
 				</div>
 
 				<div className="bg-surface border border-border rounded-lg p-4.5 mt-4.5">
@@ -138,7 +140,7 @@ function TagSettings() {
 						<Input
 							value={newTagName}
 							onChange={(e) => setNewTagName(e.target.value)}
-							placeholder="新しいタグ名"
+							placeholder={t("tags:newTagPlaceholder")}
 							maxLength={20}
 							className="flex-1"
 							onKeyDown={(e) => {
@@ -149,17 +151,14 @@ function TagSettings() {
 							onClick={submitNewTag}
 							disabled={!newTagName.trim() || createMutation.isPending}
 						>
-							追加
+							{t("common:add")}
 						</Button>
 					</div>
 
 					<div className="h-px bg-hairline my-4" />
 
 					{tags.length === 0 ? (
-						<EmptyState
-							title="タグがありません"
-							hint="上のフォームから新しいタグを追加してください"
-						/>
+						<EmptyState title={t("tags:empty")} hint={t("tags:emptyHint")} />
 					) : (
 						<>
 							<div className="flex items-center justify-end mb-2.5">
@@ -189,7 +188,7 @@ function TagSettings() {
 													size="sm"
 													onClick={() => setEditingId(null)}
 												>
-													キャンセル
+													{t("common:cancel")}
 												</Button>
 												<Button
 													size="sm"
@@ -198,7 +197,7 @@ function TagSettings() {
 														!editingName.trim() || updateMutation.isPending
 													}
 												>
-													保存
+													{t("common:save")}
 												</Button>
 											</>
 										) : (
@@ -210,7 +209,7 @@ function TagSettings() {
 													{tag.name}
 												</Badge>
 												<span className="text-xs text-faint">
-													{tag.employeeCount}名が使用
+													{t("tags:usedBy", { count: tag.employeeCount })}
 												</span>
 												<div className="flex-1" />
 												<Button
@@ -218,14 +217,14 @@ function TagSettings() {
 													size="sm"
 													onClick={() => startEdit(tag.id, tag.name)}
 												>
-													編集
+													{t("common:edit")}
 												</Button>
 												<Button
 													variant="danger"
 													size="sm"
 													onClick={() => setDeleteTarget(tag)}
 												>
-													削除
+													{t("common:delete")}
 												</Button>
 											</>
 										)}
@@ -243,12 +242,16 @@ function TagSettings() {
 			{deleteTarget && (
 				<div className="fixed inset-0 bg-[rgba(16,28,44,.42)] flex items-center justify-center p-6 z-60">
 					<div className="w-105 max-w-full bg-surface rounded-section shadow-[0_24px_60px_rgba(16,42,67,.3)] p-5.5">
-						<div className="text-base font-bold mb-2">タグを削除</div>
+						<div className="text-base font-bold mb-2">
+							{t("tags:deleteTitle")}
+						</div>
 						<div className="text-[13.5px] text-muted">
-							「{deleteTarget.name}」を削除します。
+							{t("tags:deleteConfirm", { name: deleteTarget.name })}
 							{deleteTarget.employeeCount > 0 &&
-								`${deleteTarget.employeeCount}名の従業員からこのタグが取り除かれます。`}
-							元に戻せません。
+								t("tags:deleteRemoves", {
+									count: deleteTarget.employeeCount,
+								})}
+							{t("tags:deleteIrreversible")}
 						</div>
 						<div className="flex justify-end gap-2.5 mt-6">
 							<Button
@@ -256,14 +259,16 @@ function TagSettings() {
 								onClick={() => setDeleteTarget(null)}
 								disabled={deleteMutation.isPending}
 							>
-								キャンセル
+								{t("common:cancel")}
 							</Button>
 							<Button
 								variant="danger"
 								onClick={() => deleteMutation.mutate(deleteTarget.id)}
 								disabled={deleteMutation.isPending}
 							>
-								{deleteMutation.isPending ? "削除中…" : "削除する"}
+								{deleteMutation.isPending
+									? t("tags:deleting")
+									: t("common:delete")}
 							</Button>
 						</div>
 					</div>

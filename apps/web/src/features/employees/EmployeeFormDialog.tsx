@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { useDismiss } from "#/hooks/useDismiss";
@@ -59,6 +60,7 @@ export function EmployeeFormDialog({
 	onSubmit,
 	onCancel,
 }: Props) {
+	const { t } = useTranslation(["employees", "members", "common"]);
 	const contentRef = useRef<HTMLDivElement>(null);
 	useDismiss(open, onCancel, contentRef);
 
@@ -115,33 +117,35 @@ export function EmployeeFormDialog({
 					</div>
 					<div>
 						<div className="text-lg font-bold">
-							{mode === "create" ? "従業員を追加" : "従業員を編集"}
+							{mode === "create"
+								? t("employees:dialog.createTitle")
+								: t("employees:dialog.editTitle")}
 						</div>
 						<div className="text-xs text-faint mt-0.75">
-							基本情報を入力してください
+							{t("employees:dialog.subtitle")}
 						</div>
 					</div>
 				</div>
 
 				<div className="grid grid-cols-3 gap-4 mb-4.5">
 					<Input
-						label="姓"
+						label={t("members:form.lastName")}
 						value={draft.lastName}
 						onChange={(e) =>
 							setDraft((d) => ({ ...d, lastName: e.target.value }))
 						}
-						placeholder="山田"
+						placeholder={t("members:form.lastNamePlaceholder")}
 					/>
 					<Input
-						label="名"
+						label={t("members:form.firstName")}
 						value={draft.firstName}
 						onChange={(e) =>
 							setDraft((d) => ({ ...d, firstName: e.target.value }))
 						}
-						placeholder="太郎"
+						placeholder={t("employees:dialog.firstNamePlaceholder")}
 					/>
 					<Input
-						label="社員番号"
+						label={t("employees:colCode")}
 						value={draft.code}
 						onChange={(e) => setDraft((d) => ({ ...d, code: e.target.value }))}
 						placeholder="EMP-001"
@@ -150,7 +154,10 @@ export function EmployeeFormDialog({
 				</div>
 
 				<div className="mb-2 text-xs font-semibold text-muted">
-					タグ<span className="text-faint font-medium">（複数選択可）</span>
+					{t("employees:colTags")}
+					<span className="text-faint font-medium">
+						{t("employees:dialog.multiSelect")}
+					</span>
 				</div>
 				<div className="flex flex-wrap gap-2 mb-4.5">
 					{allTags.map((tag) => {
@@ -172,13 +179,15 @@ export function EmployeeFormDialog({
 					})}
 				</div>
 
-				<div className="mb-2 text-xs font-semibold text-muted">識別カラー</div>
+				<div className="mb-2 text-xs font-semibold text-muted">
+					{t("employees:dialog.identColor")}
+				</div>
 				<div className="flex flex-wrap gap-2.25 mb-5">
 					{AVATAR_COLORS.map((color) => (
 						<button
 							key={color}
 							type="button"
-							aria-label={`カラー ${color}`}
+							aria-label={t("employees:dialog.colorAria", { color })}
 							onClick={() => setDraft((d) => ({ ...d, avatarColor: color }))}
 							className="w-7 h-7 rounded-full cursor-pointer"
 							style={{
@@ -198,9 +207,11 @@ export function EmployeeFormDialog({
 					className="w-full flex items-center justify-between px-3.5 py-3 border border-border rounded-md cursor-pointer mb-6 text-left"
 				>
 					<div>
-						<div className="text-[13.5px] font-semibold">有効</div>
+						<div className="text-[13.5px] font-semibold">
+							{t("employees:active")}
+						</div>
 						<div className="text-[11.5px] text-faint">
-							配置決めで選択できる状態にします
+							{t("employees:dialog.activeHint")}
 						</div>
 					</div>
 					<div
@@ -226,10 +237,10 @@ export function EmployeeFormDialog({
 
 				<div className="flex justify-end gap-2.5">
 					<Button variant="secondary" onClick={onCancel} disabled={isPending}>
-						キャンセル
+						{t("common:cancel")}
 					</Button>
 					<Button onClick={handleSave} disabled={!canSave || isPending}>
-						{isPending ? "保存中…" : "保存する"}
+						{isPending ? t("members:form.saving") : t("members:form.save")}
 					</Button>
 				</div>
 			</div>

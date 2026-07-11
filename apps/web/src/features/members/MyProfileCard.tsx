@@ -1,5 +1,6 @@
 import type { DisplayRole } from "@haizu/shared";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
@@ -9,13 +10,10 @@ import { PasswordChange } from "./PasswordChange";
 import { roleBadgeKey } from "./roleBadgeKey";
 import type { MemberRow, MemberStatus } from "./types";
 
-const STATUS_META: Record<
-	MemberStatus,
-	{ label: string; tone: "success" | "draft" | "warning" }
-> = {
-	active: { label: "アクティブ", tone: "success" },
-	inactive: { label: "停止中", tone: "draft" },
-	invited: { label: "招待中", tone: "warning" },
+const STATUS_TONE: Record<MemberStatus, "success" | "draft" | "warning"> = {
+	active: "success",
+	inactive: "draft",
+	invited: "warning",
 };
 
 type Props = {
@@ -31,6 +29,7 @@ export function MyProfileCard({
 	isPending,
 	onSaveName,
 }: Props) {
+	const { t } = useTranslation(["members", "common"]);
 	const [editing, setEditing] = useState(false);
 	const [name, setName] = useState(member.name);
 
@@ -54,7 +53,7 @@ export function MyProfileCard({
 			<div className="flex items-center justify-between gap-4 flex-wrap">
 				<div className="min-w-0">
 					<div className="text-xs font-semibold text-faint mb-1.5">
-						自分の情報
+						{t("members:myInfo")}
 					</div>
 					{editing ? (
 						<div className="flex items-center gap-2">
@@ -69,7 +68,7 @@ export function MyProfileCard({
 								className="w-55"
 							/>
 							<Button size="sm" onClick={save} disabled={isPending}>
-								保存
+								{t("common:save")}
 							</Button>
 							<Button
 								variant="secondary"
@@ -77,7 +76,7 @@ export function MyProfileCard({
 								onClick={() => setEditing(false)}
 								disabled={isPending}
 							>
-								キャンセル
+								{t("common:cancel")}
 							</Button>
 						</div>
 					) : (
@@ -88,7 +87,7 @@ export function MyProfileCard({
 								onClick={startEdit}
 								className="text-[12px] font-semibold text-primary cursor-pointer border-none bg-transparent"
 							>
-								編集
+								{t("common:edit")}
 							</button>
 						</div>
 					)}
@@ -96,8 +95,8 @@ export function MyProfileCard({
 				</div>
 				<div className="flex items-center gap-2.5 shrink-0">
 					<RoleBadge role={roleBadgeKey(displayRole)} />
-					<Badge tone={STATUS_META[member.status].tone}>
-						{STATUS_META[member.status].label}
+					<Badge tone={STATUS_TONE[member.status]}>
+						{t(`members:status.${member.status}`)}
 					</Badge>
 				</div>
 			</div>

@@ -1,6 +1,7 @@
 import { canSite } from "@haizu/shared";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { HomeSummary } from "#/features/home/HomeSummary";
 import { SetupChecklist } from "#/features/home/SetupChecklist";
 import { areaKeys, fetchAreas } from "#/lib/api/areas";
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/_app/s/$siteId/home")({
 function Home() {
 	const { siteRole } = Route.useRouteContext();
 	const { siteId } = Route.useParams();
+	const { t } = useTranslation("common");
 	const today = todayStr();
 
 	const workPatternQuery = useQuery({
@@ -39,7 +41,7 @@ function Home() {
 		employeesQuery.isPending ||
 		areasQuery.isPending
 	) {
-		return <div className="p-7 text-muted text-sm">読み込み中...</div>;
+		return <div className="p-7 text-muted text-sm">{t("loading")}</div>;
 	}
 
 	const workPattern = workPatternQuery.data;

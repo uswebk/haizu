@@ -7,6 +7,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 
 export type SnackbarVariant = "success" | "info" | "warning" | "error";
 
@@ -48,6 +49,7 @@ const VARIANT_ACTION: Record<SnackbarVariant, string> = {
 };
 
 export function SnackbarProvider({ children }: { children: ReactNode }) {
+	const { t } = useTranslation("common");
 	const [snacks, setSnacks] = useState<Snack[]>([]);
 	const nextId = useRef(0);
 
@@ -111,7 +113,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
 						<button
 							type="button"
 							onClick={() => dismiss(s.id)}
-							aria-label="閉じる"
+							aria-label={t("close")}
 							className="flex-none w-6 h-6 flex items-center justify-center rounded-sm text-faint hover:text-muted hover:bg-hairline cursor-pointer"
 						>
 							×

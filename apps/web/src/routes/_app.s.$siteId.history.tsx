@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Avatar } from "#/components/ui/Avatar";
 import { PagerButton } from "#/components/ui/PagerButton";
 import { PlacementViewCanvas } from "#/features/assignment/PlacementViewCanvas";
@@ -72,6 +73,7 @@ function History() {
 function HistoryList() {
 	const search = Route.useSearch();
 	const { siteId } = Route.useParams();
+	const { t } = useTranslation(["history", "assignment", "common"]);
 	const navigate = useNavigate();
 	// 日付は必須。未指定時は前日をデフォルトにする（全件検索を防ぐため）
 	const filterDate = search.date ?? yesterdayStr();
@@ -111,9 +113,9 @@ function HistoryList() {
 			<div className="max-w-250">
 				<div className="flex items-end justify-between gap-4 mb-4.5 flex-wrap">
 					<div>
-						<div className="text-[22px] font-bold">配置履歴</div>
+						<div className="text-[22px] font-bold">{t("history:title")}</div>
 						<div className="text-[13.5px] text-muted mt-1.25">
-							過去の配置決めの記録です。日付・シフト・エリアごとに振り返れます。
+							{t("history:subtitle")}
 						</div>
 					</div>
 					<div className="flex items-center gap-2">
@@ -131,23 +133,23 @@ function HistoryList() {
 				{entries.length === 0 ? (
 					<div className="border-[1.4px] border-dashed border-dash rounded-lg p-12 text-center bg-empty-bg">
 						<div className="text-[15px] font-bold text-muted">
-							該当する記録がありません
+							{t("history:noRecords")}
 						</div>
 						<div className="text-[12.5px] text-faint mt-1.5">
-							日付を変えて確認してください。
+							{t("history:tryAnotherDate")}
 						</div>
 					</div>
 				) : (
 					<div className="bg-surface border border-border rounded-lg overflow-hidden shadow-card">
 						<div className="grid grid-cols-[1.1fr_0.8fr_1.4fr_2fr_0.6fr] px-4 py-2.75 bg-table-head text-[11.5px] font-bold text-faint tracking-wide">
-							<div>日付</div>
-							<div>シフト</div>
-							<div>エリア</div>
-							<div>配置メンバー</div>
+							<div>{t("history:colDate")}</div>
+							<div>{t("history:colShift")}</div>
+							<div>{t("history:colArea")}</div>
+							<div>{t("history:colMembers")}</div>
 							<div />
 						</div>
 						{entries.map((entry) => {
-							const shiftLabel = entry.shiftName ?? "終日";
+							const shiftLabel = entry.shiftName ?? t("assignment:allDay");
 							const avatars = entry.employeeIds.slice(0, 4);
 							const moreCount = entry.employeeIds.length - avatars.length;
 							return (
@@ -178,7 +180,9 @@ function HistoryList() {
 									<div className="font-semibold">
 										{entry.areaName}{" "}
 										<span className="text-[11.5px] text-faint font-semibold">
-											{entry.employeeIds.length}名
+											{t("history:peopleCount", {
+												count: entry.employeeIds.length,
+											})}
 										</span>
 									</div>
 									<div className="flex items-center gap-1.25">
@@ -200,7 +204,7 @@ function HistoryList() {
 										)}
 									</div>
 									<div className="text-right text-[12.5px] font-bold text-primary">
-										表示 →
+										{t("history:view")}
 									</div>
 								</button>
 							);
@@ -211,15 +215,18 @@ function HistoryList() {
 				{total > PAGE_SIZE && (
 					<div className="flex items-center justify-between mt-3.5">
 						<div className="text-xs font-semibold text-muted">
-							{total} 件中 {(page - 1) * PAGE_SIZE + 1}–
-							{Math.min(page * PAGE_SIZE, total)} 件を表示
+							{t("history:showing", {
+								total,
+								from: (page - 1) * PAGE_SIZE + 1,
+								to: Math.min(page * PAGE_SIZE, total),
+							})}
 						</div>
 						<div className="flex items-center gap-1.5">
 							<PagerButton
 								onClick={() => setPage(page - 1)}
 								disabled={page <= 1}
 							>
-								前へ
+								{t("common:prev")}
 							</PagerButton>
 							<span className="text-xs font-semibold text-ink px-1.5">
 								{page} / {pageCount}
@@ -228,7 +235,7 @@ function HistoryList() {
 								onClick={() => setPage(page + 1)}
 								disabled={page >= pageCount}
 							>
-								次へ
+								{t("common:next")}
 							</PagerButton>
 						</div>
 					</div>
@@ -240,12 +247,13 @@ function HistoryList() {
 
 function HistoryDetail() {
 	const { siteId } = Route.useParams();
+	const { t } = useTranslation(["history", "assignment"]);
 	const search = Route.useSearch();
 	const navigate = useNavigate();
 	const areaId = search.selArea as string;
 	const date = search.selDate as string;
 	const shiftId = search.selShift ?? null;
-	const shiftLabel = search.selShiftLabel ?? "終日";
+	const shiftLabel = search.selShiftLabel ?? t("assignment:allDay");
 	const empById = useEmployeeMap();
 
 	const { data: area } = useQuery({
@@ -310,7 +318,7 @@ function HistoryDetail() {
 							onClick={back}
 							className="font-sans text-[12.5px] font-semibold text-muted bg-transparent border-none px-2 py-1.5 rounded-sm cursor-pointer hover:bg-hairline"
 						>
-							← 配置履歴
+							{t("history:backToList")}
 						</button>
 						<div className="w-px h-4.5 bg-border" />
 						<div className="text-sm font-bold whitespace-nowrap overflow-hidden text-ellipsis">
@@ -318,11 +326,11 @@ function HistoryDetail() {
 						</div>
 						{versionLabel && (
 							<span className="text-[10.5px] font-bold text-muted bg-table-head border border-hairline px-2.5 py-1 rounded-pill shrink-0 font-mono">
-								規格 {versionLabel}
+								{t("assignment:specVersion", { version: versionLabel })}
 							</span>
 						)}
 						<span className="text-[10.5px] font-bold text-primary-hover bg-primary-soft px-2.5 py-1 rounded-pill shrink-0">
-							読み取り専用
+							{t("history:readOnly")}
 						</span>
 					</div>
 					<div className="text-[12.5px] font-bold text-ink border border-border px-3 py-1.5 rounded-pill shrink-0">
@@ -333,7 +341,7 @@ function HistoryDetail() {
 				<div className="flex-1 min-h-0 p-4.5 bg-app-bg flex flex-col">
 					<div className="flex items-center justify-between mb-2.5 shrink-0">
 						<div className="text-[13px] font-bold">
-							配置済み {assignedCount} 名
+							{t("history:placedCount", { count: assignedCount })}
 						</div>
 						{spots.length > 0 && (
 							<div className="flex items-center gap-1 border border-border rounded-sm bg-surface px-1 py-0.5">

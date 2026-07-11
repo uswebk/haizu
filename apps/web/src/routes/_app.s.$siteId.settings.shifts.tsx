@@ -2,10 +2,12 @@ import type { ShiftMode } from "@haizu/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { OptionCard } from "#/components/ui/OptionCard";
 import { useSnackbar } from "#/contexts/snackbar-context";
+import i18n from "#/i18n/config";
 import {
 	fetchWorkPattern,
 	saveWorkPattern,
@@ -27,7 +29,7 @@ export const Route = createFileRoute("/_app/s/$siteId/settings/shifts")({
 function newShift(): DraftShift {
 	return {
 		key: crypto.randomUUID(),
-		name: "新規シフト",
+		name: i18n.t("shifts:newShiftName"),
 		startTime: "09:00",
 		endTime: "18:00",
 	};
@@ -35,6 +37,7 @@ function newShift(): DraftShift {
 
 function ShiftSettings() {
 	const { siteId } = Route.useParams();
+	const { t } = useTranslation(["shifts", "common"]);
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { showSuccess } = useSnackbar();
@@ -76,7 +79,7 @@ function ShiftSettings() {
 						? []
 						: shifts.map((s) => ({
 								id: s.id,
-								name: s.name.trim() || "新規シフト",
+								name: s.name.trim() || i18n.t("shifts:newShiftName"),
 								startTime: s.startTime,
 								endTime: s.endTime,
 							})),
@@ -84,7 +87,7 @@ function ShiftSettings() {
 		onSuccess: () => {
 			setConfirmOpen(false);
 			void queryClient.invalidateQueries({ queryKey: workPatternKeys.detail });
-			showSuccess("シフト設定を保存しました");
+			showSuccess(t("shifts:saved"));
 		},
 	});
 
@@ -133,14 +136,14 @@ function ShiftSettings() {
 		const names = new Set<string>();
 		for (const s of shifts) {
 			const timeKey = `${s.startTime}-${s.endTime}`;
-			if (times.has(timeKey)) return "開始・終了が同じシフトがあります";
+			if (times.has(timeKey)) return t("shifts:dupTime");
 			times.add(timeKey);
 			const name = s.name.trim();
-			if (name && names.has(name)) return "シフト名が重複しています";
+			if (name && names.has(name)) return t("shifts:dupName");
 			names.add(name);
 		}
 		return null;
-	}, [mode, shifts]);
+	}, [mode, shifts, t]);
 	const hasDuplicate = duplicateError !== null;
 
 	if (!ready) {
@@ -152,10 +155,12 @@ function ShiftSettings() {
 						params={{ siteId }}
 						className="text-xs font-semibold text-muted hover:text-ink"
 					>
-						← 設定
+						{t("shifts:backToSettings")}
 					</Link>
-					<div className="text-[22px] font-bold mt-2">働き方（シフト）設定</div>
-					<div className="text-[13.5px] text-muted mt-4.5">読み込み中…</div>
+					<div className="text-[22px] font-bold mt-2">{t("shifts:title")}</div>
+					<div className="text-[13.5px] text-muted mt-4.5">
+						{t("common:loading")}
+					</div>
 				</div>
 			</div>
 		);
@@ -169,23 +174,23 @@ function ShiftSettings() {
 					params={{ siteId }}
 					className="text-xs font-semibold text-muted hover:text-ink"
 				>
-					← 設定
+					{t("shifts:backToSettings")}
 				</Link>
-				<div className="text-[22px] font-bold mt-2">働き方（シフト）設定</div>
+				<div className="text-[22px] font-bold mt-2">{t("shifts:title")}</div>
 				<div className="text-[13.5px] text-muted mt-1.25">
-					この拠点のシフト区分を決めます。
+					{t("shifts:subtitle")}
 				</div>
 
 				<div className="grid grid-cols-2 gap-3.5 mt-4.5">
 					<OptionCard
-						title="シフトなし"
-						description="1日1シフト。時間帯の区分はありません。"
+						title={t("shifts:singleTitle")}
+						description={t("shifts:singleDesc")}
 						selected={mode === "single"}
 						onClick={() => setMode("single")}
 					/>
 					<OptionCard
-						title="シフトあり"
-						description="日勤・遅番・夜勤など、名前と時間で区分します。"
+						title={t("shifts:multiTitle")}
+						description={t("shifts:multiDesc")}
 						selected={mode === "multi"}
 						onClick={selectMulti}
 					/>
@@ -194,31 +199,33 @@ function ShiftSettings() {
 				{mode === "multi" ? (
 					<div className="bg-surface border border-border rounded-lg p-5.5 mt-5 shadow-card">
 						<div className="flex items-center justify-between mb-3.5">
-							<div className="text-[13.5px] font-bold">シフト区分</div>
+							<div className="text-[13.5px] font-bold">
+								{t("shifts:shiftTypes")}
+							</div>
 							<Button size="sm" onClick={addShift}>
-								＋ シフトを追加
+								{t("shifts:addShift")}
 							</Button>
 						</div>
 						{deletedNotice && (
 							<div className="flex items-start gap-2 text-[12px] font-semibold text-warning bg-warning-soft rounded-md px-3 py-2 mb-3 leading-relaxed">
 								<span aria-hidden>⚠</span>
-								<span>
-									削除したシフトで作成中の配置決めの下書きは、保存すると破棄されます。
-								</span>
+								<span>{t("shifts:deletedNotice")}</span>
 							</div>
 						)}
 						<div className="grid grid-cols-[auto_1.6fr_1fr_1fr_auto] gap-2.5 px-1 pb-2 text-[11px] font-bold text-faint tracking-wide">
 							<div />
-							<div>シフト名</div>
-							<div>開始</div>
-							<div>終了</div>
+							<div>{t("shifts:colName")}</div>
+							<div>{t("shifts:colStart")}</div>
+							<div>{t("shifts:colEnd")}</div>
 							<div />
 						</div>
 						<div className="flex flex-col gap-2.25">
 							{shifts.map((sh) => (
 								<fieldset
 									key={sh.key}
-									aria-label={`シフト ${sh.name || "新規シフト"}`}
+									aria-label={t("shifts:shiftAria", {
+										name: sh.name || t("shifts:newShiftName"),
+									})}
 									draggable={false}
 									onDragOver={(e) => {
 										e.preventDefault();
@@ -247,7 +254,7 @@ function ShiftSettings() {
 											dragKey.current = null;
 											setDragOverKey(null);
 										}}
-										title="ドラッグで並び替え"
+										title={t("shifts:dragToReorder")}
 										className="w-8.5 h-8.5 flex items-center justify-center rounded-sm bg-app-bg text-faint text-base cursor-grab active:cursor-grabbing hover:bg-hairline"
 									>
 										⠿
@@ -275,7 +282,7 @@ function ShiftSettings() {
 									<button
 										type="button"
 										onClick={() => removeShift(sh.key)}
-										title="削除"
+										title={t("common:delete")}
 										disabled={shifts.length <= 1}
 										className="w-8.5 h-8.5 flex items-center justify-center rounded-sm bg-app-bg text-faint text-base cursor-pointer hover:bg-hairline disabled:opacity-40 disabled:cursor-not-allowed"
 									>
@@ -287,7 +294,7 @@ function ShiftSettings() {
 					</div>
 				) : (
 					<div className="border-[1.4px] border-dashed border-dash rounded-lg p-7.5 text-center bg-empty-bg text-[13px] text-faint mt-5">
-						シフトなし（1日1シフト）で運用します。配置決め・ビュアーでは区分なしで扱います。
+						{t("shifts:singleRunNote")}
 					</div>
 				)}
 
@@ -304,13 +311,13 @@ function ShiftSettings() {
 						}
 						disabled={saveMutation.isPending}
 					>
-						キャンセル
+						{t("common:cancel")}
 					</Button>
 					<Button
 						onClick={() => setConfirmOpen(true)}
 						disabled={saveMutation.isPending || hasDuplicate}
 					>
-						保存する
+						{t("common:save")}
 					</Button>
 				</div>
 			</div>
@@ -318,9 +325,11 @@ function ShiftSettings() {
 			{confirmOpen && (
 				<div className="fixed inset-0 bg-[rgba(16,28,44,.42)] flex items-center justify-center p-6 z-60">
 					<div className="w-115 max-w-full bg-surface rounded-section shadow-[0_24px_60px_rgba(16,42,67,.3)] p-5.5">
-						<div className="text-base font-bold mb-2">シフト設定を保存</div>
+						<div className="text-base font-bold mb-2">
+							{t("shifts:confirmTitle")}
+						</div>
 						<div className="text-[13.5px] text-muted leading-relaxed">
-							変更・削除したシフトで作成中の配置決めの下書きは破棄されます。保存してよろしいですか？
+							{t("shifts:confirmBody")}
 						</div>
 						<div className="flex justify-end gap-2.5 mt-6">
 							<Button
@@ -328,13 +337,13 @@ function ShiftSettings() {
 								onClick={() => setConfirmOpen(false)}
 								disabled={saveMutation.isPending}
 							>
-								キャンセル
+								{t("common:cancel")}
 							</Button>
 							<Button
 								onClick={() => saveMutation.mutate()}
 								disabled={saveMutation.isPending}
 							>
-								{saveMutation.isPending ? "保存中…" : "保存する"}
+								{saveMutation.isPending ? t("shifts:saving") : t("common:save")}
 							</Button>
 						</div>
 					</div>

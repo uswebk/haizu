@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Avatar } from "#/components/ui/Avatar";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
@@ -27,6 +28,7 @@ import {
 	updateEmployee,
 } from "#/lib/api/employees";
 import { fetchTags, tagKeys } from "#/lib/api/tags";
+import { todayStr } from "#/lib/datetime";
 import { assertScreen } from "#/lib/guards";
 
 const CURRENT_SITE = "A工場";
@@ -34,11 +36,7 @@ const PAGE_SIZE = 50;
 
 type EmployeeFilter = "all" | "active" | "inactive";
 
-const FILTERS: { key: EmployeeFilter; label: string }[] = [
-	{ key: "all", label: "すべて" },
-	{ key: "active", label: "有効" },
-	{ key: "inactive", label: "無効" },
-];
+const FILTER_KEYS: EmployeeFilter[] = ["all", "active", "inactive"];
 
 export const Route = createFileRoute("/_app/s/$siteId/employees")({
 	beforeLoad: ({ context, params }) => {
@@ -54,6 +52,7 @@ export const Route = createFileRoute("/_app/s/$siteId/employees")({
 
 function EmployeeList() {
 	const queryClient = useQueryClient();
+	const { t } = useTranslation(["employees", "common"]);
 	const { showSuccess } = useSnackbar();
 	const { data: employees = [] } = useQuery({
 		queryKey: employeeKeys.all,
@@ -78,12 +77,12 @@ function EmployeeList() {
 			void queryClient.invalidateQueries({ queryKey: employeeKeys.all });
 			closeDialog();
 			showSuccess(
-				editingEmployee ? "従業員を更新しました" : "従業員を登録しました",
+				editingEmployee ? t("employees:updated") : t("employees:created"),
 			);
 		},
 		onError: (error) => {
 			setSaveError(
-				error instanceof Error ? error.message : "保存に失敗しました",
+				error instanceof Error ? error.message : t("employees:saveFailed"),
 			);
 		},
 	});
@@ -111,11 +110,11 @@ function EmployeeList() {
 			void queryClient.invalidateQueries({ queryKey: employeeKeys.all });
 			void queryClient.invalidateQueries({ queryKey: tagKeys.all });
 			closeImport();
-			showSuccess("従業員を取り込みました");
+			showSuccess(t("employees:imported"));
 		},
 		onError: (error) => {
 			setImportError(
-				error instanceof Error ? error.message : "取込に失敗しました",
+				error instanceof Error ? error.message : t("employees:importFailed"),
 			);
 		},
 	});
@@ -125,7 +124,7 @@ function EmployeeList() {
 		const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
 		const url = URL.createObjectURL(blob);
 		const anchor = document.createElement("a");
-		const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+		const stamp = todayStr().replace(/-/g, "");
 		anchor.href = url;
 		anchor.download = `haizu_employees_${stamp}.csv`;
 		anchor.click();
@@ -199,7 +198,7 @@ function EmployeeList() {
 				onClick={() => setPage((p) => Math.max(1, p - 1))}
 				disabled={currentPage <= 1}
 			>
-				前へ
+				{t("employees:prev")}
 			</PagerButton>
 			<span className="text-xs font-semibold text-ink px-1.5">
 				{currentPage} / {pageCount}
@@ -208,7 +207,7 @@ function EmployeeList() {
 				onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
 				disabled={currentPage >= pageCount}
 			>
-				次へ
+				{t("employees:next")}
 			</PagerButton>
 		</div>
 	);
@@ -216,7 +215,7 @@ function EmployeeList() {
 	const columns: TableColumn<EmployeeRow>[] = [
 		{
 			key: "name",
-			label: "従業員",
+			label: t("employees:colName"),
 			width: "2fr",
 			render: (e) => (
 				<div className="flex items-center gap-2.75 min-w-0">
@@ -233,7 +232,7 @@ function EmployeeList() {
 		},
 		{
 			key: "code",
-			label: "社員番号",
+			label: t("employees:colCode"),
 			width: "1.2fr",
 			render: (e) => (
 				<span className="text-muted font-mono text-xs">{e.code}</span>
@@ -241,7 +240,7 @@ function EmployeeList() {
 		},
 		{
 			key: "tags",
-			label: "タグ",
+			label: t("employees:colTags"),
 			width: "2fr",
 			render: (e) => (
 				<div className="flex flex-wrap gap-1.25">
@@ -255,19 +254,19 @@ function EmployeeList() {
 		},
 		{
 			key: "status",
-			label: "状態",
+			label: t("employees:colStatus"),
 			width: "1fr",
 			render: (e) => (
 				<div className="flex items-center justify-between gap-2">
 					<Badge tone={e.isActive ? "success" : "draft"}>
-						{e.isActive ? "有効" : "無効"}
+						{e.isActive ? t("employees:active") : t("employees:inactive")}
 					</Badge>
 					<Button
 						variant="secondary"
 						size="sm"
 						onClick={() => openEditDialog(e)}
 					>
-						編集
+						{t("common:edit")}
 					</Button>
 				</div>
 			),
@@ -279,10 +278,12 @@ function EmployeeList() {
 			<div className="max-w-245">
 				<div className="flex items-end justify-between gap-5 mb-4.5 flex-wrap">
 					<div>
-						<div className="text-[22px] font-bold">従業員</div>
+						<div className="text-[22px] font-bold">{t("employees:title")}</div>
 						<div className="text-[13.5px] text-muted mt-1.25">
-							{CURRENT_SITE} の従業員 {employees.length}{" "}
-							名。検索・絞り込み、CSV取込ができます。
+							{t("employees:subtitle", {
+								site: CURRENT_SITE,
+								count: employees.length,
+							})}
 						</div>
 					</div>
 					<div className="flex items-center gap-2">
@@ -294,15 +295,17 @@ function EmployeeList() {
 							onChange={handleFileSelected}
 						/>
 						<Button variant="secondary" onClick={handleExport}>
-							CSVエクスポート
+							{t("employees:exportCsv")}
 						</Button>
 						<Button
 							variant="secondary"
 							onClick={() => fileInputRef.current?.click()}
 						>
-							CSV取込
+							{t("employees:importCsv")}
 						</Button>
-						<Button onClick={openCreateDialog}>＋ 従業員を追加</Button>
+						<Button onClick={openCreateDialog}>
+							{t("employees:addButton")}
+						</Button>
 					</div>
 				</div>
 
@@ -313,25 +316,25 @@ function EmployeeList() {
 							setSearch(e.target.value);
 							setPage(1);
 						}}
-						placeholder="氏名・社員番号・タグで検索"
+						placeholder={t("employees:searchPlaceholder")}
 						className="min-w-55 flex-1"
 					/>
 					<div className="flex items-center gap-1 bg-app-bg border border-border rounded-md p-0.75">
-						{FILTERS.map((f) => (
+						{FILTER_KEYS.map((key) => (
 							<button
-								key={f.key}
+								key={key}
 								type="button"
 								onClick={() => {
-									setFilter(f.key);
+									setFilter(key);
 									setPage(1);
 								}}
 								className={`text-xs px-3.5 py-1.75 rounded-sm cursor-pointer ${
-									filter === f.key
+									filter === key
 										? "font-bold text-primary bg-primary-soft"
 										: "font-semibold text-muted"
 								}`}
 							>
-								{f.label}
+								{t(`employees:filter.${key}`)}
 							</button>
 						))}
 					</div>
@@ -339,9 +342,12 @@ function EmployeeList() {
 
 				<div className="flex items-center justify-between mb-2">
 					<div className="text-xs font-semibold text-muted">
-						{filtered.length} 件中{" "}
-						{filtered.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1}–
-						{Math.min(currentPage * PAGE_SIZE, filtered.length)} 件を表示
+						{t("employees:showing", {
+							total: filtered.length,
+							from:
+								filtered.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1,
+							to: Math.min(currentPage * PAGE_SIZE, filtered.length),
+						})}
 					</div>
 					{pager}
 				</div>

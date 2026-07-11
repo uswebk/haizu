@@ -21,7 +21,7 @@ export const auth = betterAuth({
 		sendResetPassword: async ({ user: u, url }) => {
 			await emailSender.send({
 				to: u.email,
-				subject: "パスワードリセット",
+				subject: "Password reset",
 				body: url,
 			});
 		},
@@ -30,7 +30,7 @@ export const auth = betterAuth({
 		sendVerificationEmail: async ({ user: u, url }) => {
 			await emailSender.send({
 				to: u.email,
-				subject: "メールアドレスの確認",
+				subject: "Verify your email",
 				body: url,
 			});
 		},

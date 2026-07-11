@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "#/components/ui/Badge";
 import { useDismiss } from "#/hooks/useDismiss";
 import { UNPUBLISHED_EFFECTIVE_DATE, type VersionState } from "./types";
@@ -16,6 +17,7 @@ export function VersionSelector({
 	onSelect,
 	onDuplicate,
 }: Props) {
+	const { t } = useTranslation("editor");
 	const [open, setOpen] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 	useDismiss(open, () => setOpen(false), containerRef);
@@ -38,7 +40,7 @@ export function VersionSelector({
 			{open && (
 				<div className="absolute top-10 right-0 w-50 bg-surface border border-border rounded-[11px] shadow-float p-1.5 z-30">
 					<div className="text-[10px] font-bold tracking-[.08em] text-faint px-2.25 py-1.25">
-						バージョン
+						{t("editor:version")}
 					</div>
 					{versions.map((v) => (
 						<button
@@ -54,14 +56,14 @@ export function VersionSelector({
 								<span>{v.label}</span>
 								{v.effectiveDate !== UNPUBLISHED_EFFECTIVE_DATE && (
 									<span className="text-[10.5px] font-normal text-faint">
-										適用: {v.effectiveDate}
+										{t("editor:effective", { date: v.effectiveDate })}
 									</span>
 								)}
 							</span>
 							{v.isCurrent ? (
-								<Badge tone="success">使用中</Badge>
+								<Badge tone="success">{t("editor:inUse")}</Badge>
 							) : v.status === "published" ? (
-								<Badge tone="primary">公開済み</Badge>
+								<Badge tone="primary">{t("editor:published")}</Badge>
 							) : null}
 						</button>
 					))}
@@ -74,7 +76,7 @@ export function VersionSelector({
 						}}
 						className="w-full text-left px-2.5 py-2 rounded-sm text-[12.5px] font-bold text-primary hover:bg-hairline cursor-pointer border-none bg-transparent"
 					>
-						＋ 現在を複製して新バージョン
+						{t("editor:duplicateNew")}
 					</button>
 				</div>
 			)}

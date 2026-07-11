@@ -4,6 +4,7 @@ import {
 	Outlet,
 	useMatches,
 } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { Card } from "#/components/ui/Card";
 import { assertScreen } from "#/lib/guards";
 
@@ -20,25 +21,14 @@ export const Route = createFileRoute("/_app/s/$siteId/settings")({
 });
 
 const SETTING_LINKS = [
-	{
-		to: "/s/$siteId/settings/shifts" as const,
-		title: "働き方（シフト）設定",
-		description: "この拠点のシフト区分（名前・時間帯）を管理します。",
-	},
-	{
-		to: "/s/$siteId/settings/tags" as const,
-		title: "タグ管理",
-		description: "従業員に付与するタグの追加・編集・削除を行います。",
-	},
-	{
-		to: "/s/$siteId/settings/viewer" as const,
-		title: "配置ビュアー設定",
-		description: "エリアごとに、大画面ビュアーの表示方法を設定します。",
-	},
+	{ to: "/s/$siteId/settings/shifts" as const, key: "shifts" },
+	{ to: "/s/$siteId/settings/tags" as const, key: "tags" },
+	{ to: "/s/$siteId/settings/viewer" as const, key: "viewer" },
 ];
 
 function SettingsLayout() {
 	const matches = useMatches();
+	const { t } = useTranslation("settings");
 	const { siteId } = Route.useParams();
 	const isHub =
 		matches[matches.length - 1]?.routeId === "/_app/s/$siteId/settings";
@@ -48,9 +38,9 @@ function SettingsLayout() {
 	return (
 		<div className="p-7 overflow-auto h-full">
 			<div className="max-w-170">
-				<div className="text-[22px] font-bold">設定</div>
+				<div className="text-[22px] font-bold">{t("hub.title")}</div>
 				<div className="text-[13.5px] text-muted mt-1.25">
-					拠点の運用に関する各種設定はこちらから行えます。
+					{t("hub.subtitle")}
 				</div>
 
 				<div className="flex flex-col gap-3 mt-4.5">
@@ -62,9 +52,11 @@ function SettingsLayout() {
 							className="block"
 						>
 							<Card className="hover:bg-app-bg transition-colors duration-150 cursor-pointer">
-								<div className="font-bold text-[15px]">{item.title}</div>
+								<div className="font-bold text-[15px]">
+									{t(`hub.${item.key}.title`)}
+								</div>
 								<div className="text-[13px] text-muted mt-1">
-									{item.description}
+									{t(`hub.${item.key}.description`)}
 								</div>
 							</Card>
 						</Link>

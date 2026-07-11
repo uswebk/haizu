@@ -1,8 +1,8 @@
 import type { DisplayRole } from "@haizu/shared";
+import { useTranslation } from "react-i18next";
 
-export const ROLE_LABEL: Record<DisplayRole, string> = {
-	admin: "管理者",
-	site_admin: "拠点管理者",
-	general: "一般",
-	viewer: "その他",
-};
+// 表示ロールのラベルを現在のロケールで解決するフック。
+export function useRoleLabel(): (role: DisplayRole) => string {
+	const { t } = useTranslation("roles");
+	return (role: DisplayRole) => t(role);
+}

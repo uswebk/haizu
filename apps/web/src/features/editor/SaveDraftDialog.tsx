@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { useDismiss } from "#/hooks/useDismiss";
 
@@ -17,6 +18,7 @@ export function SaveDraftDialog({
 	onConfirm,
 	onCancel,
 }: Props) {
+	const { t } = useTranslation(["editor", "common"]);
 	const contentRef = useRef<HTMLDivElement>(null);
 	useDismiss(open, onCancel, contentRef);
 
@@ -32,20 +34,18 @@ export function SaveDraftDialog({
 			>
 				<div className="px-5.5 py-5 border-b border-hairline">
 					<div className="text-base font-bold">
-						{isDraft ? "下書き保存" : "保存"}
+						{isDraft ? t("editor:saveDraft") : t("common:save")}
 					</div>
 					<div className="text-[13px] text-muted mt-1.25">
-						{isDraft
-							? "現在のスポット配置を下書きとして保存します。公開はされません。"
-							: "現在のスポット配置を保存します。"}
+						{isDraft ? t("editor:saveDraftDesc") : t("editor:saveDesc")}
 					</div>
 				</div>
 				<div className="flex justify-end gap-2.5 px-5.5 py-4">
 					<Button variant="secondary" onClick={onCancel} disabled={isPending}>
-						キャンセル
+						{t("common:cancel")}
 					</Button>
 					<Button onClick={onConfirm} disabled={isPending}>
-						{isPending ? "保存中…" : "保存する"}
+						{isPending ? t("editor:saving") : t("common:save")}
 					</Button>
 				</div>
 			</div>

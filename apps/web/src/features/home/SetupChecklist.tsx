@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 type Step = {
 	label: string;
@@ -26,30 +27,31 @@ export function SetupChecklist({
 	hasAreas: boolean;
 	hasDraftArea: boolean;
 }) {
+	const { t } = useTranslation("home");
 	const steps: Step[] = [
 		{
-			label: "シフトを登録",
-			description: "拠点の勤務体制（交代制とシフト）を設定します。",
+			label: t("setup.shiftsLabel"),
+			description: t("setup.shiftsDesc"),
 			to: "/s/$siteId/settings/shifts",
 			done: hasShifts,
-			pendingLabel: "未登録",
+			pendingLabel: t("setup.pending"),
 		},
 		{
-			label: "従業員を登録",
-			description: "配置する従業員を登録します。",
+			label: t("setup.employeesLabel"),
+			description: t("setup.employeesDesc"),
 			to: "/s/$siteId/employees",
 			done: hasEmployees,
-			pendingLabel: "未登録",
+			pendingLabel: t("setup.pending"),
 		},
 		{
-			label: "配置エリアを登録",
+			label: t("setup.areasLabel"),
 			description: hasDraftArea
-				? "下書きの規格があります。規格を公開すると完了します。"
-				: "フロアマップと配置スポットを作成し、規格を公開します。",
+				? t("setup.areasDescDraft")
+				: t("setup.areasDesc"),
 			to: "/s/$siteId/editor",
 			done: hasAreas,
 			inProgress: hasDraftArea,
-			pendingLabel: hasDraftArea ? "下書きあり（未公開）" : "未登録",
+			pendingLabel: hasDraftArea ? t("setup.pendingDraft") : t("setup.pending"),
 		},
 	];
 
@@ -58,10 +60,9 @@ export function SetupChecklist({
 
 	return (
 		<div className="max-w-175">
-			<div className="text-[22px] font-bold">初期セットアップ</div>
+			<div className="text-[22px] font-bold">{t("setup.title")}</div>
 			<div className="text-[13.5px] text-muted mt-1.25 mb-4.5">
-				haizu を使い始めるには、次の3ステップを順番に登録してください。（
-				{doneCount}/{steps.length} 完了）
+				{t("setup.subtitle", { done: doneCount, total: steps.length })}
 			</div>
 
 			<ol className="flex flex-col gap-3">
@@ -94,10 +95,14 @@ export function SetupChecklist({
 							</div>
 							<div className="ml-auto flex-none">
 								{step.done ? (
-									<span className="text-[13px] text-faint">登録済み</span>
+									<span className="text-[13px] text-faint">
+										{t("setup.registered")}
+									</span>
 								) : active ? (
 									<span className="text-[13px] font-bold text-white bg-primary px-3 py-1.5 rounded-pill">
-										{step.inProgress ? "続きから →" : "次はこちら →"}
+										{step.inProgress
+											? t("setup.continue")
+											: t("setup.startHere")}
 									</span>
 								) : (
 									<span

@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { signUp } from "#/lib/api/auth";
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/signup")({
 });
 
 function SignupPage() {
+	const { t } = useTranslation(["auth", "common"]);
 	const navigate = useNavigate();
 	const [name, setName] = useState("");
 	const [companyName, setCompanyName] = useState("");
@@ -28,7 +30,7 @@ function SignupPage() {
 			await signUp({ name, companyName, email, password });
 			void navigate({ to: "/verify-otp" });
 		} catch (e) {
-			setError(e instanceof Error ? e.message : "サインアップに失敗しました");
+			setError(e instanceof Error ? e.message : t("signup.failed"));
 		} finally {
 			setSubmitting(false);
 		}
@@ -45,15 +47,15 @@ function SignupPage() {
 				<div>
 					<div className="font-bold text-2xl leading-none text-ink">haizu</div>
 					<div className="font-mono text-[9.5px] tracking-[.14em] text-faint mt-1">
-						配置管理SYSTEM
+						{t("common:appTagline")}
 					</div>
 				</div>
 			</div>
 
 			<div className="w-90 max-w-full bg-surface border border-border rounded-section p-6.5">
-				<div className="text-lg font-bold">新規登録</div>
+				<div className="text-lg font-bold">{t("signup.title")}</div>
 				<div className="text-[13px] text-muted mt-1">
-					会社（組織）を新規に作成します。
+					{t("signup.subtitle")}
 				</div>
 
 				<form
@@ -64,21 +66,21 @@ function SignupPage() {
 					}}
 				>
 					<Input
-						label="お名前"
+						label={t("signup.name")}
 						value={name}
 						onChange={(e) => setName(e.target.value)}
-						placeholder="山田 太郎"
+						placeholder={t("signup.namePlaceholder")}
 						autoComplete="name"
 					/>
 					<Input
-						label="会社名"
+						label={t("signup.companyName")}
 						value={companyName}
 						onChange={(e) => setCompanyName(e.target.value)}
-						placeholder="株式会社haizu"
+						placeholder={t("signup.companyPlaceholder")}
 						autoComplete="organization"
 					/>
 					<Input
-						label="メールアドレス"
+						label={t("common:email")}
 						type="email"
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
@@ -86,7 +88,7 @@ function SignupPage() {
 						autoComplete="email"
 					/>
 					<Input
-						label="パスワード（8文字以上）"
+						label={t("signup.passwordLabel")}
 						type="password"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
@@ -95,14 +97,14 @@ function SignupPage() {
 					/>
 					{error && <div className="text-[12.5px] text-danger">{error}</div>}
 					<Button type="submit" className="w-full mt-1" disabled={!canSubmit}>
-						{submitting ? "登録中…" : "登録する"}
+						{submitting ? t("signup.submitting") : t("signup.submit")}
 					</Button>
 				</form>
 
 				<div className="text-[12.5px] text-muted mt-4 text-center">
-					すでにアカウントをお持ちの方は{" "}
+					{t("signup.haveAccount")}{" "}
 					<Link to="/login" className="text-primary font-semibold">
-						ログイン
+						{t("login.submit")}
 					</Link>
 				</div>
 			</div>

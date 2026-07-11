@@ -1,5 +1,6 @@
 import type { LayoutSpecStatus } from "@haizu/shared";
 import type { AreaData, SpotState } from "#/features/editor/types";
+import { todayStr } from "#/lib/datetime";
 import { API_BASE, apiFetch, handleResponse } from ".";
 
 export type AreaListItem = {
@@ -19,8 +20,9 @@ export const areaKeys = {
 };
 
 export async function fetchAreas(date?: string): Promise<AreaListItem[]> {
-	const query = date ? `?date=${date}` : "";
-	const res = await apiFetch(`${API_BASE}/areas${query}`);
+	// 規格バージョンの「当日」判定は端末TZの今日を基準にする（API任せだとUTCになる）。
+	const target = date ?? todayStr();
+	const res = await apiFetch(`${API_BASE}/areas?date=${target}`);
 	const data = await handleResponse<{ areas: AreaListItem[] }>(res);
 	return data.areas;
 }

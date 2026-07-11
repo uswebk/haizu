@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "#/components/ui/Badge";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
@@ -22,7 +23,7 @@ import {
 	updateMember,
 } from "#/lib/api/members";
 import { assertScreen } from "#/lib/guards";
-import { ROLE_LABEL } from "#/lib/roles";
+import { useRoleLabel } from "#/lib/roles";
 
 export const Route = createFileRoute("/_app/s/$siteId/members")({
 	beforeLoad: ({ context, params }) => {
@@ -31,17 +32,16 @@ export const Route = createFileRoute("/_app/s/$siteId/members")({
 	component: MemberList,
 });
 
-const STATUS_META: Record<
-	MemberStatus,
-	{ label: string; tone: "success" | "draft" | "warning" }
-> = {
-	active: { label: "アクティブ", tone: "success" },
-	inactive: { label: "停止中", tone: "draft" },
-	invited: { label: "招待中", tone: "warning" },
+const STATUS_TONE: Record<MemberStatus, "success" | "draft" | "warning"> = {
+	active: "success",
+	inactive: "draft",
+	invited: "warning",
 };
 
 function MemberList() {
 	const queryClient = useQueryClient();
+	const { t } = useTranslation(["members", "common"]);
+	const roleLabelFor = useRoleLabel();
 	const { showSuccess } = useSnackbar();
 	const { activeSites } = useSite();
 	const { user } = Route.useRouteContext();
@@ -80,12 +80,12 @@ function MemberList() {
 			void invalidate();
 			closeDialog();
 			showSuccess(
-				editingMember ? "メンバーを更新しました" : "メンバーを招待しました",
+				editingMember ? t("members:list.updated") : t("members:list.invited"),
 			);
 		},
 		onError: (error) => {
 			setSaveError(
-				error instanceof Error ? error.message : "保存に失敗しました",
+				error instanceof Error ? error.message : t("members:list.saveFailed"),
 			);
 		},
 	});
@@ -94,7 +94,7 @@ function MemberList() {
 		mutationFn: (id: string) => cancelInvitation(id),
 		onSuccess: () => {
 			void invalidate();
-			showSuccess("招待を取り消しました");
+			showSuccess(t("members:list.invitationCanceled"));
 		},
 	});
 
@@ -130,7 +130,7 @@ function MemberList() {
 	const columns: TableColumn<MemberRow>[] = [
 		{
 			key: "member",
-			label: "メンバー",
+			label: t("members:list.colMember"),
 			width: "2fr",
 			render: (m) => (
 				<div className="min-w-0">
@@ -145,21 +145,23 @@ function MemberList() {
 		},
 		{
 			key: "role",
-			label: "権限",
+			label: t("members:list.colRole"),
 			width: "1fr",
 			render: (m) =>
 				m.allSites ? (
 					<RoleBadge role={roleBadgeKey("admin")} />
 				) : (
-					<span className="text-[12.5px] text-muted">メンバー</span>
+					<span className="text-[12.5px] text-muted">
+						{t("members:form.orgRoleMember")}
+					</span>
 				),
 		},
 		{
 			key: "sites",
-			label: "担当拠点と権限",
+			label: t("members:list.colSites"),
 			width: "1.8fr",
 			render: (m) => {
-				if (m.allSites) return <span>全拠点</span>;
+				if (m.allSites) return <span>{t("members:list.allSites")}</span>;
 				if (m.siteRoles.length === 0) return <span>—</span>;
 				// 拠点ごとに権限が異なりうるため「拠点名: 権限」で並べる
 				return (
@@ -172,7 +174,7 @@ function MemberList() {
 									key={sr.siteId}
 									className="text-[11.5px] text-muted bg-hairline rounded-pill px-2 py-0.75"
 								>
-									{name}: {ROLE_LABEL[sr.role]}
+									{name}: {roleLabelFor(sr.role)}
 								</span>
 							);
 						})}
@@ -182,16 +184,16 @@ function MemberList() {
 		},
 		{
 			key: "status",
-			label: "状態",
+			label: t("members:list.colStatus"),
 			width: "1.1fr",
 			render: (m) => (
 				<div className="flex items-center justify-between gap-2">
-					<Badge tone={STATUS_META[m.status].tone}>
-						{STATUS_META[m.status].label}
+					<Badge tone={STATUS_TONE[m.status]}>
+						{t(`members:status.${m.status}`)}
 					</Badge>
 					{m.kind === "user" ? (
 						<Button variant="secondary" size="sm" onClick={() => openEdit(m)}>
-							編集
+							{t("common:edit")}
 						</Button>
 					) : (
 						<Button
@@ -200,7 +202,7 @@ function MemberList() {
 							disabled={cancelMutation.isPending}
 							onClick={() => cancelMutation.mutate(m.id)}
 						>
-							取消
+							{t("members:list.cancel")}
 						</Button>
 					)}
 				</div>
@@ -214,13 +216,13 @@ function MemberList() {
 				<div className="flex items-end justify-between gap-5 mb-4.5 flex-wrap">
 					<div>
 						<div className="text-[22px] font-bold">
-							メンバー{" "}
+							{t("members:list.title")}{" "}
 							<span className="text-sm text-faint font-semibold">
 								（{activeCount} / {members.length}）
 							</span>
 						</div>
 						<div className="text-[13.5px] text-muted mt-1.25">
-							haizuを利用するメンバーと権限・担当拠点を管理します。
+							{t("members:list.subtitle")}
 						</div>
 					</div>
 				</div>
@@ -229,10 +231,10 @@ function MemberList() {
 					<Input
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
-						placeholder="名前・メールで検索"
+						placeholder={t("members:list.searchPlaceholder")}
 						className="min-w-55 w-70 max-w-full"
 					/>
-					<Button onClick={openInvite}>＋ メンバーを招待</Button>
+					<Button onClick={openInvite}>{t("members:list.inviteButton")}</Button>
 				</div>
 
 				<Table columns={columns} rows={filtered} rowKey={(m) => m.id} />

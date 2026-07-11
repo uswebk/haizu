@@ -1,5 +1,5 @@
 import type { ViewerConfig, WorkPattern } from "@haizu/shared";
-import { hmToMinutes, toDateStr } from "#/lib/datetime";
+import { hmToMinutes, minutesOfDay, toDateStr } from "#/lib/datetime";
 
 export type ViewerDisplay = { date: string; shiftId: string | null };
 
@@ -28,7 +28,7 @@ export function resolveViewerDisplay(
 	const shifts = workPattern.shifts;
 	if (shifts.length === 0) return { date, shiftId: null };
 
-	const nowMin = now.getHours() * 60 + now.getMinutes();
+	const nowMin = minutesOfDay(now);
 	// 各シフトの切替時刻 = 開始時刻 - leadMinutes（正=前倒し）。24時間で正規化。
 	const switches = shifts
 		.map((s) => ({

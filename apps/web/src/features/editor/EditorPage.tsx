@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type * as React from "react";
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { useSnackbar } from "#/contexts/snackbar-context";
 import { API_BASE } from "#/lib/api";
@@ -37,6 +38,7 @@ type Props = { siteId: string; areaId: string };
 
 export function EditorPage({ siteId, areaId }: Props) {
 	const navigate = useNavigate();
+	const { t } = useTranslation(["editor", "common"]);
 	const queryClient = useQueryClient();
 	const { showSuccess } = useSnackbar();
 
@@ -195,7 +197,7 @@ export function EditorPage({ siteId, areaId }: Props) {
 				);
 			}
 			setSaveDialogOpen(false);
-			showSuccess("下書きを保存しました");
+			showSuccess(t("editor:draftSaved"));
 		},
 	});
 
@@ -242,7 +244,7 @@ export function EditorPage({ siteId, areaId }: Props) {
 				setCurrentVersionId(versionId);
 			}
 			setPublishDialogOpen(false);
-			showSuccess("規格を公開しました");
+			showSuccess(t("editor:specPublished"));
 		},
 	});
 
@@ -250,7 +252,7 @@ export function EditorPage({ siteId, areaId }: Props) {
 		mutationFn: unpublishVersion,
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: areaKeys.detail(areaId) });
-			showSuccess("公開を取り消しました");
+			showSuccess(t("editor:unpublished"));
 		},
 	});
 
@@ -314,12 +316,12 @@ export function EditorPage({ siteId, areaId }: Props) {
 		mutationFn: deleteArea,
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: areaKeys.all });
-			showSuccess("配置エリアを削除しました");
+			showSuccess(t("editor:areaDeleted"));
 			navigate({ to: "/s/$siteId/editor", params: { siteId } });
 		},
 		onError: (error) => {
 			setDeleteAreaError(
-				error instanceof Error ? error.message : "削除に失敗しました",
+				error instanceof Error ? error.message : t("editor:deleteFailed"),
 			);
 		},
 	});
@@ -327,7 +329,7 @@ export function EditorPage({ siteId, areaId }: Props) {
 	if (!areaData || !resolvedVersion) {
 		return (
 			<div className="p-7 h-full flex items-center justify-center text-faint text-sm">
-				読み込み中…
+				{t("common:loading")}
 			</div>
 		);
 	}
@@ -345,7 +347,7 @@ export function EditorPage({ siteId, areaId }: Props) {
 							}
 							className="font-sans text-[12.5px] font-semibold text-muted bg-transparent border-none px-2 py-1.5 rounded-sm cursor-pointer hover:bg-hairline shrink-0"
 						>
-							← エリア一覧
+							{t("editor:backToList")}
 						</button>
 						<div className="w-px h-4.5 bg-border shrink-0" />
 						<div className="text-sm font-bold truncate">{resolvedName}</div>
@@ -355,11 +357,11 @@ export function EditorPage({ siteId, areaId }: Props) {
 							disabled={isLocked}
 							className="font-sans text-[12.5px] font-bold text-ink bg-surface border border-border px-3 py-1.5 rounded-sm cursor-pointer hover:bg-hairline shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
 						>
-							＋ 配置スポット
+							{t("editor:addSpot")}
 						</button>
 						{isLocked && (
 							<span className="text-[11.5px] font-semibold text-warning bg-warning-soft px-2.5 py-1.25 rounded-sm shrink-0">
-								配置決めで使用中のため編集できません
+								{t("editor:lockedEditing")}
 							</span>
 						)}
 					</div>
@@ -386,14 +388,14 @@ export function EditorPage({ siteId, areaId }: Props) {
 									size="sm"
 									onClick={() => setSaveDialogOpen(true)}
 								>
-									下書き保存
+									{t("editor:saveDraft")}
 								</Button>
 								<Button
 									size="sm"
 									onClick={() => setPublishDialogOpen(true)}
 									disabled={publishMutation.isPending}
 								>
-									この規格を公開
+									{t("editor:publishThisSpec")}
 								</Button>
 							</>
 						) : (
@@ -404,10 +406,10 @@ export function EditorPage({ siteId, areaId }: Props) {
 									onClick={() => setSaveDialogOpen(true)}
 									disabled={isLocked}
 								>
-									保存
+									{t("common:save")}
 								</Button>
 								<span className="text-xs font-semibold text-success px-2.5 py-1.5 bg-success/10 rounded-sm">
-									公開済み
+									{t("editor:publishedDone")}
 								</span>
 								<Button
 									variant="secondary"
@@ -419,15 +421,11 @@ export function EditorPage({ siteId, areaId }: Props) {
 										})
 									}
 									disabled={unpublishMutation.isPending || isLocked}
-									title={
-										isLocked
-											? "配置決めで使用されているため取り消せません"
-											: undefined
-									}
+									title={isLocked ? t("editor:cantUnpublishLocked") : undefined}
 								>
 									{unpublishMutation.isPending
-										? "取り消し中…"
-										: "公開を取り消す"}
+										? t("editor:unpublishing")
+										: t("editor:unpublish")}
 								</Button>
 							</>
 						)}
@@ -513,10 +511,11 @@ export function EditorPage({ siteId, areaId }: Props) {
 			{deleteAreaDialogOpen && (
 				<div className="fixed inset-0 bg-[rgba(16,28,44,.42)] flex items-center justify-center p-6 z-60">
 					<div className="w-105 max-w-full bg-surface rounded-section shadow-[0_24px_60px_rgba(16,42,67,.3)] p-5.5">
-						<div className="text-base font-bold mb-2">エリアを削除</div>
+						<div className="text-base font-bold mb-2">
+							{t("editor:deleteAreaTitle")}
+						</div>
 						<div className="text-[13.5px] text-muted">
-							「{resolvedName}
-							」を削除します。図面・配置スポットもすべて削除され、元に戻せません。
+							{t("editor:deleteAreaConfirm", { name: resolvedName })}
 						</div>
 						{deleteAreaError && (
 							<div className="text-[12.5px] text-warning bg-warning-soft rounded-md px-3 py-2 mt-3 leading-relaxed">
@@ -529,13 +528,15 @@ export function EditorPage({ siteId, areaId }: Props) {
 								onClick={() => setDeleteAreaDialogOpen(false)}
 								disabled={deleteAreaMutation.isPending}
 							>
-								キャンセル
+								{t("common:cancel")}
 							</Button>
 							<Button
 								onClick={() => deleteAreaMutation.mutate(areaData.id)}
 								disabled={deleteAreaMutation.isPending}
 							>
-								{deleteAreaMutation.isPending ? "削除中…" : "削除する"}
+								{deleteAreaMutation.isPending
+									? t("editor:deleting")
+									: t("common:delete")}
 							</Button>
 						</div>
 					</div>

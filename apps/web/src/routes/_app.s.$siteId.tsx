@@ -7,13 +7,15 @@ import {
 	useNavigate,
 } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "#/components/ui/LanguageSwitcher";
 import { NavItem } from "#/components/ui/NavItem";
 import { SiteProvider, useSite } from "#/contexts/site-context";
 import { useDismiss } from "#/hooks/useDismiss";
 import { siteKeys } from "#/lib/api/sites";
 import { authClient } from "#/lib/auth-client";
 import { formatDateLabel, todayStr } from "#/lib/datetime";
-import { ROLE_LABEL } from "#/lib/roles";
+import { useRoleLabel } from "#/lib/roles";
 import { fetchSiteRole } from "#/lib/session";
 
 // 直前に表示していた拠点。拠点をまたいだ遷移の検出だけに使う（クライアント限定）。
@@ -52,20 +54,19 @@ function SiteLayout() {
 }
 
 const MAIN_NAV = [
-	{ label: "ホーム", to: "/s/$siteId/home", screen: "home" },
-	{ label: "配置エリア", to: "/s/$siteId/editor", screen: "editor" },
-	{ label: "配置決め", to: "/s/$siteId/assignment", screen: "assignment" },
-	{ label: "配置履歴", to: "/s/$siteId/history", screen: "history" },
-	{ label: "ビュアー", to: "/s/$siteId/viewer", screen: "viewer" },
-	{ label: "従業員", to: "/s/$siteId/employees", screen: "employees" },
-	{ label: "設定", to: "/s/$siteId/settings", screen: "settings" },
+	{ to: "/s/$siteId/home", screen: "home" },
+	{ to: "/s/$siteId/editor", screen: "editor" },
+	{ to: "/s/$siteId/assignment", screen: "assignment" },
+	{ to: "/s/$siteId/history", screen: "history" },
+	{ to: "/s/$siteId/viewer", screen: "viewer" },
+	{ to: "/s/$siteId/employees", screen: "employees" },
+	{ to: "/s/$siteId/settings", screen: "settings" },
 ] as const;
 
 const ADMIN_NAV = [
-	{ label: "拠点管理", to: "/s/$siteId/sites", screen: "sites" },
-	{ label: "メンバー", to: "/s/$siteId/members", screen: "members" },
+	{ to: "/s/$siteId/sites", screen: "sites" },
+	{ to: "/s/$siteId/members", screen: "members" },
 	{
-		label: "事業所設定",
 		to: "/s/$siteId/organization-settings",
 		screen: "organization-settings",
 	},
@@ -76,10 +77,12 @@ function SiteLayoutInner() {
 	const navigate = useNavigate();
 	const { user, siteRole } = Route.useRouteContext();
 	const { siteId } = Route.useParams();
+	const { t } = useTranslation(["nav", "layout", "common"]);
+	const roleLabelFor = useRoleLabel();
 	const userName = user.name;
 	const userEmail = user.email;
 	// 表示は「現在拠点における実効ロール」
-	const roleLabel = ROLE_LABEL[displayRole(user.role, siteRole) ?? "viewer"];
+	const roleLabel = roleLabelFor(displayRole(user.role, siteRole) ?? "viewer");
 	const initial = userName.charAt(0) || "?";
 
 	const mainNav = MAIN_NAV.filter((i) =>
@@ -112,13 +115,13 @@ function SiteLayoutInner() {
 					<div>
 						<div className="font-bold text-xl leading-none text-ink">haizu</div>
 						<div className="font-mono text-[9.5px] tracking-[.13em] text-faint mt-1">
-							配置管理SYSTEM
+							{t("common:appTagline")}
 						</div>
 					</div>
 				</div>
 
 				<div className="font-mono text-[10.5px] tracking-[.12em] text-faint px-3 pb-2">
-					{currentSite.name}管理
+					{t("nav:siteManagement", { site: currentSite.name })}
 				</div>
 				{mainNav.map((item) => (
 					<Link
@@ -129,7 +132,7 @@ function SiteLayoutInner() {
 						activeOptions={{ exact: item.screen === "home" }}
 					>
 						{({ isActive }) => (
-							<NavItem active={isActive}>{item.label}</NavItem>
+							<NavItem active={isActive}>{t(`nav:${item.screen}`)}</NavItem>
 						)}
 					</Link>
 				))}
@@ -137,7 +140,7 @@ function SiteLayoutInner() {
 				{adminNav.length > 0 && (
 					<>
 						<div className="font-mono text-[10.5px] tracking-[.12em] text-faint px-3 pb-2 pt-4.5">
-							事業所管理
+							{t("nav:orgManagement")}
 						</div>
 						{adminNav.map((item) => (
 							<Link
@@ -147,7 +150,7 @@ function SiteLayoutInner() {
 								className="block"
 							>
 								{({ isActive }) => (
-									<NavItem active={isActive}>{item.label}</NavItem>
+									<NavItem active={isActive}>{t(`nav:${item.screen}`)}</NavItem>
 								)}
 							</Link>
 						))}
@@ -172,10 +175,10 @@ function SiteLayoutInner() {
 						<span className="text-[13.5px] font-bold">{currentSite.name}</span>
 						<Link
 							to="/select-site"
-							title="拠点を切り替え"
+							title={t("layout:switchSiteTitle")}
 							className="text-[11.5px] font-bold text-primary bg-primary-soft px-2.25 py-1 rounded-[7px] cursor-pointer border-none"
 						>
-							切り替え
+							{t("layout:switchSite")}
 						</Link>
 					</div>
 					<div className="flex items-center gap-3.5">
@@ -199,6 +202,12 @@ function SiteLayoutInner() {
 										<div className="text-sm font-bold">{userName}</div>
 										<div className="text-xs text-faint mt-0.5">{userEmail}</div>
 									</div>
+									<div className="px-4 py-3 border-b border-hairline">
+										<div className="text-[11px] text-faint font-semibold mb-1.5">
+											{t("common:language")}
+										</div>
+										<LanguageSwitcher className="flex gap-1.5" />
+									</div>
 									<div className="p-1.5">
 										<Link
 											to="/account"
@@ -206,7 +215,7 @@ function SiteLayoutInner() {
 											onClick={() => setUserMenuOpen(false)}
 											className="block px-2.75 py-2.5 rounded-[9px] text-[13px] font-semibold hover:bg-app-bg"
 										>
-											アカウント設定
+											{t("layout:accountSettings")}
 										</Link>
 										<button
 											type="button"
@@ -216,7 +225,7 @@ function SiteLayoutInner() {
 											}}
 											className="w-full text-left px-2.75 py-2.5 rounded-[9px] text-[13px] font-semibold cursor-pointer border-none bg-transparent text-danger hover:bg-danger-soft"
 										>
-											ログアウト
+											{t("layout:logout")}
 										</button>
 									</div>
 								</div>

@@ -2,6 +2,7 @@ import type { ViewerConfig } from "@haizu/shared";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Avatar } from "#/components/ui/Avatar";
 import { PlacementViewCanvas } from "#/features/assignment/PlacementViewCanvas";
 import type { EmployeeRow } from "#/features/employees/types";
@@ -70,6 +71,7 @@ function Viewer() {
 }
 
 function ViewerList() {
+	const { t } = useTranslation(["viewer", "assignment"]);
 	const { data: areas = [] } = useQuery({
 		queryKey: areaKeys.all,
 		queryFn: () => fetchAreas(),
@@ -79,9 +81,9 @@ function ViewerList() {
 	return (
 		<div className="p-7 overflow-auto h-full">
 			<div className="max-w-250">
-				<div className="text-[22px] font-bold">配置ビュアー</div>
+				<div className="text-[22px] font-bold">{t("viewer:title")}</div>
 				<div className="text-[13.5px] text-muted mt-1.25 mb-4.5">
-					エリアを選んで、現在の配置を大きく表示します。表示内容はエリアごとの設定に従います。
+					{t("viewer:subtitle")}
 				</div>
 
 				<div className="grid grid-cols-3 gap-4">
@@ -109,6 +111,7 @@ function ViewerAreaCard({
 	workPattern: ReturnType<typeof useCommonData>["workPattern"];
 }) {
 	const { siteId } = Route.useParams();
+	const { t } = useTranslation("viewer");
 	const navigate = useNavigate();
 	const display = workPattern
 		? resolveViewerDisplay(config, workPattern, new Date())
@@ -151,7 +154,7 @@ function ViewerAreaCard({
 				<div className="flex items-center gap-1.5 shrink-0">
 					{config.mode === "manual" && (
 						<span className="text-[10.5px] font-bold text-warning bg-warning-soft px-2.25 py-0.75 rounded-pill">
-							強制表示中
+							{t("viewer:forcedBadge")}
 						</span>
 					)}
 					{area.currentVersion && (
@@ -162,9 +165,9 @@ function ViewerAreaCard({
 				</div>
 			</div>
 			<div className="flex items-center justify-between mt-4 mb-1.75">
-				<div className="text-xs text-muted">配置状況</div>
+				<div className="text-xs text-muted">{t("viewer:placementStatus")}</div>
 				<div className="text-xs font-bold">
-					{assigned} / {total} 名
+					{t("viewer:ofPeople", { assigned, total })}
 				</div>
 			</div>
 			<div className="h-1.75 rounded-pill bg-hairline overflow-hidden">
@@ -177,7 +180,9 @@ function ViewerAreaCard({
 				/>
 			</div>
 			<div className="flex justify-end mt-3.5">
-				<div className="text-xs font-bold text-primary">大きく表示 →</div>
+				<div className="text-xs font-bold text-primary">
+					{t("viewer:showLarge")}
+				</div>
 			</div>
 		</button>
 	);
@@ -185,6 +190,7 @@ function ViewerAreaCard({
 
 function ViewerDetail({ areaId }: { areaId: string }) {
 	const { siteId } = Route.useParams();
+	const { t } = useTranslation(["viewer", "assignment"]);
 	const navigate = useNavigate();
 	const { configByArea, workPattern } = useCommonData();
 	const [zoom, setZoom] = useState(1);
@@ -208,8 +214,8 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 		? (workPattern?.shifts.find((s) => s.id === shiftId) ?? null)
 		: null;
 	const shiftLabel = shiftId
-		? (shift?.name ?? config.shiftName ?? "シフト")
-		: "終日";
+		? (shift?.name ?? config.shiftName ?? t("viewer:shiftFallback"))
+		: t("assignment:allDay");
 	const shiftStart = shift?.startTime ?? config.shiftStartTime;
 	const shiftEnd = shift?.endTime ?? config.shiftEndTime;
 	const shiftTime =
@@ -290,12 +296,12 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 		setZoom(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(z * 100) / 100)));
 	}, [aspect]);
 
-	// スポット読込・アスペクト比確定時に画面いっぱいへ自動フィット
+	// スポット読込・アスペクト比確定時に画面いっぱいへ自動{t("viewer:fit")}
 	useEffect(() => {
 		if (totalCount > 0) fitToScreen();
 	}, [fitToScreen, totalCount]);
 
-	// ボードの表示領域が変わったら（ウィンドウリサイズ・パネル開閉）再フィット
+	// ボードの表示領域が変わったら（ウィンドウリサイズ・パネル開閉）再{t("viewer:fit")}
 	// レイアウト確定後に測るため次フレームで実行する
 	useEffect(() => {
 		const el = boardRef.current;
@@ -323,7 +329,7 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 						}
 						className="font-sans text-[12.5px] font-semibold text-muted bg-transparent border-none px-2 py-1.5 rounded-sm cursor-pointer hover:bg-hairline"
 					>
-						← ビュアー一覧
+						{t("viewer:backToList")}
 					</button>
 					<div className="w-px h-4.5 bg-border" />
 					<div className="text-[20px] font-bold whitespace-nowrap overflow-hidden text-ellipsis">
@@ -333,12 +339,12 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 						<div className="flex items-center gap-2 shrink-0">
 							{config.mode === "manual" && (
 								<span className="text-[13px] font-bold text-warning bg-warning-soft px-3 py-1.5 rounded-pill">
-									強制表示中
+									{t("viewer:forcedBadge")}
 								</span>
 							)}
 							{showTargetDate && date && (
 								<span className="text-[13px] font-bold text-ink border border-border px-3 py-1.5 rounded-pill">
-									表示日 {formatDateLabel(date)}
+									{t("viewer:displayDate", { date: formatDateLabel(date) })}
 								</span>
 							)}
 							<span className="text-[13px] font-bold text-primary-hover bg-primary-soft px-3 py-1.5 rounded-pill">
@@ -361,14 +367,14 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 							{assignedCount}
 						</div>
 						<div className="text-sm text-faint font-semibold">
-							/ {totalCount} 名
+							{t("viewer:ofTotal", { total: totalCount })}
 						</div>
 					</div>
 					<button
 						type="button"
-						aria-label="メンバーパネルの表示切替"
+						aria-label={t("viewer:togglePanel")}
 						aria-pressed={panelOpen}
-						title="メンバーパネル"
+						title={t("viewer:memberPanel")}
 						onClick={() => setPanelOpen((o) => !o)}
 						className={`flex items-center justify-center w-9 h-9 rounded-md border cursor-pointer ${
 							panelOpen
@@ -395,11 +401,9 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 					) : (
 						<div className="flex-1 m-5.5 rounded-md border-[1.6px] border-dashed border-dash bg-empty-bg flex flex-col items-center justify-center gap-2">
 							<div className="text-sm font-bold text-muted">
-								このエリアの図面が未設定です
+								{t("viewer:noPlan")}
 							</div>
-							<div className="text-xs text-faint">
-								配置エディタで図面を登録してください
-							</div>
+							<div className="text-xs text-faint">{t("viewer:noPlanHint")}</div>
 						</div>
 					)}
 
@@ -430,7 +434,7 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 								onClick={fitToScreen}
 								className="text-xs font-bold text-primary px-2.75 py-1.5 rounded-pill cursor-pointer border-none bg-transparent hover:bg-hairline"
 							>
-								フィット
+								{t("viewer:fit")}
 							</button>
 						</div>
 					)}
@@ -440,14 +444,14 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 					<aside className="w-72 shrink-0 border-l border-border bg-surface flex flex-col">
 						<div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-border">
 							<div className="text-[13px] font-bold">
-								配置メンバー{" "}
+								{t("viewer:members")}{" "}
 								<span className="text-faint font-semibold">
-									{members.length}名
+									{t("viewer:membersCount", { count: members.length })}
 								</span>
 							</div>
 							<button
 								type="button"
-								aria-label="パネルを閉じる"
+								aria-label={t("viewer:closePanel")}
 								onClick={() => setPanelOpen(false)}
 								className="w-7 h-7 flex items-center justify-center rounded-sm text-muted hover:bg-hairline cursor-pointer border-none bg-transparent text-base"
 							>
@@ -457,7 +461,7 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 						<div className="flex-1 min-h-0 overflow-auto p-2.5 flex flex-col gap-1.5">
 							{members.length === 0 ? (
 								<div className="text-xs text-faint text-center py-8">
-									配置されているメンバーはいません
+									{t("viewer:noMembers")}
 								</div>
 							) : (
 								members.map(({ spot, emp }) => (
@@ -475,7 +479,7 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 												{emp.lastName} {emp.firstName}
 											</div>
 											<div className="text-[11px] text-faint">
-												スポット {spot.label}
+												{t("assignment:detail.spot", { label: spot.label })}
 											</div>
 										</div>
 									</div>

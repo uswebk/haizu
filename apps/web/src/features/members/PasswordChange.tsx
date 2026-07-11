@@ -1,11 +1,13 @@
 import { MIN_PASSWORD_LENGTH } from "@haizu/shared";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { useSnackbar } from "#/contexts/snackbar-context";
 import { authClient } from "#/lib/auth-client";
 
 export function PasswordChange() {
+	const { t } = useTranslation(["members", "common", "auth"]);
 	const { showSuccess } = useSnackbar();
 	const [open, setOpen] = useState(false);
 	const [current, setCurrent] = useState("");
@@ -24,11 +26,11 @@ export function PasswordChange() {
 
 	const submit = async () => {
 		if (next.length < MIN_PASSWORD_LENGTH) {
-			setError(`パスワードは${MIN_PASSWORD_LENGTH}文字以上で入力してください`);
+			setError(t("auth:forgot.passwordTooShort", { min: MIN_PASSWORD_LENGTH }));
 			return;
 		}
 		if (next !== confirm) {
-			setError("確認用パスワードが一致しません");
+			setError(t("auth:forgot.passwordMismatch"));
 			return;
 		}
 		setBusy(true);
@@ -40,11 +42,12 @@ export function PasswordChange() {
 				// 変更後は他デバイスのセッションを無効化する
 				revokeOtherSessions: true,
 			});
-			if (err) throw new Error(err.message ?? "パスワード変更に失敗しました");
+			if (err)
+				throw new Error(err.message ?? t("members:password.changeFailed"));
 			reset();
-			showSuccess("パスワードを変更しました");
+			showSuccess(t("members:password.changed"));
 		} catch (e) {
-			setError(e instanceof Error ? e.message : "エラーが発生しました");
+			setError(e instanceof Error ? e.message : t("common:errorOccurred"));
 		} finally {
 			setBusy(false);
 		}
@@ -54,11 +57,11 @@ export function PasswordChange() {
 		return (
 			<div className="flex items-center justify-between gap-3">
 				<div>
-					<div className="text-[13px] font-bold">パスワード</div>
+					<div className="text-[13px] font-bold">{t("common:password")}</div>
 					<div className="text-xs text-faint mt-0.5">••••••••</div>
 				</div>
 				<Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
-					変更
+					{t("common:change")}
 				</Button>
 			</div>
 		);
@@ -66,25 +69,27 @@ export function PasswordChange() {
 
 	return (
 		<div>
-			<div className="text-[13px] font-bold mb-2.5">パスワードの変更</div>
+			<div className="text-[13px] font-bold mb-2.5">
+				{t("members:password.changeTitle")}
+			</div>
 			<div className="flex flex-col gap-2.5">
 				<Input
-					label="現在のパスワード"
+					label={t("members:password.current")}
 					type="password"
 					value={current}
 					onChange={(e) => setCurrent(e.target.value)}
 					width={320}
 				/>
 				<Input
-					label="新しいパスワード"
+					label={t("auth:forgot.newPassword")}
 					type="password"
 					value={next}
-					placeholder={`${MIN_PASSWORD_LENGTH}文字以上`}
+					placeholder={t("auth:forgot.minChars", { min: MIN_PASSWORD_LENGTH })}
 					onChange={(e) => setNext(e.target.value)}
 					width={320}
 				/>
 				<Input
-					label="新しいパスワード（確認）"
+					label={t("auth:forgot.newPasswordConfirm")}
 					type="password"
 					value={confirm}
 					onChange={(e) => setConfirm(e.target.value)}
@@ -102,10 +107,10 @@ export function PasswordChange() {
 						confirm.length === 0
 					}
 				>
-					{busy ? "変更中…" : "変更する"}
+					{busy ? t("members:password.changing") : t("common:change")}
 				</Button>
 				<Button variant="secondary" size="sm" onClick={reset} disabled={busy}>
-					キャンセル
+					{t("common:cancel")}
 				</Button>
 				{error && (
 					<span className="text-xs font-semibold text-danger">{error}</span>

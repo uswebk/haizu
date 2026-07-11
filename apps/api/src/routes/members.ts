@@ -285,7 +285,7 @@ export const membersRoute = new Hono<AppEnv>()
 		const acceptUrl = `${WEB_ORIGIN}/invite-accept?token=${invitation.token}`;
 		await emailSender.send({
 			to: invitation.email,
-			subject: "メンバー招待",
+			subject: "Member invitation",
 			body: acceptUrl,
 		});
 

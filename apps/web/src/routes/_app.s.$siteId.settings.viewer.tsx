@@ -2,6 +2,7 @@ import type { ViewerConfig, ViewerMode } from "@haizu/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { OptionCard } from "#/components/ui/OptionCard";
 import { useSnackbar } from "#/contexts/snackbar-context";
@@ -43,6 +44,7 @@ function defaultConfig(areaId: string): ViewerConfig {
 
 function ViewerSettings() {
 	const { siteId } = Route.useParams();
+	const { t } = useTranslation(["viewerSettings", "assignment", "common"]);
 	const queryClient = useQueryClient();
 	const { showSuccess } = useSnackbar();
 	const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
@@ -69,8 +71,9 @@ function ViewerSettings() {
 
 	const shiftLabel = (shiftId: string | null) =>
 		shiftId
-			? (shiftChips.find((s) => s.id === shiftId)?.name ?? "不明なシフト")
-			: "終日";
+			? (shiftChips.find((s) => s.id === shiftId)?.name ??
+				t("viewerSettings:unknownShift"))
+			: t("assignment:allDay");
 
 	const saveMutation = useMutation({
 		mutationFn: () => {
@@ -86,7 +89,7 @@ function ViewerSettings() {
 		},
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: viewerConfigKeys.all });
-			showSuccess("ビュアー設定を保存しました");
+			showSuccess(t("viewerSettings:saved"));
 		},
 	});
 
@@ -119,25 +122,25 @@ function ViewerSettings() {
 						onClick={closeArea}
 						className="text-xs font-semibold text-muted hover:text-ink bg-transparent border-none cursor-pointer px-0"
 					>
-						← エリア一覧
+						{t("viewerSettings:backToAreas")}
 					</button>
 					<div className="text-[20px] font-bold mt-3.5">
-						{selectedArea.name} の表示設定
+						{t("viewerSettings:areaDisplayTitle", { name: selectedArea.name })}
 					</div>
 					<div className="text-[13px] text-muted mt-1">
-						このエリアのビュアー表示方法を選びます。
+						{t("viewerSettings:areaDisplaySubtitle")}
 					</div>
 
 					<div className="grid grid-cols-2 gap-3.5 mt-5">
 						<OptionCard
-							title="強制表示"
-							description="指定した日付・シフトを常に表示します。"
+							title={t("viewerSettings:manualTitle")}
+							description={t("viewerSettings:manualDesc")}
 							selected={draft.mode === "manual"}
 							onClick={() => setDraft({ ...draft, mode: "manual" })}
 						/>
 						<OptionCard
-							title="働き方に合わせて自動表示"
-							description="現在時刻に応じて今日のシフトを自動表示します。"
+							title={t("viewerSettings:autoTitle")}
+							description={t("viewerSettings:autoDesc")}
 							selected={draft.mode === "auto"}
 							onClick={() => setDraft({ ...draft, mode: "auto" })}
 						/>
@@ -145,11 +148,13 @@ function ViewerSettings() {
 
 					{draft.mode === "manual" ? (
 						<div className="bg-surface border border-border rounded-lg p-5.5 mt-5 shadow-card">
-							<div className="text-[13.5px] font-bold mb-4">強制表示の内容</div>
+							<div className="text-[13.5px] font-bold mb-4">
+								{t("viewerSettings:manualContent")}
+							</div>
 							<div className="grid grid-cols-[1fr_1.4fr] gap-5 items-start">
 								<div>
 									<div className="block text-xs font-semibold text-muted mb-2">
-										表示する日付
+										{t("viewerSettings:displayDate")}
 									</div>
 									<input
 										type="date"
@@ -162,7 +167,7 @@ function ViewerSettings() {
 								</div>
 								<div>
 									<div className="block text-xs font-semibold text-muted mb-2">
-										シフト
+										{t("history:colShift")}
 									</div>
 									<div className="flex flex-wrap gap-2">
 										<button
@@ -174,7 +179,7 @@ function ViewerSettings() {
 													: "font-semibold border-border text-muted bg-surface"
 											}`}
 										>
-											終日
+											{t("assignment:allDay")}
 										</button>
 										{shiftChips.map((s) => {
 											const on = draft.shiftId === s.id;
@@ -183,7 +188,11 @@ function ViewerSettings() {
 													key={s.id}
 													type="button"
 													onClick={() => setDraft({ ...draft, shiftId: s.id })}
-													title={s.deleted ? "過去のシフト" : undefined}
+													title={
+														s.deleted
+															? t("viewerSettings:pastShift")
+															: undefined
+													}
 													className={`flex flex-col items-start px-3.25 py-1.75 rounded-md border cursor-pointer ${
 														on
 															? "font-bold border-primary text-primary bg-primary-soft"
@@ -196,7 +205,7 @@ function ViewerSettings() {
 														{s.name}
 														{s.deleted && (
 															<span className="text-[10px] font-bold text-faint bg-table-head px-1.5 py-0.5 rounded-[6px]">
-																過去
+																{t("viewerSettings:past")}
 															</span>
 														)}
 													</span>
@@ -209,7 +218,7 @@ function ViewerSettings() {
 									</div>
 									{shiftChips.length === 0 && (
 										<div className="text-[11px] text-faint mt-1.5">
-											この日に確定済みの配置がまだありません
+											{t("viewerSettings:noConfirmedYet")}
 										</div>
 									)}
 								</div>
@@ -218,13 +227,13 @@ function ViewerSettings() {
 					) : (
 						<div className="bg-surface border border-border rounded-lg p-5.5 mt-5 shadow-card">
 							<div className="text-[13.5px] font-bold mb-1">
-								自動表示のカスタマイズ
+								{t("viewerSettings:autoCustomize")}
 							</div>
 							<div className="text-xs text-faint mb-4">
-								働き方（シフト）設定の時間帯に基づいて切り替わります。
+								{t("viewerSettings:autoBasedOn")}
 							</div>
 							<div className="block text-xs font-semibold text-muted mb-2">
-								シフト開始の何分前／何分後から表示するか
+								{t("viewerSettings:leadLabel")}
 							</div>
 							<div className="flex items-center gap-2.5">
 								<input
@@ -244,7 +253,7 @@ function ViewerSettings() {
 									className="w-27.5 font-sans text-sm font-bold text-ink border border-border rounded-md px-3 py-2.5 bg-surface outline-none"
 								/>
 								<span className="text-[13.5px] font-semibold text-muted">
-									分
+									{t("viewerSettings:minutes")}
 								</span>
 								<div className="flex items-center gap-1 border border-border rounded-md p-0.75 bg-app-bg">
 									{(["before", "after"] as const).map((dir) => (
@@ -258,18 +267,18 @@ function ViewerSettings() {
 													: "font-semibold text-muted"
 											}`}
 										>
-											{dir === "before" ? "前" : "後"}
+											{dir === "before"
+												? t("viewerSettings:before")
+												: t("viewerSettings:after")}
 										</button>
 									))}
 								</div>
 								<span className="text-[13.5px] font-semibold text-muted">
-									から表示
+									{t("viewerSettings:fromDisplay")}
 								</span>
 							</div>
 							<div className="text-[11.5px] text-faint mt-2.5">
-								例：30分前 →
-								シフト開始30分前に次のシフトの配置へ切り替え。30分後 →
-								シフト開始30分後に切り替わります。
+								{t("viewerSettings:leadExample")}
 							</div>
 						</div>
 					)}
@@ -277,7 +286,7 @@ function ViewerSettings() {
 					<div className="flex items-center justify-end gap-2.5 mt-5">
 						{saveMutation.isSuccess && !saveMutation.isPending && (
 							<span className="text-[12.5px] font-bold text-success mr-auto">
-								保存しました
+								{t("viewerSettings:savedShort")}
 							</span>
 						)}
 						<Button
@@ -285,13 +294,13 @@ function ViewerSettings() {
 							onClick={closeArea}
 							disabled={saveMutation.isPending}
 						>
-							一覧へ戻る
+							{t("viewerSettings:backToList")}
 						</Button>
 						<Button
 							onClick={() => saveMutation.mutate()}
 							disabled={saveMutation.isPending}
 						>
-							{saveMutation.isPending ? "保存中…" : "保存する"}
+							{saveMutation.isPending ? t("shifts:saving") : t("common:save")}
 						</Button>
 					</div>
 				</div>
@@ -307,11 +316,13 @@ function ViewerSettings() {
 					params={{ siteId }}
 					className="text-xs font-semibold text-muted hover:text-ink"
 				>
-					← 設定
+					{t("shifts:backToSettings")}
 				</Link>
-				<div className="text-[20px] font-bold mt-3.5">配置ビュアー設定</div>
+				<div className="text-[20px] font-bold mt-3.5">
+					{t("viewerSettings:title")}
+				</div>
 				<div className="text-[13px] text-muted mt-1 mb-5">
-					エリアごとに、大画面ビュアーの表示方法を設定します。
+					{t("viewerSettings:subtitle")}
 				</div>
 
 				<div className="flex flex-col gap-3">
@@ -320,10 +331,16 @@ function ViewerSettings() {
 						const isManual = cfg.mode === "manual";
 						const manualShift = cfg.shiftId
 							? (cfg.shiftName ?? shiftLabel(cfg.shiftId))
-							: "終日";
+							: t("assignment:allDay");
 						const detail = isManual
 							? `${cfg.displayDate ?? "-"} ・ ${manualShift}`
-							: `${Math.abs(cfg.leadMinutes)}分${cfg.leadMinutes < 0 ? "後" : "前"}から自動表示`;
+							: t("viewerSettings:autoDetail", {
+									min: Math.abs(cfg.leadMinutes),
+									dir:
+										cfg.leadMinutes < 0
+											? t("viewerSettings:after")
+											: t("viewerSettings:before"),
+								});
 						return (
 							<button
 								key={area.id}
@@ -345,7 +362,9 @@ function ViewerSettings() {
 												: "text-primary-hover bg-primary-soft"
 										}`}
 									>
-										{isManual ? "強制表示" : "自動表示"}
+										{isManual
+											? t("viewerSettings:manualBadge")
+											: t("viewerSettings:autoBadge")}
 									</span>
 									<span className="text-lg text-faint">›</span>
 								</div>

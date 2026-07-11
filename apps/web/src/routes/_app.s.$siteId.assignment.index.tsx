@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { ShiftDatePicker } from "#/features/assignment/ShiftDatePicker";
 import {
 	getShiftOptions,
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/_app/s/$siteId/assignment/")({
 
 function AssignmentList() {
 	const { siteId } = Route.useParams();
+	const { t } = useTranslation("assignment");
 	const navigate = useNavigate();
 	const search = Route.useSearch();
 	const date = search.date ?? todayStr();
@@ -68,17 +70,15 @@ function AssignmentList() {
 		return (
 			<div className="p-7 overflow-auto h-full">
 				<div className="max-w-245">
-					<div className="text-[22px] font-bold">配置決め</div>
+					<div className="text-[22px] font-bold">{t("title")}</div>
 					<div className="border-[1.4px] border-dashed border-dash rounded-lg p-7.5 text-center bg-empty-bg mt-4.5">
-						<div className="text-[13.5px] text-muted">
-							配置決めを始めるには、先に勤務体制（シフト）を登録してください。
-						</div>
+						<div className="text-[13.5px] text-muted">{t("noShiftPrompt")}</div>
 						<Link
 							to="/s/$siteId/settings/shifts"
 							params={{ siteId }}
 							className="inline-block mt-3.5 text-[13px] font-bold text-primary hover:text-primary-hover"
 						>
-							シフトを登録する →
+							{t("registerShift")}
 						</Link>
 					</div>
 				</div>
@@ -91,9 +91,9 @@ function AssignmentList() {
 			<div className="max-w-245">
 				<div className="flex items-end justify-between gap-5 mb-4.5 flex-wrap">
 					<div>
-						<div className="text-[22px] font-bold">配置決め</div>
+						<div className="text-[22px] font-bold">{t("title")}</div>
 						<div className="text-[13.5px] text-muted mt-1.25">
-							エリアを選び、アクティブな規格に従業員を配置します。
+							{t("subtitle")}
 						</div>
 					</div>
 					<ShiftDatePicker
@@ -108,15 +108,15 @@ function AssignmentList() {
 
 				{shiftMismatch && (
 					<div className="text-[12.5px] text-muted bg-table-head rounded-md px-3.5 py-2.5 mb-4.5 leading-relaxed">
-						この日には、当時のシフト設定から変更されたデータが含まれています。当時の内容を確認したい場合は
+						{t("mismatchPrefix")}
 						<Link
 							to="/s/$siteId/history"
 							params={{ siteId }}
 							className="font-bold underline"
 						>
-							履歴
+							{t("history")}
 						</Link>
-						をご覧ください。
+						{t("mismatchSuffix")}
 					</div>
 				)}
 
@@ -132,14 +132,14 @@ function AssignmentList() {
 							return (
 								<div
 									key={area.id}
-									title="配置エディタで規格を公開すると配置決めができます"
+									title={t("publishToAssign")}
 									className="text-left bg-surface border border-border rounded-lg p-4.5 opacity-55 cursor-not-allowed"
 								>
 									<div className="font-bold text-base whitespace-nowrap overflow-hidden text-ellipsis">
 										{area.name}
 									</div>
 									<div className="text-xs text-faint mt-4">
-										規格が未公開です
+										{t("specUnpublished")}
 									</div>
 								</div>
 							);
@@ -164,14 +164,16 @@ function AssignmentList() {
 									</div>
 									{area.currentVersion && (
 										<span className="text-[10.5px] font-bold text-primary-hover bg-primary-soft px-2.25 py-0.75 rounded-pill shrink-0">
-											規格 {area.currentVersion}
+											{t("specVersion", { version: area.currentVersion })}
 										</span>
 									)}
 								</div>
 								<div className="flex items-center justify-between mt-4 mb-1.75">
-									<div className="text-xs text-muted">配置状況</div>
+									<div className="text-xs text-muted">
+										{t("placementStatus")}
+									</div>
 									<div className="text-xs font-bold">
-										{assigned} / {total} 名
+										{t("assignedOfTotal", { assigned, total })}
 									</div>
 								</div>
 								<div className="h-1.75 rounded-pill bg-hairline overflow-hidden">
@@ -187,7 +189,7 @@ function AssignmentList() {
 								</div>
 								<div className="flex justify-end mt-3.5">
 									<div className="text-xs font-bold text-primary">
-										配置する →
+										{t("place")}
 									</div>
 								</div>
 							</button>
