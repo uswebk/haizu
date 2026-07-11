@@ -369,6 +369,14 @@
 			"hasErrors": "There are rows with errors, so importing isn't possible. Fix the CSV and upload again.",
 			"importing": "Importing…",
 			"importCount": "Import {{count}} rows"
+		},
+		"csv": {
+			"colCode": "Employee Code",
+			"colLastName": "Last Name",
+			"colFirstName": "First Name",
+			"colAvatarColor": "Avatar Color",
+			"colStatus": "Status",
+			"colTag": "Tag{{n}}"
 		}
 	},
 	"shifts": {

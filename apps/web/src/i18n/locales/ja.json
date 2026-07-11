@@ -369,6 +369,14 @@
 			"hasErrors": "エラー行があるため取込できません。CSVを修正して再度アップロードしてください。",
 			"importing": "取込中…",
 			"importCount": "{{count}} 件を取込む"
+		},
+		"csv": {
+			"colCode": "従業員コード",
+			"colLastName": "姓",
+			"colFirstName": "名",
+			"colAvatarColor": "アバターカラー",
+			"colStatus": "ステータス",
+			"colTag": "タグ{{n}}"
 		}
 	},
 	"shifts": {

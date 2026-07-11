@@ -8,6 +8,7 @@ import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { PagerButton } from "#/components/ui/PagerButton";
 import { Table, type TableColumn } from "#/components/ui/Table";
+import { useSite } from "#/contexts/site-context";
 import { useSnackbar } from "#/contexts/snackbar-context";
 import { employeesToCsv, parseEmployeesCsv } from "#/features/employees/csv";
 import {
@@ -31,7 +32,6 @@ import { fetchTags, tagKeys } from "#/lib/api/tags";
 import { todayStr } from "#/lib/datetime";
 import { assertScreen } from "#/lib/guards";
 
-const CURRENT_SITE = "A工場";
 const PAGE_SIZE = 50;
 
 type EmployeeFilter = "all" | "active" | "inactive";
@@ -54,12 +54,13 @@ function EmployeeList() {
 	const queryClient = useQueryClient();
 	const { t } = useTranslation(["employees", "common"]);
 	const { showSuccess } = useSnackbar();
+	const { currentSite } = useSite();
 	const { data: employees = [] } = useQuery({
 		queryKey: employeeKeys.all,
 		queryFn: fetchEmployees,
 	});
 	const [search, setSearch] = useState("");
-	const [filter, setFilter] = useState<EmployeeFilter>("all");
+	const [filter, setFilter] = useState<EmployeeFilter>("active");
 	const [page, setPage] = useState(1);
 	const [dialogMode, setDialogMode] = useState<"create" | "edit" | null>(null);
 	const [editingEmployee, setEditingEmployee] = useState<EmployeeRow | null>(
@@ -281,7 +282,7 @@ function EmployeeList() {
 						<div className="text-[22px] font-bold">{t("employees:title")}</div>
 						<div className="text-[13.5px] text-muted mt-1.25">
 							{t("employees:subtitle", {
-								site: CURRENT_SITE,
+								site: currentSite.name,
 								count: employees.length,
 							})}
 						</div>

@@ -1,19 +1,22 @@
+import i18n from "#/i18n/config";
 import type { EmployeeRow } from "./types";
 
 export const MAX_TAGS = 10;
 
 const BOM = "﻿";
 
-const TAG_HEADERS = Array.from({ length: MAX_TAGS }, (_, i) => `Tag${i + 1}`);
-
-export const CSV_HEADERS = [
-	"Employee Code",
-	"Last Name",
-	"First Name",
-	"Avatar Color",
-	"Status",
-	...TAG_HEADERS,
-] as const;
+function buildCsvHeaders(): string[] {
+	return [
+		i18n.t("employees:csv.colCode"),
+		i18n.t("employees:csv.colLastName"),
+		i18n.t("employees:csv.colFirstName"),
+		i18n.t("employees:csv.colAvatarColor"),
+		i18n.t("employees:csv.colStatus"),
+		...Array.from({ length: MAX_TAGS }, (_, i) =>
+			i18n.t("employees:csv.colTag", { n: i + 1 }),
+		),
+	];
+}
 
 export const ACTIVE_LABEL = "Active";
 export const INACTIVE_LABEL = "Inactive";
@@ -39,7 +42,7 @@ function escapeCell(value: string): string {
 }
 
 export function employeesToCsv(rows: EmployeeRow[]): string {
-	const lines = [CSV_HEADERS.join(",")];
+	const lines = [buildCsvHeaders().join(",")];
 	for (const e of rows) {
 		const tagNames = e.tags.slice(0, MAX_TAGS).map((t) => t.name);
 		const cells = [
