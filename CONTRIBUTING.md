@@ -1,5 +1,7 @@
 # Contributing
 
+**English** · [日本語](CONTRIBUTING.ja.md)
+
 Issues and pull requests are welcome.
 
 ## Before you start

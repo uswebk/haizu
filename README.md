@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/images/haiz-logo-lockup-horizontal-tight.svg" alt="haizu" width="320">
+<img src="docs/images/haizu-logo-lockup-horizontal.svg" alt="haizu" width="320">
 
 ### Decide who stands where, today, on a floor map
 
@@ -27,6 +27,7 @@ On a factory or warehouse floor, someone decides every day which worker stands a
 - Show the confirmed placement in a **display-only viewer** for large screens
 
 <!-- TODO: screenshots of the placement editor and the viewer -->
+
 ## Getting started
 
 You need Node.js 24.18+ (see [`.nvmrc`](.nvmrc)), pnpm 10+, and Docker.

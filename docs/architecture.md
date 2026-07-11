@@ -1,5 +1,7 @@
 # Architecture
 
+**English** · [日本語](architecture.ja.md)
+
 Design decisions that are not obvious from the code, and that you will break if you do not know about them.
 
 ## Monorepo
