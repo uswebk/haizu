@@ -84,8 +84,7 @@ Set them in `apps/web/.env`. There is no per-user timezone setting: the app assu
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Development commands, conventions, and how to open a PR |
 
 ## License
-
-Not decided yet. It will be chosen before the public release.
+MIT
 
 ---
 
