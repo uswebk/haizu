@@ -88,6 +88,10 @@
 			"saveDraftTitle": "下書きを保存",
 			"confirmBody": "この日・シフトの配置を確定します。確定すると配置ビュアーに表示されます。よろしいですか？",
 			"saveDraftBody": "この日・シフトの配置を下書きとして保存します。（配置ビュアーには表示されません）",
+			"dialogDate": "日付",
+			"dialogShift": "シフト",
+			"dialogArea": "エリア",
+			"dialogPlaced": "配置人数",
 			"confirmed": "配置を確定しました",
 			"draftSaved": "下書きを保存しました"
 		}
