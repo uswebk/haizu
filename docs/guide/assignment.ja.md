@@ -39,12 +39,12 @@
    - 従業員をスポットへ **ドラッグ** する、または
    - 従業員を **タップ** してからスポットをタップする
 
-<div align="center"><img src="../images/guide/assignment/assign.png" width="800"></div>
+<div align="center"><img src="../images/guide/assignment/assign-ja.png" width="800"></div>
 
 4. 解除するには、スポットをタップして **配置を解除** を選ぶか、未配置リストへドラッグして戻します。
 5. 途中でやめるときは **下書き保存**。確定してよければ **確定する** を押します。確認ダイアログに日付・シフト・エリア・配置人数が表示されます。
 
-<div align="center"><img src="../images/guide/assignment/fixed.png" width="800"></div>
+<div align="center"><img src="../images/guide/assignment/fixed-ja.png" width="800"></div>
 
 ヘッダーには進捗（*配置済み 12 / 20*）と使用中の規格バージョンが表示されます。
 
@@ -59,7 +59,7 @@
 
 確定すると **確定済み** バッジが付きます。その後も **更新する**（編集して再確定）や、**下書きに戻す**（ビュアーから取り下げる）ができます。
 
-<div align="center"><img src="../images/guide/assignment/fixed-budge.png" width="800"></div>
+<div align="center"><img src="../images/guide/assignment/fixed-budge-ja.png" width="800"></div>
 
 ## 注意点
 
