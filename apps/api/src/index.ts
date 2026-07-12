@@ -10,7 +10,7 @@ import { assignmentsRoute } from "./routes/assignments";
 import { authRoute } from "./routes/auth";
 import { employeesRoute } from "./routes/employees";
 import { invitationsRoute } from "./routes/invitations";
-import { membersRoute } from "./routes/members";
+import { membersRoute } from "./features/members/routes";
 import { organizationsRoute } from "./routes/organizations";
 import { sitesRoute } from "./routes/sites";
 import { tagsRoute } from "./routes/tags";

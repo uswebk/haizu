@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	assertSitesManageable,
 	evaluateOrgRoleAssignment,
-} from "./member-role-policy";
+} from "./role-policy";
 
 describe("evaluateOrgRoleAssignment", () => {
 	it("自身の権限を変更しようとすると拒否する", () => {
