@@ -4,7 +4,7 @@
 
 [English](site-selection.md) · [マニュアル目次に戻る](index.ja.md)
 
-<div align="center"><img src="docs/images/guide/01-select-site-ja.png" width="800"></div>
+<div align="center"><img src="docs/images/guide/site/select-site-ja.png" width="800"></div>
 
 ## 概要 
 
@@ -26,7 +26,7 @@
 
 拠点は [設定 → 拠点管理](settings.ja.md#拠点管理) からも管理でき、名前の変更や非アクティブ化ができます。
 
-<div align="center"><img src="docs/images/guide/01-create-site-ja.png" width="800"></div>
+<div align="center"><img src="docs/images/guide/site/create-site-ja.png" width="800"></div>
 
 
 ## 注意点
