@@ -31,6 +31,23 @@ export async function inviteMember(
 	return handleResponse(res);
 }
 
+export type BulkInviteInput = {
+	members: { lastName: string; firstName: string; email: string }[];
+	orgRole: OrgRole;
+	siteRoles: SiteRoleAssignment[];
+};
+
+export async function bulkInviteMembers(
+	input: BulkInviteInput,
+): Promise<{ created: number }> {
+	const res = await apiFetch(`${API_BASE}/members/invite/bulk`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(input),
+	});
+	return handleResponse(res);
+}
+
 export type UpdateMemberInput = {
 	orgRole: OrgRole;
 	siteRoles: SiteRoleAssignment[];

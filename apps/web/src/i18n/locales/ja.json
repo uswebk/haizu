@@ -134,6 +134,7 @@
 			"subtitle": "haizuを利用するメンバーと権限・担当拠点を管理します。",
 			"searchPlaceholder": "名前・メールで検索",
 			"inviteButton": "＋ メンバーを招待",
+			"bulkInviteButton": "CSVで一括招待",
 			"colMember": "メンバー",
 			"colRole": "権限",
 			"colSites": "担当拠点と権限",
@@ -144,6 +145,38 @@
 			"invited": "メンバーを招待しました",
 			"saveFailed": "保存に失敗しました",
 			"invitationCanceled": "招待を取り消しました"
+		},
+		"csv": {
+			"colLastName": "姓",
+			"colFirstName": "名",
+			"colEmail": "メールアドレス"
+		},
+		"bulkInvite": {
+			"title": "CSVで一括招待",
+			"subtitle": "権限と担当拠点を選び、CSVの全員に同じ設定で招待を送ります",
+			"csvLabel": "CSVファイル（姓・名・メールアドレス）",
+			"selectFile": "CSVを選択",
+			"downloadTemplate": "テンプレートをダウンロード",
+			"noFile": "ファイルが選択されていません",
+			"inviting": "招待中…",
+			"inviteCount": "{{count}} 件を招待する",
+			"invited": "{{count}} 件の招待を送信しました"
+		},
+		"import": {
+			"okCount": "正常 {{count}} 件",
+			"errorCount": "エラー {{count}} 件",
+			"colResult": "判定",
+			"colName": "氏名",
+			"colDetail": "詳細",
+			"ok": "正常",
+			"error": "エラー",
+			"errorRowsSkipped": "エラー行は招待されません。正常な行のみ送信されます。",
+			"tooManyRows": "CSVの行数が多すぎます。{{max}}件以下のファイルに分割してください。",
+			"errLastNameEmpty": "姓が空です",
+			"errEmailEmpty": "メールアドレスが空です",
+			"errEmailInvalid": "メールアドレスの形式が不正です",
+			"errEmailDuplicateInCsv": "CSV内でメールアドレスが重複しています",
+			"errEmailAlreadyMember": "既存のメンバー・招待と重複しています"
 		},
 		"form": {
 			"inviteTitle": "メンバーを招待",

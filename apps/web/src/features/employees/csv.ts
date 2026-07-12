@@ -1,10 +1,9 @@
 import i18n from "#/i18n/config";
+import { parseCsv, toCsv } from "#/lib/csv";
 import type { EmployeeRow } from "./types";
 
 export const MAX_TAGS = 10;
 export const MAX_IMPORT_ROWS = 1000;
-
-const BOM = "﻿";
 
 function buildCsvHeaders(): string[] {
 	return [
@@ -35,88 +34,20 @@ export type ParsedEmployeeRow = {
 	hasExcessTags: boolean;
 };
 
-function escapeCell(value: string): string {
-	if (/[",\r\n]/.test(value)) {
-		return `"${value.replace(/"/g, '""')}"`;
-	}
-	return value;
-}
-
 export function employeesToCsv(rows: EmployeeRow[]): string {
-	const lines = [buildCsvHeaders().join(",")];
+	const table = [buildCsvHeaders()];
 	for (const e of rows) {
 		const tagNames = e.tags.slice(0, MAX_TAGS).map((t) => t.name);
-		const cells = [
+		table.push([
 			e.code,
 			e.lastName,
 			e.firstName,
 			e.avatarColor,
 			e.isActive ? ACTIVE_LABEL : INACTIVE_LABEL,
 			...Array.from({ length: MAX_TAGS }, (_, i) => tagNames[i] ?? ""),
-		];
-		lines.push(cells.map(escapeCell).join(","));
+		]);
 	}
-	return BOM + lines.join("\r\n");
-}
-
-// Minimal RFC4180-compliant parser. Correctly handles commas, newlines, and "" inside quotes.
-function parseCsv(text: string): string[][] {
-	const rows: string[][] = [];
-	let row: string[] = [];
-	let cell = "";
-	let inQuotes = false;
-	let i = 0;
-
-	// Strip a leading BOM
-	if (text.charCodeAt(0) === 0xfeff) i = 1;
-
-	const pushCell = () => {
-		row.push(cell);
-		cell = "";
-	};
-	const pushRow = () => {
-		pushCell();
-		rows.push(row);
-		row = [];
-	};
-
-	while (i < text.length) {
-		const ch = text[i];
-		if (inQuotes) {
-			if (ch === '"') {
-				if (text[i + 1] === '"') {
-					cell += '"';
-					i += 2;
-				} else {
-					inQuotes = false;
-					i += 1;
-				}
-			} else {
-				cell += ch;
-				i += 1;
-			}
-		} else if (ch === '"') {
-			inQuotes = true;
-			i += 1;
-		} else if (ch === ",") {
-			pushCell();
-			i += 1;
-		} else if (ch === "\r") {
-			// Treat both \r\n and \r as a line break
-			pushRow();
-			i += text[i + 1] === "\n" ? 2 : 1;
-		} else if (ch === "\n") {
-			pushRow();
-			i += 1;
-		} else {
-			cell += ch;
-			i += 1;
-		}
-	}
-	// Final cell. Drop fully empty rows (from a trailing newline)
-	if (cell.length > 0 || row.length > 0) pushRow();
-
-	return rows;
+	return toCsv(table);
 }
 
 export function parseEmployeesCsv(text: string): ParsedEmployeeRow[] {

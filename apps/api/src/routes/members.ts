@@ -1,34 +1,28 @@
-import { randomUUID } from "node:crypto";
-import {
-	type OrgRole,
-	OrgRoleSchema,
-	type SiteRole,
-	SiteRoleSchema,
-} from "@haizu/shared";
+import { type OrgRole, OrgRoleSchema, SiteRoleSchema } from "@haizu/shared";
 import { zValidator } from "@hono/zod-validator";
 import { and, eq, inArray } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../db/client";
+import { invitationSites, invitations, memberSites, user } from "../db/schema";
 import {
-	invitationSites,
-	invitations,
-	memberSites,
-	sites,
-	user,
-} from "../db/schema";
-import { emailSender } from "../email";
-import { WEB_ORIGIN } from "../lib/env";
+	authorizeInvite,
+	createInvitations,
+	findTakenEmails,
+} from "../lib/invitation";
 import {
 	assertSitesManageable,
 	evaluateOrgRoleAssignment,
 } from "../lib/member-role-policy";
+import {
+	assertSitesInOrg,
+	manageableSiteIds,
+	type SiteRoleAssignment,
+} from "../lib/member-scope";
 import { requireAuth } from "../middleware/auth";
 import { requireSitePermission } from "../middleware/require-permission";
 import { siteScope } from "../middleware/site-scope";
 import type { AppEnv } from "../types";
-
-const INVITE_TTL_DAYS = 7;
 
 const siteRoleInput = z.object({
 	siteId: z.string().uuid(),
@@ -52,13 +46,34 @@ const inviteInput = z
 		message: NO_SITE_MESSAGE,
 	});
 
+// Bulk invite from CSV: the permission set is chosen in the UI and applied to every row
+const MAX_BULK_INVITES = 200;
+
+const bulkInviteInput = z
+	.object({
+		members: z
+			.array(
+				z.object({
+					lastName: z.string().min(1),
+					firstName: z.string(),
+					email: z.string().email(),
+				}),
+			)
+			.min(1)
+			.max(MAX_BULK_INVITES),
+		orgRole: OrgRoleSchema,
+		siteRoles: z.array(siteRoleInput),
+	})
+	.refine((v) => v.orgRole === "admin" || v.siteRoles.length > 0, {
+		path: ["siteRoles"],
+		message: NO_SITE_MESSAGE,
+	});
+
 const updateInput = z.object({
 	orgRole: OrgRoleSchema,
 	siteRoles: z.array(siteRoleInput),
 	isActive: z.boolean(),
 });
-
-type SiteRoleAssignment = { siteId: string; role: SiteRole };
 
 type MemberResponse = {
 	id: string;
@@ -72,38 +87,6 @@ type MemberResponse = {
 	status: "active" | "inactive" | "invited";
 };
 
-// Sites where the operator can set site roles. Admins get all sites in the org
-async function manageableSiteIds(
-	organizationId: string,
-	actor: { id: string; role: OrgRole },
-): Promise<string[]> {
-	if (actor.role === "admin") {
-		const rows = await db
-			.select({ id: sites.id })
-			.from(sites)
-			.where(eq(sites.organizationId, organizationId));
-		return rows.map((r) => r.id);
-	}
-	const rows = await db
-		.select({ siteId: memberSites.siteId })
-		.from(memberSites)
-		.where(
-			and(eq(memberSites.userId, actor.id), eq(memberSites.role, "site_admin")),
-		);
-	return rows.map((r) => r.siteId);
-}
-
-// Verify all given site ids belong to the organization (prevents mixing in other orgs' sites)
-async function assertSitesInOrg(organizationId: string, siteIds: string[]) {
-	if (siteIds.length === 0) return true;
-	const rows = await db
-		.select({ id: sites.id })
-		.from(sites)
-		.where(
-			and(eq(sites.organizationId, organizationId), inArray(sites.id, siteIds)),
-		);
-	return rows.length === siteIds.length;
-}
 
 // Member management is done only by the "current site's site admin" (admins count as site admins at every site).
 // The list includes other members' email addresses too, so restrict viewing as well.
@@ -202,95 +185,34 @@ export const membersRoute = new Hono<AppEnv>()
 
 	.post("/invite", zValidator("json", inviteInput), async (c) => {
 		const organizationId = c.get("organizationId");
-		const actor = c.get("user");
 		const input = c.req.valid("json");
 
-		// Prevent privilege escalation via invitations. Apply the same rules as PUT /:id.
-		const orgAssignment = evaluateOrgRoleAssignment({
-			actorOrgRole: actor.role,
-			isSelf: false,
-			targetOrgRole: null,
-			nextOrgRole: input.orgRole,
-		});
-		if (!orgAssignment.ok) {
-			return c.json({ error: orgAssignment.message }, orgAssignment.status);
+		const authorized = await authorizeInvite(
+			organizationId,
+			c.get("user"),
+			input.orgRole,
+			input.siteRoles,
+		);
+		if ("error" in authorized) {
+			return c.json({ error: authorized.error }, authorized.status);
 		}
+		const { siteRoles } = authorized;
 
-		// Admins can access all sites, so don't give them per-site assignments
-		const siteRoles = input.orgRole === "admin" ? [] : input.siteRoles;
-		const siteIds = siteRoles.map((s) => s.siteId);
-
-		if (!(await assertSitesInOrg(organizationId, siteIds))) {
+		const taken = await findTakenEmails(organizationId, [input.email]);
+		if (taken.length > 0) {
 			return c.json(
-				{ error: "Includes a site that doesn't exist in this organization" },
-				400,
-			);
-		}
-		const manageable = await manageableSiteIds(organizationId, actor);
-		const scopeCheck = assertSitesManageable(manageable, siteIds);
-		if (!scopeCheck.ok) {
-			return c.json({ error: scopeCheck.message }, scopeCheck.status);
-		}
-
-		// Reject emails already registered as a member / pending an invitation in the same organization
-		const existingUser = await db.query.user.findFirst({
-			where: and(
-				eq(user.organizationId, organizationId),
-				eq(user.email, input.email),
-			),
-		});
-		if (existingUser) {
-			return c.json({ error: "This email address is already a member" }, 400);
-		}
-		const existingInvite = await db.query.invitations.findFirst({
-			where: and(
-				eq(invitations.organizationId, organizationId),
-				eq(invitations.email, input.email),
-			),
-		});
-		if (existingInvite && existingInvite.acceptedAt === null) {
-			return c.json(
-				{ error: "This email address has already been invited" },
+				{ error: "This email address is already a member or invited" },
 				400,
 			);
 		}
 
-		const expiresAt = new Date();
-		expiresAt.setDate(expiresAt.getDate() + INVITE_TTL_DAYS);
-
-		const invitation = await db.transaction(async (tx) => {
-			const inserted = await tx
-				.insert(invitations)
-				.values({
-					organizationId,
-					lastName: input.lastName,
-					firstName: input.firstName,
-					email: input.email,
-					role: input.orgRole,
-					token: randomUUID(),
-					expiresAt,
-				})
-				.returning();
-			const row = inserted[0];
-			if (!row) throw new Error("Insert failed");
-			if (siteRoles.length > 0) {
-				await tx.insert(invitationSites).values(
-					siteRoles.map((s) => ({
-						invitationId: row.id,
-						siteId: s.siteId,
-						role: s.role,
-					})),
-				);
-			}
-			return row;
-		});
-
-		const acceptUrl = `${WEB_ORIGIN}/invite-accept?token=${invitation.token}`;
-		await emailSender.send({
-			to: invitation.email,
-			subject: "Member invitation",
-			body: acceptUrl,
-		});
+		const [invitation] = await createInvitations(
+			organizationId,
+			[input],
+			input.orgRole,
+			siteRoles,
+		);
+		if (!invitation) throw new Error("Insert failed");
 
 		const member: MemberResponse = {
 			id: invitation.id,
@@ -303,6 +225,43 @@ export const membersRoute = new Hono<AppEnv>()
 			status: "invited",
 		};
 		return c.json(member, 201);
+	})
+
+	.post("/invite/bulk", zValidator("json", bulkInviteInput), async (c) => {
+		const organizationId = c.get("organizationId");
+		const input = c.req.valid("json");
+
+		const authorized = await authorizeInvite(
+			organizationId,
+			c.get("user"),
+			input.orgRole,
+			input.siteRoles,
+		);
+		if ("error" in authorized) {
+			return c.json({ error: authorized.error }, authorized.status);
+		}
+		const { siteRoles } = authorized;
+
+		const emails = input.members.map((m) => m.email.toLowerCase());
+		if (new Set(emails).size !== emails.length) {
+			return c.json({ error: "The CSV contains duplicate emails" }, 400);
+		}
+
+		const taken = await findTakenEmails(organizationId, emails);
+		if (taken.length > 0) {
+			return c.json(
+				{ error: `Already a member or invited: ${taken.join(", ")}` },
+				400,
+			);
+		}
+
+		const created = await createInvitations(
+			organizationId,
+			input.members,
+			input.orgRole,
+			siteRoles,
+		);
+		return c.json({ created: created.length }, 201);
 	})
 
 	.put("/:id", zValidator("json", updateInput), async (c) => {

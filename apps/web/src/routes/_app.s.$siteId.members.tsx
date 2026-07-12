@@ -10,12 +10,17 @@ import { Table, type TableColumn } from "#/components/ui/Table";
 import { useSite } from "#/contexts/site-context";
 import { useSnackbar } from "#/contexts/snackbar-context";
 import {
+	BulkInviteDialog,
+	type BulkInviteValues,
+} from "#/features/members/BulkInviteDialog";
+import {
 	MemberFormDialog,
 	type MemberFormValues,
 } from "#/features/members/MemberFormDialog";
 import { roleBadgeKey } from "#/features/members/roleBadgeKey";
 import type { MemberRow, MemberStatus } from "#/features/members/types";
 import {
+	bulkInviteMembers,
 	cancelInvitation,
 	fetchMembers,
 	inviteMember,
@@ -85,6 +90,24 @@ function MemberList() {
 		},
 		onError: (error) => {
 			setSaveError(
+				error instanceof Error ? error.message : t("members:list.saveFailed"),
+			);
+		},
+	});
+
+	const [bulkOpen, setBulkOpen] = useState(false);
+	const [bulkError, setBulkError] = useState<string | null>(null);
+
+	const bulkInviteMutation = useMutation({
+		mutationFn: (values: BulkInviteValues) => bulkInviteMembers(values),
+		onSuccess: (result) => {
+			void invalidate();
+			setBulkOpen(false);
+			setBulkError(null);
+			showSuccess(t("members:bulkInvite.invited", { count: result.created }));
+		},
+		onError: (error) => {
+			setBulkError(
 				error instanceof Error ? error.message : t("members:list.saveFailed"),
 			);
 		},
@@ -234,6 +257,15 @@ function MemberList() {
 						placeholder={t("members:list.searchPlaceholder")}
 						className="min-w-55 w-70 max-w-full"
 					/>
+					<Button
+						variant="secondary"
+						onClick={() => {
+							setBulkError(null);
+							setBulkOpen(true);
+						}}
+					>
+						{t("members:list.bulkInviteButton")}
+					</Button>
 					<Button onClick={openInvite}>{t("members:list.inviteButton")}</Button>
 				</div>
 
@@ -252,6 +284,22 @@ function MemberList() {
 					saveMutation.mutate(data);
 				}}
 				onCancel={closeDialog}
+			/>
+
+			<BulkInviteDialog
+				open={bulkOpen}
+				canAssignAdmin={user.role === "admin"}
+				existingMembers={members}
+				isPending={bulkInviteMutation.isPending}
+				errorMessage={bulkError}
+				onSubmit={(values) => {
+					setBulkError(null);
+					bulkInviteMutation.mutate(values);
+				}}
+				onCancel={() => {
+					setBulkOpen(false);
+					setBulkError(null);
+				}}
 			/>
 		</div>
 	);
