@@ -1,7 +1,7 @@
 import type { OrgRole, SiteRole } from "@haizu/shared";
 import { and, eq, inArray } from "drizzle-orm";
-import { db } from "../db/client";
-import { memberSites, sites } from "../db/schema";
+import { db } from "../../db/client";
+import { memberSites, sites } from "../../db/schema";
 
 export type SiteRoleAssignment = { siteId: string; role: SiteRole };
 

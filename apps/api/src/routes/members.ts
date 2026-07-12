@@ -9,16 +9,16 @@ import {
 	authorizeInvite,
 	createInvitations,
 	findTakenEmails,
-} from "../lib/invitation";
+} from "../features/members/invitation";
 import {
 	assertSitesManageable,
 	evaluateOrgRoleAssignment,
-} from "../lib/member-role-policy";
+} from "../features/members/role-policy";
 import {
 	assertSitesInOrg,
 	manageableSiteIds,
 	type SiteRoleAssignment,
-} from "../lib/member-scope";
+} from "../features/members/scope";
 import { requireAuth } from "../middleware/auth";
 import { requireSitePermission } from "../middleware/require-permission";
 import { siteScope } from "../middleware/site-scope";

@@ -1,20 +1,20 @@
 import { randomUUID } from "node:crypto";
 import type { OrgRole } from "@haizu/shared";
 import { and, eq, inArray } from "drizzle-orm";
-import { db } from "../db/client";
-import { invitationSites, invitations, user } from "../db/schema";
-import { emailSender } from "../email";
-import { WEB_ORIGIN } from "./env";
+import { db } from "../../db/client";
+import { invitationSites, invitations, user } from "../../db/schema";
+import { emailSender } from "../../email";
+import { WEB_ORIGIN } from "../../lib/env";
 import {
 	type Actor,
 	assertSitesInOrg,
 	manageableSiteIds,
 	type SiteRoleAssignment,
-} from "./member-scope";
+} from "./scope";
 import {
 	assertSitesManageable,
 	evaluateOrgRoleAssignment,
-} from "./member-role-policy";
+} from "./role-policy";
 
 export const INVITE_TTL_DAYS = 7;
 
