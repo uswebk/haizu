@@ -4,8 +4,6 @@
 
 [English](editor.md) · [マニュアル目次に戻る](index.ja.md)
 
-<!-- screenshot: editor-01-canvas.png -->
-
 ## できること
 
 - **配置エリア** を作成する（拠点内の作業エリア1つ。「検収室」「ラインA」など）
