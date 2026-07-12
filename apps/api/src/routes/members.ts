@@ -3,26 +3,26 @@ import { zValidator } from "@hono/zod-validator";
 import { and, eq, inArray } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
-import { db } from "../../db/client";
-import { invitationSites, invitations, memberSites, user } from "../../db/schema";
+import { db } from "../db/client";
+import { invitationSites, invitations, memberSites, user } from "../db/schema";
 import {
 	authorizeInvite,
 	createInvitations,
 	findTakenEmails,
-} from "./invitation";
+} from "../features/members/invitation";
 import {
 	assertSitesManageable,
 	evaluateOrgRoleAssignment,
-} from "./role-policy";
+} from "../features/members/role-policy";
 import {
 	assertSitesInOrg,
 	manageableSiteIds,
 	type SiteRoleAssignment,
-} from "./scope";
-import { requireAuth } from "../../middleware/auth";
-import { requireSitePermission } from "../../middleware/require-permission";
-import { siteScope } from "../../middleware/site-scope";
-import type { AppEnv } from "../../types";
+} from "../features/members/scope";
+import { requireAuth } from "../middleware/auth";
+import { requireSitePermission } from "../middleware/require-permission";
+import { siteScope } from "../middleware/site-scope";
+import type { AppEnv } from "../types";
 
 const siteRoleInput = z.object({
 	siteId: z.string().uuid(),
