@@ -8,7 +8,7 @@ import { evaluateSessionAccess } from "./session-access";
 export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
 	const session = await auth.api.getSession({ headers: c.req.raw.headers });
 	if (!session) {
-		return c.json({ error: "認証が必要です" }, 401);
+		return c.json({ error: "Authentication required" }, 401);
 	}
 
 	const user = session.user as {

@@ -16,7 +16,7 @@ describe("evaluateOrgRoleAssignment", () => {
 		).toEqual({
 			ok: false,
 			status: 403,
-			message: "自身の権限は変更できません",
+			message: "You can't change your own role",
 		});
 	});
 
@@ -42,7 +42,7 @@ describe("evaluateOrgRoleAssignment", () => {
 		).toEqual({
 			ok: false,
 			status: 403,
-			message: "拠点管理者は管理者権限を設定できません",
+			message: "Site admins can't grant the admin role",
 		});
 	});
 
@@ -57,7 +57,7 @@ describe("evaluateOrgRoleAssignment", () => {
 		).toEqual({
 			ok: false,
 			status: 403,
-			message: "拠点管理者は管理者権限を設定できません",
+			message: "Site admins can't grant the admin role",
 		});
 	});
 
@@ -95,7 +95,7 @@ describe("assertSitesManageable", () => {
 		expect(assertSitesManageable(["s1", "s2"], ["s1", "s9"])).toEqual({
 			ok: false,
 			status: 403,
-			message: "権限を設定できない拠点が含まれています",
+			message: "Includes a site you can't set permissions for",
 		});
 	});
 
@@ -107,7 +107,7 @@ describe("assertSitesManageable", () => {
 		expect(assertSitesManageable([], ["s1"])).toEqual({
 			ok: false,
 			status: 403,
-			message: "権限を設定できない拠点が含まれています",
+			message: "Includes a site you can't set permissions for",
 		});
 	});
 });

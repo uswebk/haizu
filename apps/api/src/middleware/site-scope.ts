@@ -12,17 +12,17 @@ import type { AppEnv } from "../types";
 export const siteScope = createMiddleware<AppEnv>(async (c, next) => {
 	const siteId = c.req.header("x-site-id");
 	if (!siteId) {
-		return c.json({ error: "x-site-id ヘッダーが必要です" }, 400);
+		return c.json({ error: "x-site-id header is required" }, 400);
 	}
 
 	const site = await db.query.sites.findFirst({
 		where: eq(sites.id, siteId),
 	});
 	if (!site || !site.isActive) {
-		return c.json({ error: "拠点が見つかりません" }, 404);
+		return c.json({ error: "Site not found" }, 404);
 	}
 	if (site.organizationId !== c.get("organizationId")) {
-		return c.json({ error: "この拠点にアクセスする権限がありません" }, 403);
+		return c.json({ error: "You don't have access to this site" }, 403);
 	}
 
 	const actor = c.get("user");
@@ -34,7 +34,7 @@ export const siteScope = createMiddleware<AppEnv>(async (c, next) => {
 	});
 	const role = effectiveSiteRole(actor.role, membership?.role ?? null);
 	if (!role) {
-		return c.json({ error: "この拠点にアクセスする権限がありません" }, 403);
+		return c.json({ error: "You don't have access to this site" }, 403);
 	}
 
 	c.set("siteId", site.id);

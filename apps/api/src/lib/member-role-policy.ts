@@ -22,7 +22,7 @@ export function evaluateOrgRoleAssignment({
 	nextOrgRole,
 }: OrgRoleAssignment): RoleAssignmentResult {
 	if (isSelf && nextOrgRole !== targetOrgRole) {
-		return { ok: false, status: 403, message: "自身の権限は変更できません" };
+		return { ok: false, status: 403, message: "You can't change your own role" };
 	}
 	// Only admins can create admins. Non-admins can't touch existing admins either (prevents privilege escalation)
 	if (
@@ -32,7 +32,7 @@ export function evaluateOrgRoleAssignment({
 		return {
 			ok: false,
 			status: 403,
-			message: "拠点管理者は管理者権限を設定できません",
+			message: "Site admins can't grant the admin role",
 		};
 	}
 	return { ok: true };
@@ -49,6 +49,6 @@ export function assertSitesManageable(
 	return {
 		ok: false,
 		status: 403,
-		message: "権限を設定できない拠点が含まれています",
+		message: "Includes a site you can't set permissions for",
 	};
 }

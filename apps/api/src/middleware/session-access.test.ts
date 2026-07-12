@@ -5,7 +5,7 @@ describe("evaluateSessionAccess", () => {
 	it("無効化ユーザーは403で遮断する", () => {
 		expect(
 			evaluateSessionAccess({ isActive: false, emailVerified: true }),
-		).toEqual({ ok: false, status: 403, message: "このアカウントは無効です" });
+		).toEqual({ ok: false, status: 403, message: "This account is disabled" });
 	});
 
 	it("メール未確認ユーザーは403で遮断する", () => {
@@ -14,7 +14,7 @@ describe("evaluateSessionAccess", () => {
 		).toEqual({
 			ok: false,
 			status: 403,
-			message: "メールアドレスの確認が必要です",
+			message: "Email verification required",
 		});
 	});
 
@@ -28,6 +28,6 @@ describe("evaluateSessionAccess", () => {
 		// A deactivated account returns "inactive" regardless of verification state
 		expect(
 			evaluateSessionAccess({ isActive: false, emailVerified: false }),
-		).toEqual({ ok: false, status: 403, message: "このアカウントは無効です" });
+		).toEqual({ ok: false, status: 403, message: "This account is disabled" });
 	});
 });

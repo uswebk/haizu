@@ -14,7 +14,7 @@ describe("evaluateEmailOtp", () => {
 			}),
 		).toEqual({
 			ok: false,
-			error: "確認コードの有効期限が切れました",
+			error: "The verification code has expired",
 			expired: true,
 		});
 	});
@@ -29,7 +29,7 @@ describe("evaluateEmailOtp", () => {
 			}),
 		).toEqual({
 			ok: false,
-			error: "確認コードが正しくありません",
+			error: "The verification code is incorrect",
 			expired: false,
 		});
 	});

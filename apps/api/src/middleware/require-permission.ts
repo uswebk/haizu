@@ -22,7 +22,7 @@ export type PermissionResult =
 const DENIED: PermissionResult = {
 	ok: false,
 	status: 403,
-	message: "この操作を行う権限がありません",
+	message: "You don't have permission to perform this action",
 };
 
 // Pure decision function. It doesn't depend on Hono / the DB, so it's unit-testable.

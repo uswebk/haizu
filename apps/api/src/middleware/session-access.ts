@@ -9,13 +9,13 @@ export type AccessResult =
 // Evaluate isActive before emailVerified (deactivated accounts are blocked regardless of verification state).
 export function evaluateSessionAccess(user: SessionUser): AccessResult {
 	if (!user.isActive) {
-		return { ok: false, status: 403, message: "このアカウントは無効です" };
+		return { ok: false, status: 403, message: "This account is disabled" };
 	}
 	if (!user.emailVerified) {
 		return {
 			ok: false,
 			status: 403,
-			message: "メールアドレスの確認が必要です",
+			message: "Email verification required",
 		};
 	}
 	return { ok: true };

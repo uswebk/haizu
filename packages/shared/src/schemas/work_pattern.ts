@@ -49,7 +49,10 @@ export const WorkPatternInputSchema = z
 			}
 			return true;
 		},
-		{ message: "開始・終了が同じシフトは登録できません", path: ["shifts"] },
+		{
+			message: "Shifts with the same start and end time can't be registered",
+			path: ["shifts"],
+		},
 	)
 	.refine(
 		(v) => {
@@ -61,7 +64,7 @@ export const WorkPatternInputSchema = z
 			}
 			return true;
 		},
-		{ message: "シフト名が重複しています", path: ["shifts"] },
+		{ message: "Shift names must be unique", path: ["shifts"] },
 	);
 
 export type WorkPatternInput = z.infer<typeof WorkPatternInputSchema>;
