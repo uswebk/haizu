@@ -27,9 +27,14 @@ export function todayStr(): string {
 	return toDateStr(new Date());
 }
 
+// The given instant offset by whole days, as "YYYY-MM-DD" (device-TZ based)
+export function addDaysStr(d: Date, days: number): string {
+	return toDateStr(new Date(d.getTime() + days * 24 * 60 * 60 * 1000));
+}
+
 // Previous day as "YYYY-MM-DD" (device-TZ based)
 export function yesterdayStr(): string {
-	return toDateStr(new Date(Date.now() - 24 * 60 * 60 * 1000));
+	return addDaysStr(new Date(), -1);
 }
 
 // "YYYY-MM-DD" -> locale-specific date label (with weekday)
