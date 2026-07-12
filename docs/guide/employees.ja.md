@@ -4,7 +4,7 @@
 
 [English](employees.md) · [マニュアル目次に戻る](index.ja.md)
 
-<div align="center"><img src="docs/images/guide/employee/list-ja.png" width="800"></div>
+<div align="center"><img src="../images/guide/employee/list-ja.png" width="800"></div>
 
 ## できること
 
@@ -28,7 +28,7 @@
 | タグ | 複数選択可。タグは事前に登録が必要です（[設定 → タグ管理](settings.ja.md#タグ管理)） |
 | 有効 | *配置決めで選択できる状態にします*。チェックを外すと記録は残したまま、候補に出なくなります |
 
-<div align="center"><img src="docs/images/guide/employee/add-ja.png" width="800"></div>
+<div align="center"><img src="../images/guide/employee/add-ja.png" width="800"></div>
 
 退職者は削除ではなく「無効」にするのが基本です。配置決めの候補から消えますが、過去の[配置履歴](history.ja.md)はそのまま残ります。
 
@@ -64,7 +64,7 @@
 - *未登録のタグ: …* — [設定 → タグ管理](settings.ja.md#タグ管理)で先にタグを作成してください
 - *タグは最大10個までです* — 11列目以降のタグ列に値がある場合も該当します
 
-<div align="center"><img src="docs/images/guide/employee/import-preview-ja.png" width="800"></div>
+<div align="center"><img src="../images/guide/employee/import-preview-ja.png" width="800"></div>
 
 ## 注意点
 

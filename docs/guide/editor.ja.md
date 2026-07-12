@@ -20,11 +20,11 @@
 
 1. **＋ エリアを追加** で **エリア名** を入力し、**追加する**。
 
-<div align="center"><img src="docs/images/guide/editor/add-area-ja.png" width="800"></div>
+<div align="center"><img src="../images/guide/editor/add-area-ja.png" width="800"></div>
 
 2. エリア一覧には、図面の有無（**図面あり** / **図面なし**）、規格の状態（**公開中** / **下書き**）、スポット数が表示されます。
 
-<div align="center"><img src="docs/images/guide/editor/list-ja.png" width="800"></div>
+<div align="center"><img src="../images/guide/editor/list-ja.png" width="800"></div>
 
 ### 図面をアップロードする
 
@@ -35,8 +35,8 @@
 
 図面は任意で、なくてもスポットは置けます。ただしモニター上で配置を読み取りやすくするために、アップロードすることを推奨します。
 
-<div align="center"><img src="docs/images/guide/editor/empty-floor-image-ja.png" width="800"></div>
-<div align="center"><img src="docs/images/guide/editor/floor-image-ja.png" width="800"></div>
+<div align="center"><img src="../images/guide/editor/empty-floor-image-ja.png" width="800"></div>
+<div align="center"><img src="../images/guide/editor/floor-image-ja.png" width="800"></div>
 
 ### スポットを置く
 
@@ -45,7 +45,7 @@
 3. パネルの **配置スポットの設定** で **ラベル** を付けます。現場はこのラベルで位置を識別します。
 4. **スポットを削除** で削除できます。
 
-<div align="center"><img src="docs/images/guide/editor/spot-ja.png" width="800"></div>
+<div align="center"><img src="../images/guide/editor/spot-ja.png" width="800"></div>
 
 1エリアあたり **最大100スポット** です。
 
@@ -54,7 +54,9 @@
 1. **下書き保存** は、公開せずに作業内容を保存します。保存していない変更は残りません。
 2. **この規格を公開** でダイアログが開きます。**適用開始日**（必須）を設定し、**公開する** を押します。
 
-<div align="center"><img src="docs/images/guide/editor/publish-ja.png" width="800"></div>
+<div align="center"><img src="../images/guide/editor/publish-ja.png" width="800"></div>
+
+<div align="center"><img src="../images/guide/editor/draft-save-ja.png" width="800"></div>
 
 **配置決めとビュアーが使うのは公開済みバージョンだけです。** ある日付に対しては「適用開始日がその日以前で、最も新しい公開済みバージョン」が使われます。したがって、どれだけ作り込んでも下書きのままではこれらの画面から見えません。
 
@@ -77,7 +79,7 @@
 - 複製した時点ではバージョンは**まだ作られません**。編集後に **保存または公開** して初めて新バージョンとして記録されます。保存せずに離れると何も残りません。
 - **最新でない**バージョンを公開しても、配置決め・ビュアーには反映されません（エディタが警告します）。解決ルールが「その日以前で最も新しい公開済みバージョン」を選ぶため、古いバージョンが勝つことはありません。使用中の内容を変えたい場合は、新しいバージョンを作ってください。
 
-<div align="center"><img src="docs/images/guide/editor/new-version-ja.png" width="800"></div>
+<div align="center"><img src="../images/guide/editor/new-version-ja.png" width="800"></div>
 
 ## エリアを削除する
 
