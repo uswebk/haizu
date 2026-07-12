@@ -20,20 +20,20 @@ async function resolveInvitation(token: string): Promise<InvitationState> {
 		where: eq(invitations.token, token),
 	});
 	if (!invitation) {
-		return { ok: false, status: 404, message: "招待が見つかりません" };
+		return { ok: false, status: 404, message: "Invitation not found" };
 	}
 	if (invitation.acceptedAt !== null) {
 		return {
 			ok: false,
 			status: 410,
-			message: "この招待は既に使用されています",
+			message: "This invitation has already been used",
 		};
 	}
 	if (invitation.expiresAt < new Date()) {
 		return {
 			ok: false,
 			status: 410,
-			message: "この招待の有効期限が切れています",
+			message: "This invitation has expired",
 		};
 	}
 	return { ok: true, invitation };
@@ -74,7 +74,7 @@ export const invitationsRoute = new Hono()
 			const message =
 				error instanceof Error && error.message
 					? error.message
-					: "アカウントの作成に失敗しました";
+					: "Failed to create account";
 			return c.json({ error: message }, 400);
 		}
 

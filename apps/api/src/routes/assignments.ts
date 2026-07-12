@@ -243,7 +243,10 @@ export const assignmentsRoute = new Hono<AppEnv>()
 			where: eq(workPatterns.siteId, c.get("siteId")),
 		});
 		if (!workPattern) {
-			return c.json({ error: "勤務体制が未登録のため配置決めできません" }, 400);
+			return c.json(
+				{ error: "Assignment isn't possible because no work pattern is registered" },
+				400,
+			);
 		}
 
 		// Verify the target area belongs to the current site
@@ -257,12 +260,15 @@ export const assignmentsRoute = new Hono<AppEnv>()
 			where: eq(layoutSpecVersions.id, input.layoutSpecVersionId),
 		});
 		if (!version || version.status !== "published") {
-			return c.json({ error: "この規格は未公開のため配置決めできません" }, 400);
+			return c.json(
+				{ error: "This spec is unpublished, so it can't be used for assignment" },
+				400,
+			);
 		}
 
 		if (!version.effectiveDate || version.effectiveDate > input.date) {
 			return c.json(
-				{ error: "この規格はこの日付にはまだ適用されていません" },
+				{ error: "This spec doesn't apply to this date yet" },
 				400,
 			);
 		}

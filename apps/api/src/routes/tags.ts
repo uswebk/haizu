@@ -11,7 +11,7 @@ import type { AppEnv } from "../types";
 
 const tagInput = z.object({ name: z.string().min(1).max(20) });
 
-const DUPLICATE_NAME_MESSAGE = "このタグ名は既に使用されています";
+const DUPLICATE_NAME_MESSAGE = "This tag name is already in use";
 
 function isUniqueViolation(error: unknown): boolean {
 	if (typeof error !== "object" || error === null) return false;

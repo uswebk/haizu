@@ -41,7 +41,7 @@ const versionGuard = createMiddleware<AppEnv>(async (c, next) => {
 });
 
 const LOCKED_MESSAGE =
-	"この規格は配置決めで使用されているため編集できません。新しいバージョンを作成して編集してください。";
+	"This spec is in use by an assignment and can't be edited. Create a new version to edit it.";
 
 function todayDateStr() {
 	return new Date().toISOString().slice(0, 10);
@@ -470,7 +470,7 @@ export const areasRoute = new Hono<AppEnv>()
 
 		if (await hasAssignmentsForVersion(versionId)) {
 			return c.json(
-				{ error: "配置決めに使用されたバージョンは取り消せません" },
+				{ error: "A version used by an assignment can't be unpublished" },
 				409,
 			);
 		}
@@ -497,7 +497,7 @@ export const areasRoute = new Hono<AppEnv>()
 		).map((v) => v.id);
 		if ((await versionIdsWithAssignments(versionIds)).size > 0) {
 			return c.json(
-				{ error: "配置決めに使用された規格があるエリアは削除できません" },
+				{ error: "An area whose spec is used by an assignment can't be deleted" },
 				409,
 			);
 		}

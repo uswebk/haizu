@@ -24,13 +24,13 @@ export const accountRoute = new Hono<AppEnv>()
 		)[0];
 		if (!me) return c.json({ error: "Not found" }, 404);
 		if (me.email === newEmail) {
-			return c.json({ error: "現在と同じメールアドレスです" }, 400);
+			return c.json({ error: "This is already your current email address" }, 400);
 		}
 		const taken = (
 			await db.select().from(user).where(eq(user.email, newEmail)).limit(1)
 		)[0];
 		if (taken) {
-			return c.json({ error: "このメールアドレスは使用されています" }, 400);
+			return c.json({ error: "This email address is already in use" }, 400);
 		}
 
 		const otp = await storeEmailOtp(`email-change:${userId}`, newEmail);
@@ -57,7 +57,7 @@ export const accountRoute = new Hono<AppEnv>()
 				.limit(1)
 		)[0];
 		if (taken && taken.id !== userId) {
-			return c.json({ error: "このメールアドレスは使用されています" }, 400);
+			return c.json({ error: "This email address is already in use" }, 400);
 		}
 
 		await db

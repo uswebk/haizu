@@ -37,7 +37,7 @@ const siteRoleInput = z.object({
 
 // Invariant: a member always belongs to at least one site (admins have all-site access, so they hold no assignments).
 // Breaking this would create a user who can't enter any screen.
-const NO_SITE_MESSAGE = "担当拠点を1つ以上選択してください";
+const NO_SITE_MESSAGE = "Select at least one assigned site";
 
 const inviteInput = z
 	.object({
@@ -222,7 +222,7 @@ export const membersRoute = new Hono<AppEnv>()
 
 		if (!(await assertSitesInOrg(organizationId, siteIds))) {
 			return c.json(
-				{ error: "この事業所に存在しない拠点が含まれています" },
+				{ error: "Includes a site that doesn't exist in this organization" },
 				400,
 			);
 		}
@@ -240,7 +240,7 @@ export const membersRoute = new Hono<AppEnv>()
 			),
 		});
 		if (existingUser) {
-			return c.json({ error: "このメールアドレスは既にメンバーです" }, 400);
+			return c.json({ error: "This email address is already a member" }, 400);
 		}
 		const existingInvite = await db.query.invitations.findFirst({
 			where: and(
@@ -249,7 +249,10 @@ export const membersRoute = new Hono<AppEnv>()
 			),
 		});
 		if (existingInvite && existingInvite.acceptedAt === null) {
-			return c.json({ error: "このメールアドレスは既に招待済みです" }, 400);
+			return c.json(
+				{ error: "This email address has already been invited" },
+				400,
+			);
 		}
 
 		const expiresAt = new Date();
@@ -327,7 +330,7 @@ export const membersRoute = new Hono<AppEnv>()
 		const siteIds = siteRoles.map((s) => s.siteId);
 		if (!(await assertSitesInOrg(organizationId, siteIds))) {
 			return c.json(
-				{ error: "この事業所に存在しない拠点が含まれています" },
+				{ error: "Includes a site that doesn't exist in this organization" },
 				400,
 			);
 		}

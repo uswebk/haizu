@@ -33,7 +33,7 @@ export function evaluateEmailOtp(params: {
 	if (expiresAt.getTime() < now) {
 		return {
 			ok: false,
-			error: "確認コードの有効期限が切れました",
+			error: "The verification code has expired",
 			expired: true,
 		};
 	}
@@ -42,7 +42,11 @@ export function evaluateEmailOtp(params: {
 	// Email addresses can't contain a colon, but split on the first colon and treat the rest as the address
 	const newEmail = value.slice(sep + 1);
 	if (savedOtp !== otp) {
-		return { ok: false, error: "確認コードが正しくありません", expired: false };
+		return {
+			ok: false,
+			error: "The verification code is incorrect",
+			expired: false,
+		};
 	}
 	return { ok: true, newEmail };
 }
@@ -59,7 +63,7 @@ export async function consumeEmailOtp(
 			.where(eq(verification.identifier, identifier))
 			.limit(1)
 	)[0];
-	if (!row) return { ok: false, error: "確認コードが見つかりません" };
+	if (!row) return { ok: false, error: "Verification code not found" };
 
 	const result = evaluateEmailOtp({
 		value: row.value,

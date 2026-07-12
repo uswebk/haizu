@@ -55,7 +55,7 @@ async function setEmployeeTags(employeeId: string, tagIds: string[]) {
 	}
 }
 
-const DUPLICATE_CODE_MESSAGE = "この社員番号は既に使用されています";
+const DUPLICATE_CODE_MESSAGE = "This employee code is already in use";
 
 function isUniqueViolation(error: unknown): boolean {
 	if (typeof error !== "object" || error === null) return false;
@@ -127,7 +127,7 @@ export const employeesRoute = new Hono<AppEnv>()
 				const invalid = referencedTagIds.filter((id) => !validTagIds.has(id));
 				if (invalid.length > 0) {
 					return c.json(
-						{ error: "この拠点に存在しないタグが含まれています" },
+						{ error: "Includes a tag that doesn't exist at this site" },
 						400,
 					);
 				}

@@ -21,7 +21,7 @@ export const authRoute = new Hono().post(
 			.returning();
 		const organization = inserted[0];
 		if (!organization) {
-			return c.json({ error: "組織の作成に失敗しました" }, 500);
+			return c.json({ error: "Failed to create organization" }, 500);
 		}
 
 		const rollbackOrg = () =>
@@ -53,7 +53,7 @@ export const authRoute = new Hono().post(
 			const message =
 				error instanceof Error && error.message
 					? error.message
-					: "サインアップに失敗しました";
+					: "Sign-up failed";
 			return c.json({ error: message }, 400);
 		}
 	},

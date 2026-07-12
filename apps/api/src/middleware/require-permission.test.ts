@@ -35,7 +35,7 @@ describe("evaluateOrgPermission", () => {
 		expect(evaluateOrgPermission("member", "org:write")).toEqual({
 			ok: false,
 			status: 403,
-			message: "この操作を行う権限がありません",
+			message: "You don't have permission to perform this action",
 		});
 	});
 });
@@ -51,7 +51,7 @@ describe("evaluateSitePermission", () => {
 		expect(evaluateSitePermission("viewer", "area:write")).toEqual({
 			ok: false,
 			status: 403,
-			message: "この操作を行う権限がありません",
+			message: "You don't have permission to perform this action",
 		});
 	});
 });

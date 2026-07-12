@@ -86,7 +86,7 @@ export const sitesRoute = new Hono<AppEnv>()
 			.where(eq(sites.organizationId, organizationId));
 		const total = existing[0]?.value ?? 0;
 		if (total >= MAX_SITES) {
-			return c.json({ error: `拠点は最大${MAX_SITES}件までです` }, 400);
+			return c.json({ error: `Up to ${MAX_SITES} sites are allowed` }, 400);
 		}
 
 		const icon = ICON_PALETTE[total % ICON_PALETTE.length] ?? {
@@ -137,7 +137,7 @@ export const sitesRoute = new Hono<AppEnv>()
 				);
 			if ((others[0]?.value ?? 0) === 0) {
 				return c.json(
-					{ error: "最後のアクティブ拠点は非アクティブ化できません" },
+					{ error: "You can't deactivate the last active site" },
 					400,
 				);
 			}
