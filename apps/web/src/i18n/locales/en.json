@@ -49,6 +49,7 @@
 		"placementStatus": "Placement status",
 		"place": "Assign →",
 		"specVersion": "Spec {{version}}",
+		"confirmedBadge": "Confirmed",
 		"assignedOfTotal": "{{assigned}} / {{total}} people",
 		"mismatchPrefix": "This day contains data changed from the shift settings at the time. To review what it was then, see the ",
 		"history": "history",

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { Badge } from "#/components/ui";
 import { ShiftDatePicker } from "#/features/assignment/ShiftDatePicker";
 import {
 	getShiftOptions,
@@ -44,9 +45,7 @@ function AssignmentList() {
 		enabled: !!workPattern,
 	});
 
-	const assignedByArea = new Map(
-		assignments.map((a) => [a.areaId, a.spotAssignments.length]),
-	);
+	const assignmentByArea = new Map(assignments.map((a) => [a.areaId, a]));
 
 	const { data: shiftMismatch = false } = useQuery({
 		queryKey: ["assignments", "shift-mismatch", date],
@@ -122,8 +121,10 @@ function AssignmentList() {
 
 				<div className="grid grid-cols-3 gap-4">
 					{areas.map((area) => {
+						const assignment = assignmentByArea.get(area.id);
 						const total = area.spotCount;
-						const assigned = assignedByArea.get(area.id) ?? 0;
+						const assigned = assignment?.spotAssignments.length ?? 0;
+						const isConfirmed = assignment?.status === "confirmed";
 						const pct = total > 0 ? Math.round((assigned / total) * 100) : 0;
 						const full = total > 0 && assigned === total;
 						const isPublished = area.currentStatus === "published";
@@ -162,11 +163,16 @@ function AssignmentList() {
 									<div className="font-bold text-base whitespace-nowrap overflow-hidden text-ellipsis">
 										{area.name}
 									</div>
-									{area.currentVersion && (
-										<span className="text-[10.5px] font-bold text-primary-hover bg-primary-soft px-2.25 py-0.75 rounded-pill shrink-0">
-											{t("specVersion", { version: area.currentVersion })}
-										</span>
-									)}
+									<div className="flex items-center gap-1.5 shrink-0">
+										{isConfirmed && (
+											<Badge tone="success">{t("confirmedBadge")}</Badge>
+										)}
+										{area.currentVersion && (
+											<span className="text-[10.5px] font-bold text-primary-hover bg-primary-soft px-2.25 py-0.75 rounded-pill">
+												{t("specVersion", { version: area.currentVersion })}
+											</span>
+										)}
+									</div>
 								</div>
 								<div className="flex items-center justify-between mt-4 mb-1.75">
 									<div className="text-xs text-muted">
