@@ -134,6 +134,7 @@
 			"subtitle": "Manage the members who use haizu, along with their permissions and assigned sites.",
 			"searchPlaceholder": "Search by name or email",
 			"inviteButton": "＋ Invite member",
+			"bulkInviteButton": "Bulk invite via CSV",
 			"colMember": "Member",
 			"colRole": "Role",
 			"colSites": "Assigned sites and permissions",
@@ -144,6 +145,38 @@
 			"invited": "Member invited",
 			"saveFailed": "Failed to save",
 			"invitationCanceled": "Invitation canceled"
+		},
+		"csv": {
+			"colLastName": "Last name",
+			"colFirstName": "First name",
+			"colEmail": "Email"
+		},
+		"bulkInvite": {
+			"title": "Bulk invite via CSV",
+			"subtitle": "Choose permissions and assigned sites, then invite everyone in the CSV with those settings",
+			"csvLabel": "CSV file (last name, first name, email)",
+			"selectFile": "Select CSV",
+			"downloadTemplate": "Download template",
+			"noFile": "No file selected",
+			"inviting": "Inviting…",
+			"inviteCount": "Invite {{count}}",
+			"invited": "Sent {{count}} invitations"
+		},
+		"import": {
+			"okCount": "{{count}} valid",
+			"errorCount": "{{count}} errors",
+			"colResult": "Result",
+			"colName": "Name",
+			"colDetail": "Details",
+			"ok": "Valid",
+			"error": "Error",
+			"errorRowsSkipped": "Rows with errors won't be invited. Only valid rows are sent.",
+			"tooManyRows": "The CSV has too many rows. Split it into files of {{max}} rows or fewer.",
+			"errLastNameEmpty": "Last name is empty",
+			"errEmailEmpty": "Email is empty",
+			"errEmailInvalid": "Invalid email format",
+			"errEmailDuplicateInCsv": "Duplicate email within the CSV",
+			"errEmailAlreadyMember": "Duplicates an existing member or invitation"
 		},
 		"form": {
 			"inviteTitle": "Invite member",

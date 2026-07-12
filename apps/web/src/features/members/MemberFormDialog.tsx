@@ -1,12 +1,11 @@
-import { type OrgRole, SITE_ROLES, type SiteRole } from "@haizu/shared";
+import type { OrgRole } from "@haizu/shared";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { OptionCard } from "#/components/ui/OptionCard";
-import { useSite } from "#/contexts/site-context";
 import { useDismiss } from "#/hooks/useDismiss";
-import { useRoleLabel } from "#/lib/roles";
+import { SiteRolePicker } from "./SiteRolePicker";
 import type { MemberRow, SiteRoleAssignment } from "./types";
 
 export type MemberFormValues = {
@@ -28,8 +27,6 @@ type Props = {
 	onSubmit: (data: MemberFormValues) => void;
 	onCancel: () => void;
 };
-
-const SITE_ROLE_ORDER = SITE_ROLES;
 
 function draftFromProps(
 	mode: "invite" | "edit",
@@ -70,9 +67,6 @@ export function MemberFormDialog({
 	useDismiss(open, onCancel, contentRef);
 
 	const { t } = useTranslation(["members", "common"]);
-	const roleLabelFor = useRoleLabel();
-	const { activeSites } = useSite();
-	const assignableSites = activeSites.filter((s) => s.role === "site_admin");
 
 	const [draft, setDraft] = useState<MemberFormValues>(() =>
 		draftFromProps(mode, initialValue, canAssignAdmin),
@@ -83,26 +77,6 @@ export function MemberFormDialog({
 	}, [open, mode, initialValue, canAssignAdmin]);
 
 	if (!open) return null;
-
-	// Remove the site assignment / add it with the default role (general)
-	const toggleSite = (siteId: string) => {
-		setDraft((d) => ({
-			...d,
-			siteRoles: d.siteRoles.some((s) => s.siteId === siteId)
-				? d.siteRoles.filter((s) => s.siteId !== siteId)
-				: [...d.siteRoles, { siteId, role: "general" }],
-		}));
-	};
-
-	// A different role can be set per site (site A = site admin, site B = general, etc.)
-	const setSiteRole = (siteId: string, role: SiteRole) => {
-		setDraft((d) => ({
-			...d,
-			siteRoles: d.siteRoles.map((s) =>
-				s.siteId === siteId ? { ...s, role } : s,
-			),
-		}));
-	};
 
 	// A member always belongs to at least one site (with zero sites they can't enter any screen)
 	const hasSite = draft.orgRole === "admin" || draft.siteRoles.length > 0;
@@ -202,82 +176,10 @@ export function MemberFormDialog({
 						{t("members:form.allSitesAccess")}
 					</div>
 				) : (
-					<>
-						<div className="mb-2 text-xs font-semibold text-muted">
-							{t("members:form.siteRolesLabel")}
-							<span className="text-faint font-medium">
-								{t("members:form.siteRolesHint")}
-							</span>
-						</div>
-						<div className="flex flex-col gap-2 mb-4.5">
-							{assignableSites.map((site) => {
-								const assigned = draft.siteRoles.find(
-									(s) => s.siteId === site.id,
-								);
-								return (
-									<div
-										key={site.id}
-										className={`px-3.25 py-2.75 border rounded-md ${
-											assigned ? "border-primary" : "border-border"
-										}`}
-									>
-										{/* Site selection is a checkbox; keep its color role separate from the permission selection (primary) */}
-										<button
-											type="button"
-											onClick={() => toggleSite(site.id)}
-											className="w-full flex items-center gap-2.5 cursor-pointer border-none bg-transparent p-0 text-left"
-										>
-											<span
-												className={`w-4.5 h-4.5 shrink-0 rounded-[5px] border flex items-center justify-center text-[11px] leading-none ${
-													assigned
-														? "bg-ink border-ink text-white"
-														: "bg-surface border-border text-transparent"
-												}`}
-											>
-												✓
-											</span>
-											<span
-												className={`text-[13px] min-w-0 truncate ${
-													assigned
-														? "font-bold text-ink"
-														: "font-semibold text-muted"
-												}`}
-												title={site.name}
-											>
-												{site.name}
-											</span>
-										</button>
-
-										{assigned && (
-											<div className="flex flex-wrap gap-1.5 mt-2.5 pl-7">
-												{SITE_ROLE_ORDER.map((role) => (
-													<button
-														key={role}
-														type="button"
-														title={t(`members:siteRoleDesc.${role}`)}
-														onClick={() => setSiteRole(site.id, role)}
-														className={`text-[12px] px-2.5 py-1.5 rounded-sm border cursor-pointer whitespace-nowrap ${
-															assigned.role === role
-																? "font-bold border-primary text-primary bg-primary-soft"
-																: "font-semibold border-border text-muted bg-surface"
-														}`}
-													>
-														{roleLabelFor(role)}
-													</button>
-												))}
-											</div>
-										)}
-									</div>
-								);
-							})}
-						</div>
-
-						{!hasSite && (
-							<div className="-mt-2.5 mb-4.5 text-[12px] text-warning">
-								{t("members:form.selectAtLeastOneSite")}
-							</div>
-						)}
-					</>
+					<SiteRolePicker
+						value={draft.siteRoles}
+						onChange={(siteRoles) => setDraft((d) => ({ ...d, siteRoles }))}
+					/>
 				)}
 
 				{mode === "edit" && (
