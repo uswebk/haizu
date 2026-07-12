@@ -49,6 +49,7 @@
 		"placementStatus": "配置状況",
 		"place": "配置する →",
 		"specVersion": "規格 {{version}}",
+		"confirmedBadge": "確定済み",
 		"assignedOfTotal": "{{assigned}} / {{total}} 名",
 		"mismatchPrefix": "この日には、当時のシフト設定から変更されたデータが含まれています。当時の内容を確認したい場合は",
 		"history": "履歴",
