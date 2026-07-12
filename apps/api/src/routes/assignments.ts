@@ -21,6 +21,10 @@ import {
 	spotAssignments,
 	workPatterns,
 } from "../db/schema";
+import {
+	saveAssignment,
+	validateAssignmentTarget,
+} from "../features/assignments/save";
 import { requireAuth } from "../middleware/auth";
 import {
 	requireSitePermission,
@@ -238,96 +242,11 @@ export const assignmentsRoute = new Hono<AppEnv>()
 	.put("/", zValidator("json", AssignmentInputSchema), async (c) => {
 		const input = c.req.valid("json");
 
-		// Assignment isn't possible at a site with no work pattern registered (shifts are a prerequisite)
-		const workPattern = await db.query.workPatterns.findFirst({
-			where: eq(workPatterns.siteId, c.get("siteId")),
-		});
-		if (!workPattern) {
-			return c.json(
-				{ error: "Assignment isn't possible because no work pattern is registered" },
-				400,
-			);
+		const rejection = await validateAssignmentTarget(c.get("siteId"), input);
+		if (rejection) {
+			return c.json({ error: rejection.error }, rejection.status);
 		}
 
-		// Verify the target area belongs to the current site
-		const area = await db.query.areas.findFirst({
-			where: and(eq(areas.id, input.areaId), eq(areas.siteId, c.get("siteId"))),
-		});
-		if (!area) return c.json({ error: "Not found" }, 404);
-
-		// Assignment is allowed only against a published spec (draft specs aren't reflected on-site, so they're excluded)
-		const version = await db.query.layoutSpecVersions.findFirst({
-			where: eq(layoutSpecVersions.id, input.layoutSpecVersionId),
-		});
-		if (!version || version.status !== "published") {
-			return c.json(
-				{ error: "This spec is unpublished, so it can't be used for assignment" },
-				400,
-			);
-		}
-
-		if (!version.effectiveDate || version.effectiveDate > input.date) {
-			return c.json(
-				{ error: "This spec doesn't apply to this date yet" },
-				400,
-			);
-		}
-
-		const saved = await db.transaction(async (tx) => {
-			const existing = await tx
-				.select()
-				.from(assignments)
-				.where(
-					and(
-						eq(assignments.areaId, input.areaId),
-						eq(assignments.date, input.date),
-						input.shiftId
-							? eq(assignments.shiftId, input.shiftId)
-							: isNull(assignments.shiftId),
-					),
-				);
-
-			let assignment = existing[0];
-			if (assignment) {
-				const updated = await tx
-					.update(assignments)
-					.set({
-						layoutSpecVersionId: input.layoutSpecVersionId,
-						status: input.status,
-						updatedAt: new Date(),
-					})
-					.where(eq(assignments.id, assignment.id))
-					.returning();
-				assignment = updated[0];
-			} else {
-				const inserted = await tx
-					.insert(assignments)
-					.values({
-						areaId: input.areaId,
-						layoutSpecVersionId: input.layoutSpecVersionId,
-						date: input.date,
-						shiftId: input.shiftId,
-						status: input.status,
-					})
-					.returning();
-				assignment = inserted[0];
-			}
-			if (!assignment) throw new Error("Failed to upsert assignment");
-
-			await tx
-				.delete(spotAssignments)
-				.where(eq(spotAssignments.assignmentId, assignment.id));
-			if (input.spotAssignments.length > 0) {
-				await tx.insert(spotAssignments).values(
-					input.spotAssignments.map((spotAssignment) => ({
-						assignmentId: assignment.id,
-						spotId: spotAssignment.spotId,
-						employeeId: spotAssignment.employeeId,
-					})),
-				);
-			}
-			return assignment;
-		});
-
+		const saved = await saveAssignment(input);
 		return c.json(serialize(saved, input.spotAssignments));
 	});
