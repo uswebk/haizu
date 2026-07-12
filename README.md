@@ -30,6 +30,10 @@ On a factory or warehouse floor, someone decides every day which worker stands a
 
 <div align="center"><img src="docs/images/haizu_demo.gif" width="800"></div>
 
+## Features
+
+**→ [User guide](docs/guide/index.md)** — how to use each screen, step by step.
+
 ## Getting started
 
 You need Node.js 24.18+ (see [`.nvmrc`](.nvmrc)), pnpm 10+, and Docker.
@@ -82,6 +86,7 @@ Set them in `apps/web/.env` (copied from `apps/web/.env.example`). There is no p
 
 | | |
 |---|---|
+| [docs/guide/](docs/guide/index.md) | User guide: what each screen does and how to operate it *(English + Japanese)* |
 | [docs/architecture.md](docs/architecture.md) | Design decisions you will break if you don't know them |
 | [docs/domain/](docs/domain/) | Domain knowledge, one file per concept *(English + Japanese)* |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Development commands, conventions, and how to open a PR |
