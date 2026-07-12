@@ -14,8 +14,8 @@
 2. お名前・会社名・メールアドレス・パスワード（8文字以上）を入力します。これで **事業所（組織）** が作成され、あなたがその **管理者** になります。
 3. メールに届いた確認コードを入力します。
 
-<div align="center"><img src="../images/guide/signup/signup-ja.png" width="800"></div>
-<div align="center"><img src="../images/guide/signup/signup-otp-ja.png" width="800"></div>
+<img src="../images/guide/signup/signup-ja.png" width="800">
+<img src="../images/guide/signup/signup-otp-ja.png" width="800">
 
 > 確認コードは、その環境で設定されたメールアダプタ経由で届きます。ローカルの初期設定では実際には送信されず、APIサーバーのコンソールに出力されます。→ [README](../../README.ja.md)
 
@@ -64,7 +64,7 @@
 
 後からレイアウトを変更する場合のバージョンの扱いを含め、詳細は [editor.ja.md](editor.ja.md) を参照してください。
 
-<!-- screenshot: 02-editor-publish.png -->
+<img src="../images/guide/editor/publish-ja.png" width="800">
 
 ## 5. 人を配置する
 
@@ -76,7 +76,7 @@
 
 確定するまでは下書き扱いで、ビュアーには表示されません。詳細は [assignment.ja.md](assignment.ja.md) を参照してください。
 
-<!-- screenshot: 03-assignment.png -->
+<img src="../images/guide/assignment/assign-ja.png" width="800">
 
 ## 6. 現場に映す
 
@@ -84,7 +84,7 @@
 
 現場のモニターにこの画面を映してください。初期状態では現在時刻に追従して今日のシフトを自動表示します。特定の日付・シフトを強制表示することもできます。詳細は [viewer.ja.md](viewer.ja.md) を参照してください。
 
-<!-- screenshot: 04-viewer.png -->
+<img src="../images/guide/viewer/viewer-ja.png" width="800">
 
 ## 続いて：同僚を招待する
 

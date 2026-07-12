@@ -4,7 +4,7 @@ The screen the floor reads. Display-only: nothing here changes a placement.
 
 [日本語](viewer.ja.md) · [Back to guide index](index.md)
 
-<div align="center"><img src="../images/guide/viewer/list.png" width="800"></div>
+<img src="../images/guide/viewer/list.png" width="800">
 
 ## What you can do
 
@@ -20,8 +20,8 @@ The spec: [docs/domain/layout_viewer.md](../domain/layout_viewer.md).
 2. **Show large →** opens the full-size view. Point the floor's monitor at it.
 3. **Fit** re-fits the plan to the window. **Toggle member panel** shows or hides the list of **Placed members**.
 
-<div align="center"><img src="../images/guide/viewer/viewer.png" width="800"></div>
-<div align="center"><img src="../images/guide/viewer/viewer-full.png" width="800"></div>
+<img src="../images/guide/viewer/viewer.png" width="800">
+<img src="../images/guide/viewer/viewer-full.png" width="800">
 
 The header shows the display date and the shift it's currently showing.
 

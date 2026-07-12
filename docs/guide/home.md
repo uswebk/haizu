@@ -4,8 +4,6 @@ The screen you land on. It answers two questions: "what's left to set up" and "i
 
 [日本語](home.ja.md) · [Back to guide index](index.md)
 
-<div align="center"><img src="../images/guide/home/setup-en.png" width="800"></div>
-
 ## What you can do
 
 - Follow the **Initial setup** checklist until the site is usable
@@ -14,6 +12,8 @@ The screen you land on. It answers two questions: "what's left to set up" and "i
 ## Initial setup
 
 Until all three steps are done, Home shows a checklist with a progress count.
+
+<img src="../images/guide/home/setup-en.png" width="800">
 
 | Step | Meaning | Done when |
 |---|---|---|
@@ -37,7 +37,7 @@ You get, per shift:
 
 Also shown: **Active employees**, **Published areas**, **Total spots**.
 
-<div align="center"><img src="../images/guide/home/overview-en.png" width="800"></div>
+<img src="../images/guide/home/overview-en.png" width="800">
 
 > A draft placement counts as *Has draft*, not as placed. Only confirmed placements reach the [viewer](viewer.md).
 

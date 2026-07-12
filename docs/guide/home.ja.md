@@ -4,8 +4,6 @@
 
 [English](home.md) · [マニュアル目次に戻る](index.ja.md)
 
-<div align="center"><img src="../images/guide/home/setup-ja.png" width="800"></div>
-
 ## できること
 
 - **初期セットアップ** のチェックリストに沿って、拠点が使える状態になるまで進める
@@ -14,6 +12,8 @@
 ## 初期セットアップ
 
 3ステップすべてが終わるまで、ホームには進捗つきのチェックリストが表示されます。
+
+<img src="../images/guide/home/setup-ja.png" width="800">
 
 | ステップ | 内容 | 完了条件 |
 |---|---|---|
@@ -37,7 +37,7 @@
 
 このほか **在籍従業員数**・**公開エリア数**・**総スポット数** も表示されます。
 
-<div align="center"><img src="../images/guide/home/overview-ja.png" width="800"></div>
+<img src="../images/guide/home/overview-ja.png" width="800">
 
 > 下書きの配置は「配置済み」ではなく「下書きあり」として数えられます。[ビュアー](viewer.ja.md)に出るのは確定済みの配置だけです。
 

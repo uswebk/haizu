@@ -14,8 +14,8 @@ If nobody in your company has an account yet, one person creates the organizatio
 2. Enter your name, your company name, your email, and a password (8+ characters). This creates the **organization** and makes you its **Admin**.
 3. Enter the verification code sent to your email.
 
-<div align="center"><img src="../images/guide/signup/signup.png" width="800"></div>
-<div align="center"><img src="../images/guide/signup/signup-otp.png" width="800"></div>
+<img src="../images/guide/signup/signup.png" width="800">
+<img src="../images/guide/signup/signup-otp.png" width="800">
 
 > Verification codes are delivered by whatever email adapter the deployment uses. On a default local install nothing is actually sent — the code is printed to the API server console. See the [README](../../README.md).
 
@@ -64,7 +64,7 @@ For a large roster, CSV is the fast path, but note that tags must already exist 
 
 Details, including how versions work when you later change the layout: [editor.md](editor.md).
 
-<div align="center"><img src="../images/guide/editor/publish.png" width="800"></div>
+<img src="../images/guide/editor/publish.png" width="800">
 
 ## 5. Assign people
 
@@ -76,7 +76,7 @@ Details, including how versions work when you later change the layout: [editor.m
 
 Until you confirm, the placement is a draft and the viewer will not show it. Details: [assignment.md](assignment.md).
 
-<div align="center"><img src="../images/guide/assignment/assign.png" width="800"></div>
+<img src="../images/guide/assignment/assign.png" width="800">
 
 ## 6. Show it on the floor
 
@@ -84,7 +84,7 @@ Until you confirm, the placement is a draft and the viewer will not show it. Det
 
 Point the floor's monitor at this screen. By default the viewer follows the current time and shows today's shift automatically; you can instead force a specific date and shift. Details: [viewer.md](viewer.md).
 
-<div align="center"><img src="../images/guide/viewer/viewer.png" width="800"></div>
+<img src="../images/guide/viewer/viewer.png" width="800">
 
 ## Then: invite your colleagues
 

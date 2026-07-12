@@ -29,22 +29,22 @@
 
 1. 配置決め一覧で日付とシフトを選びます。エリアごとに配置状況と規格バージョンが表示されます。**配置する →** を押します。
 
-<div align="center"><img src="../images/guide/assignment/list-ja.png" width="800"></div>
+<img src="../images/guide/assignment/list-ja.png" width="800">
 
 2. 左の **未配置の従業員** に、まだ配置されていない有効な従業員が並びます。**名前で検索** や **タグで絞り込み** で絞れます。
 
-<div align="center"><img src="../images/guide/assignment/initial-ja.png" width="800"></div>
+<img src="../images/guide/assignment/initial-ja.png" width="800">
 
 3. 配置します。
    - 従業員をスポットへ **ドラッグ** する、または
    - 従業員を **タップ** してからスポットをタップする
 
-<div align="center"><img src="../images/guide/assignment/assign-ja.png" width="800"></div>
+<img src="../images/guide/assignment/assign-ja.png" width="800">
 
 4. 解除するには、スポットをタップして **配置を解除** を選ぶか、未配置リストへドラッグして戻します。
 5. 途中でやめるときは **下書き保存**。確定してよければ **確定する** を押します。確認ダイアログに日付・シフト・エリア・配置人数が表示されます。
 
-<div align="center"><img src="../images/guide/assignment/fixed-ja.png" width="800"></div>
+<img src="../images/guide/assignment/fixed-ja.png" width="800">
 
 ヘッダーには進捗（*配置済み 12 / 20*）と使用中の規格バージョンが表示されます。
 
@@ -59,7 +59,7 @@
 
 確定すると **確定済み** バッジが付きます。その後も **更新する**（編集して再確定）や、**下書きに戻す**（ビュアーから取り下げる）ができます。
 
-<div align="center"><img src="../images/guide/assignment/fixed-budge-ja.png" width="800"></div>
+<img src="../images/guide/assignment/fixed-budge-ja.png" width="800">
 
 ## 注意点
 

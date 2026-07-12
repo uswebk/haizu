@@ -4,7 +4,7 @@ The people you place on the map. Employees **do not log in** — for the adminis
 
 [日本語](employees.ja.md) · [Back to guide index](index.md)
 
-<div align="center"><img src="../images/guide/employee/list.png" width="800"></div>
+<img src="../images/guide/employee/list.png" width="800">
 
 ## What you can do
 
@@ -28,7 +28,7 @@ Attributes are defined in [docs/domain/employee.md](../domain/employee.md).
 | Tags | Multiple allowed. Tags must already exist — create them in [Settings → Tag management](settings.md#tags) |
 | Active | *Make selectable in assignment.* Uncheck to keep the record but stop offering them |
 
-<div align="center"><img src="../images/guide/employee/add.png" width="800"></div>
+<img src="../images/guide/employee/add.png" width="800">
 
 Deactivating is the way to handle someone who has left: they disappear from the assignment pool but past [history](history.md) stays intact.
 
@@ -64,7 +64,7 @@ Up to **1000 rows** per file. Split larger rosters.
 - *Unregistered tags: …* — create the tag first in [Settings → Tag management](settings.md#tags)
 - *Up to 10 tags allowed* — also triggered by values in an 11th tag column
 
-<div align="center"><img src="../images/guide/employee/import-preview.png" width="800"></div>
+<img src="../images/guide/employee/import-preview.png" width="800">
 
 ## Notes
 
