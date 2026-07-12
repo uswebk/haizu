@@ -4,6 +4,7 @@ import { and, eq, inArray, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db/client";
 import { shifts, workPatterns } from "../db/schema";
+import { diffShifts } from "../features/work-patterns/diff";
 import { requireAuth } from "../middleware/auth";
 import { requireSiteWritePermission } from "../middleware/require-permission";
 import { siteScope } from "../middleware/site-scope";
@@ -76,65 +77,14 @@ export const workPatternsRoute = new Hono<AppEnv>()
 						isNull(shifts.deletedAt),
 					),
 				);
-			const existingById = new Map(existing.map((r) => [r.id, r]));
-			// Names are unique within the current shifts. Even if the id is stale/missing, match existing rows by name
-			// so unchanged rows aren't mistakenly soft-deleted + re-inserted
-			// fixme: e.g. when a Night record is deleted and a new Night record is created, I thought it wouldn't be removed but it was. Maybe it's not removed if the time is also the same?
-			// this area adds complexity, so consider whether the design can be simplified
-			// e.g. even with the same name, once a record is deleted, delete it and add a new record
-			const existingByName = new Map(existing.map((r) => [r.name, r]));
-
-			const handled = new Set<string>();
-			const kept: { id: string; order: number }[] = [];
-			const toInsert: {
-				name: string;
-				startTime: string;
-				endTime: string;
-				order: number;
-			}[] = [];
-			const softDelete = new Set<string>();
-
-			rows.forEach((s, i) => {
-				const ex =
-					(s.id ? existingById.get(s.id) : undefined) ??
-					existingByName.get(s.name);
-				if (ex && !handled.has(ex.id)) {
-					handled.add(ex.id);
-					if (
-						ex.name === s.name &&
-						ex.startTime === s.startTime &&
-						ex.endTime === s.endTime
-					) {
-						kept.push({ id: ex.id, order: i });
-					} else {
-						softDelete.add(ex.id);
-						toInsert.push({
-							name: s.name,
-							startTime: s.startTime,
-							endTime: s.endTime,
-							order: i,
-						});
-					}
-				} else {
-					toInsert.push({
-						name: s.name,
-						startTime: s.startTime,
-						endTime: s.endTime,
-						order: i,
-					});
-				}
-			});
-
-			for (const id of existingById.keys()) {
-				if (!handled.has(id)) softDelete.add(id);
-			}
+			const { kept, toInsert, softDelete } = diffShifts(existing, rows);
 
 			// Soft-delete first to free up the partial-unique slot, then insert
-			if (softDelete.size > 0) {
+			if (softDelete.length > 0) {
 				await tx
 					.update(shifts)
 					.set({ deletedAt: new Date() })
-					.where(inArray(shifts.id, [...softDelete]));
+					.where(inArray(shifts.id, softDelete));
 			}
 			if (toInsert.length > 0) {
 				await tx.insert(shifts).values(
