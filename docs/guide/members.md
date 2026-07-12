@@ -23,12 +23,12 @@ The model is specified in [docs/domain/member_permission.md](../domain/member_pe
 4. For a Member, pick the assigned sites and, for each, the site role. Different sites can have different roles for the same person.
 5. **Send invitation**.
 
-<div align="center"><img src="../images/guide/member/invite-admin.png" width="800"></div>
-<div align="center"><img src="../images/guide/member/invite-member.png" width="800"></div>
+<img src="../images/guide/member/invite-admin.png" width="800">
+<img src="../images/guide/member/invite-member.png" width="800">
 
 The invitee gets an email with a link, sets their password, and can then log in. Until they do, they show as **Invited**, and you can **Cancel** the invitation.
 
-<div align="center"><img src="../images/guide/member/list-inviting.png" width="800"></div>
+<img src="../images/guide/member/list-inviting.png" width="800">
 
 There is no self-service sign-up into an existing organization — signing up creates a *new* organization, so always bring colleagues in via an invitation.
 
@@ -40,7 +40,7 @@ Selecting a member from the list opens **Edit member**, where everything you set
 - For a Member, add or remove **assigned sites**, and change the **site role** at each one (Site Admin / General / Other)
 - Uncheck **Activate this member** to **suspend** them (suspended members can't log in; their record and history remain)
 
-<div align="center"><img src="../images/guide/member/edit-member.png" width="800"></div>
+<img src="../images/guide/member/edit-member.png" width="800">
 
 Changes take effect when you press **Save**. A member who is already logged in gets the new permission from their next navigation.
 
@@ -59,7 +59,7 @@ Some changes aren't possible:
 - The preview marks each row **Valid** or **Error**. Unlike the employee import, **rows with errors are simply skipped** — the valid rows are still invited.
 - Errors: last name empty, email empty, invalid email format, duplicate email within the CSV, or duplicates an existing member or invitation.
 
-<div align="center"><img src="../images/guide/member/csv-import.png" width="800"></div>
+<img src="../images/guide/member/csv-import.png" width="800">
 
 ## Permissions
 
@@ -98,8 +98,8 @@ Give a floor monitor account the **Other** role: it can open nothing but the vie
 - Change your name, your **email address** (confirmed with a verification code sent to the new address), and your **password** (requires your current one).
 - The language switcher is here too — your choice is remembered and overrides the deployment default.
 
-<div align="center"><img src="../images/guide/member/account-nav.png" width="800"></div>
-<div align="center"><img src="../images/guide/member/edit-account.png" width="800"></div>
+<img src="../images/guide/member/account-nav.png" width="800">
+<img src="../images/guide/member/edit-account.png" width="800">
 
 ## Notes
 

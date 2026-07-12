@@ -20,11 +20,11 @@ The vocabulary is defined in [docs/domain/layout_spec.md](../domain/layout_spec.
 
 1. **＋ Add area**, enter an **Area name** (e.g. "Loading dock"), then **Add**.
 
-<div align="center"><img src="../images/guide/editor/add-area.png" width="800"></div>
+<img src="../images/guide/editor/add-area.png" width="800">
 
 2. The area list shows each area's plan status (**Has plan** / **No plan**), spec status (**Published** / **Draft**), and spot count.
 
-<div align="center"><img src="../images/guide/editor/list.png" width="800"></div>
+<img src="../images/guide/editor/list.png" width="800">
 
 ### Upload a floor plan
 
@@ -35,8 +35,8 @@ In the area, open the right-hand panel:
 
 The floor plan is optional — you can place spots without one — but it's what makes the placement legible on the monitor.
 
-<div align="center"><img src="../images/guide/editor/empty-floor-image.png" width="800"></div>
-<div align="center"><img src="../images/guide/editor/floor-image.png" width="800"></div>
+<img src="../images/guide/editor/empty-floor-image.png" width="800">
+<img src="../images/guide/editor/floor-image.png" width="800">
 
 ### Place spots
 
@@ -47,15 +47,15 @@ The floor plan is optional — you can place spots without one — but it's what
 
 Up to **100 spots** per area.
 
-<div align="center"><img src="../images/guide/editor/spot.png" width="800"></div>
+<img src="../images/guide/editor/spot.png" width="800">
 
 ### Publish
 
 1. **Save draft** keeps your work without publishing. Nothing you haven't saved is kept.
 2. **Publish this spec** opens a dialog. Set the **Effective date** (required), then **Publish**.
 
-<div align="center"><img src="../images/guide/editor/publish.png" width="800"></div>
-<div align="center"><img src="../images/guide/editor/draft-save.png" width="800"></div>
+<img src="../images/guide/editor/publish.png" width="800">
+<img src="../images/guide/editor/draft-save.png" width="800">
 
 **Assignment and the viewer only use published versions.** For a given date they use the newest published version whose effective date is on or before that date. So a draft, however complete, is invisible to them.
 
@@ -78,7 +78,7 @@ Two things surprise people here:
 - Duplicating does **not** create the version immediately. The new version is only recorded once you **save or publish** after editing. Leave without saving and nothing remains.
 - Publishing a version that is **not the latest** has no effect on assignment or the viewer — the editor warns you about this. Resolution picks the *newest* published version on or before the date, so an older one never wins. If you want to change what's in use, create a new version.
 
-<div align="center"><img src="../images/guide/editor/new-version.png" width="800"></div>
+<img src="../images/guide/editor/new-version.png" width="800">
 
 ## Deleting an area
 

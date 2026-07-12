@@ -16,13 +16,13 @@
 
 1. サイドバーの **ビュアー** に、エリアごとの現在の配置状況が一覧表示されます。
 
-<div align="center"><img src="../images/guide/viewer/list-ja.png" width="800"></div>
+<img src="../images/guide/viewer/list-ja.png" width="800">
 
 2. **大きく表示 →** で全画面表示になります。現場のモニターにこの画面を映してください。
 3. **フィット** で図面をウィンドウに合わせ直せます。**メンバーパネルの表示切替** で **配置メンバー** の一覧を開閉できます。
 
-<div align="center"><img src="../images/guide/viewer/viewer-ja.png" width="800"></div>
-<div align="center"><img src="../images/guide/viewer/viewer-full-ja.png" width="800"></div>
+<img src="../images/guide/viewer/viewer-ja.png" width="800">
+<img src="../images/guide/viewer/viewer-full-ja.png" width="800">
 
 ヘッダーには表示日と、いま表示しているシフトが出ます。
 

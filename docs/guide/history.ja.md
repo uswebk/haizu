@@ -4,7 +4,7 @@
 
 [English](history.md) · [マニュアル目次に戻る](index.ja.md)
 
-<div align="center"><img src="../images/guide/history/list-ja.png" width="800"></div>
+<img src="../images/guide/history/list-ja.png" width="800">
 
 ## できること
 
@@ -17,7 +17,7 @@
 2. 日付を変更すると他の日を検索できます。表には **日付**・**シフト**・**エリア**・**配置メンバー**の人数が並びます。件数が多い場合はページ送りで移動します。
 3. **表示 →** で当時の配置が開きます（**読み取り専用**）。
 
-<div align="center"><img src="../images/guide/history/detail-ja.png" width="800"></div>
+<img src="../images/guide/history/detail-ja.png" width="800">
 
 ## 注意点
 

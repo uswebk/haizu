@@ -4,8 +4,6 @@
 
 [English](site-selection.md) · [マニュアル目次に戻る](index.ja.md)
 
-<div align="center"><img src="../images/guide/site/select-site-ja.png" width="800"></div>
-
 ## 概要 
 
 **拠点** は工場・倉庫など1つを指し、ほぼすべての基準になります。従業員・配置エリア・配置決め・シフト・タグ・履歴は、いずれも拠点に属します。拠点が全ての基準となります。
@@ -15,6 +13,9 @@
 ## 操作手順
 
 1. ログインします。アクセスできる拠点が複数ある場合、この画面に着きます。
+
+<img src="../images/guide/site/select-site-ja.png" width="800">
+
 2. 各カードには拠点名・説明・従業員数が表示されます。**選択 →** を押します。
 3. **その拠点での**権限に応じた画面に着地します。通常は[ホーム](home.ja.md)ですが、その拠点での権限がビュアー閲覧のみの場合は[ビュアー](viewer.ja.md)に直接移動します。
 
@@ -26,8 +27,7 @@
 
 拠点は [設定 → 拠点管理](settings.ja.md#拠点管理) からも管理でき、名前の変更や非アクティブ化ができます。
 
-<div align="center"><img src="../images/guide/site/add-site-ja.png" width="800"></div>
-
+<img src="../images/guide/site/add-site-ja.png" width="800">
 
 ## 注意点
 

@@ -10,7 +10,7 @@
 
 *設定 → 働き方（シフト）設定*。この拠点で1日をどう区切るかを決めます。
 
-<div align="center"><img src="../images/guide/setting/shift-ja.png" width="800"></div>
+<img src="../images/guide/setting/shift-ja.png" width="800">
 
 - **シフトなし** — 1日1シフト。時間帯の区分なし。配置決めもビュアーも区分なしで扱います。
 - **シフトあり** — 日勤・遅番・夜勤など、名前と時間で区分します。**＋ シフトを追加** で **シフト名**・**開始**・**終了** を設定します。ドラッグで並び替えできます。
@@ -25,24 +25,24 @@
 
 *設定 → タグ管理*。従業員に付ける自由なラベルです（「フォークリフト」「新人」「検査資格あり」など）。配置決めのときに候補を絞り込むために使います。
 
-<div align="center"><img src="../images/guide/setting/tag-ja.png" width="800"></div>
+<img src="../images/guide/setting/tag-ja.png" width="800">
 
 - 名前を入力して追加します。一覧から編集・削除でき、各タグを何名が使用しているかも表示されます。
 - **タグを削除すると、そのタグを持つ全従業員からも外れます。** 確認ダイアログに対象人数が表示されます。
 - CSV取込でタグを指定するには、**事前に**タグが登録されている必要があります。→ [employees.ja.md](employees.ja.md#csv取込)
 - 1人の従業員に付けられるタグは最大10個です。
 
-
 ## 配置ビュアー設定
 
 *設定 → 配置ビュアー設定*。エリアごとに、大画面に何を映すかを決めます。挙動の説明は [viewer.ja.md](viewer.ja.md#何をいつ表示するか) にあります。ここはその設定場所です。
 
-<div align="center"><img src="../images/guide/setting/viewer-list-ja.png" width="800"></div>
+<img src="../images/guide/setting/viewer-list-ja.png" width="800">
 
 - **働き方に合わせて自動表示** — 時刻に追従します。シフト開始の **何分前／何分後** にそのシフトの配置へ切り替えるかを設定します（例：30分前にすると、早く来た人が次のシフトの配置を見られます）。
-<div align="center"><img src="../images/guide/setting/viewer-auto-ja.png" width="800"></div>
+<img src="../images/guide/setting/viewer-auto-ja.png" width="800">
+
 - **強制表示** — 特定の **日付** とシフトを固定表示します。ビュアーには *強制表示中* のバッジが出ます。
-<div align="center"><img src="../images/guide/setting/viewer-force-ja.png" width="800"></div>
+<img src="../images/guide/setting/viewer-force-ja.png" width="800">
 
 一覧では各エリアに **自動表示** / **強制表示** のバッジが付き、一目で判別できます。
 
@@ -52,15 +52,14 @@
 
 **拠点** は工場・倉庫1つを指します。従業員・エリア・配置はすべていずれかの拠点に属します。
 
-<div align="center"><img src="../images/guide/setting/site-list-ja.png" width="800"></div>
+<img src="../images/guide/setting/site-list-ja.png" width="800">
 
 - **＋ 拠点を追加** で拠点名と説明（任意）を入力します。
 
-<div align="center"><img src="../images/guide/setting/add-site-ja.png" width="800"></div>
+<img src="../images/guide/setting/add-site-ja.png" width="800">
 
 - 非アクティブにすると拠点選択画面に表示されなくなります。データは保持されます。
 - 操作対象の拠点はサイドバーの **切り替え** から変更します。
-
 
 ## 事業所設定
 
@@ -68,11 +67,10 @@
 
 事業所（組織）は会社そのもので、全拠点の最上位にあたります。**事業所名** と **連絡先メールアドレス**（確認コードで確定）を設定します。
 
-<div align="center"><img src="../images/guide/setting/edit-org.png" width="800"></div>
-
+<img src="../images/guide/setting/edit-org-ja.png" width="800">
 
 ## アカウント設定
 
 自分の名前・メールアドレス・パスワード・**言語** を設定します。サイドバーのユーザーメニューから開けます。すべての権限で利用できます。→ [members.ja.md](members.ja.md#自分のアカウント)
 
-<div align="center"><img src="../images/guide/setting/account-ja.png" width="800"></div>
+<img src="../images/guide/setting/account-ja.png" width="800">

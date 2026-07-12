@@ -29,22 +29,22 @@ The second one catches people out: an area with a *draft* spec is not assignable
 
 1. On the assignment list, choose the date and shift. Each area shows its placement status and spec version. Press **Assign →**.
 
-<div align="center"><img src="../images/guide/assignment/list.png" width="800"></div>
+<img src="../images/guide/assignment/list.png" width="800">
 
 2. On the left, **Unplaced employees** lists everyone active who isn't placed yet. Narrow it with **Search by name** or **Filter by tag**.
 
-<div align="center"><img src="../images/guide/assignment/initial.png" width="800"></div>
+<img src="../images/guide/assignment/initial.png" width="800">
 
 3. Place people:
    - **Drag** an employee onto a spot, or
    - **Tap** the employee, then tap the spot.
 
-<div align="center"><img src="../images/guide/assignment/assign.png" width="800"></div>
+<img src="../images/guide/assignment/assign.png" width="800">
 
 4. To undo one: tap the spot and choose **Unassign**, or drag the person back onto the unplaced list.
 5. **Save draft** to stop halfway. **Confirm** when the placement is final.
 
-<div align="center"><img src="../images/guide/assignment/fixed.png" width="800"></div>
+<img src="../images/guide/assignment/fixed.png" width="800">
 
 The header shows progress (*Placed 12 / 20*) and which spec version is in use.
 
@@ -59,7 +59,7 @@ Confirming is the step that shows the placement to the floor. Until then it's yo
 
 After confirming, the placement is marked **Confirmed**. You can still **Update** it (edit and re-confirm), or **Revert to draft** to pull it back off the viewer.
 
-<div align="center"><img src="../images/guide/assignment/fixed-budge.png" width="800"></div>
+<img src="../images/guide/assignment/fixed-budge.png" width="800">
 
 ## Notes
 

@@ -4,7 +4,7 @@ Past confirmed placements, exactly as they were confirmed. Read-only.
 
 [日本語](history.ja.md) · [Back to guide index](index.md)
 
-<div align="center"><img src="../images/guide/history/list.png" width="800"></div>
+<img src="../images/guide/history/list.png" width="800">
 
 ## What you can do
 
@@ -17,7 +17,7 @@ Past confirmed placements, exactly as they were confirmed. Read-only.
 2. Change the date to look up another day. The table lists **Date**, **Shift**, **Area**, and the number of **Placed members**; page through with the pager.
 3. **View →** opens the placement as it was, marked **Read-only**.
 
-<div align="center"><img src="../images/guide/history/detail.png" width="800"></div>
+<img src="../images/guide/history/detail.png" width="800">
 
 ## Notes
 
