@@ -1,12 +1,21 @@
 import { zValidator } from "@hono/zod-validator";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, count, eq, inArray } from "drizzle-orm";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { createMiddleware } from "hono/factory";
 import { imageSize } from "image-size";
 import { z } from "zod";
 import { db } from "../db/client";
-import { areas, assignments, layoutSpecVersions, spots } from "../db/schema";
+import { areas, layoutSpecVersions, spots } from "../db/schema";
+import {
+	hasAssignmentsForVersion,
+	LOCKED_MESSAGE,
+	versionIdsWithAssignments,
+} from "../features/areas/lock";
+import {
+	resolveCurrentVersion,
+	resolveListedVersion,
+} from "../features/areas/version";
 import { requireAuth } from "../middleware/auth";
 import { requireSiteWritePermission } from "../middleware/require-permission";
 import { siteScope } from "../middleware/site-scope";
@@ -40,52 +49,8 @@ const versionGuard = createMiddleware<AppEnv>(async (c, next) => {
 	await next();
 });
 
-const LOCKED_MESSAGE =
-	"This spec is in use by an assignment and can't be edited. Create a new version to edit it.";
-
 function todayDateStr() {
 	return new Date().toISOString().slice(0, 10);
-}
-
-async function hasAssignmentsForVersion(versionId: string) {
-	const found = await db.query.assignments.findFirst({
-		where: eq(assignments.layoutSpecVersionId, versionId),
-	});
-	return !!found;
-}
-
-async function versionIdsWithAssignments(versionIds: string[]) {
-	if (versionIds.length === 0) return new Set<string>();
-	const rows = await db
-		.selectDistinct({ versionId: assignments.layoutSpecVersionId })
-		.from(assignments)
-		.where(inArray(assignments.layoutSpecVersionId, versionIds));
-	return new Set(rows.map((r) => r.versionId));
-}
-
-type VersionForResolution = {
-	id: string;
-	version: number;
-	status: "draft" | "published";
-	effectiveDate: string;
-};
-
-// The spec applied in assignment on the given date = among published versions whose effective date is on or before that date,
-// the one with the newest effective date (ties broken by the larger version number)
-function resolveCurrentVersion<T extends VersionForResolution>(
-	versions: T[],
-	date: string,
-): T | null {
-	const candidates = versions.filter(
-		(v) => v.status === "published" && v.effectiveDate <= date,
-	);
-	candidates.sort((a, b) => {
-		if (a.effectiveDate !== b.effectiveDate) {
-			return b.effectiveDate.localeCompare(a.effectiveDate);
-		}
-		return b.version - a.version;
-	});
-	return candidates[0] ?? null;
 }
 
 export const areasRoute = new Hono<AppEnv>()
@@ -103,42 +68,52 @@ export const areasRoute = new Hono<AppEnv>()
 			const targetDate = date ?? todayDateStr();
 			const siteId = c.get("siteId");
 
-			// Use a LATERAL JOIN to pick the active version (prefer the published version applied on the given date, else the latest draft) and get its spot count
-			const rows = await db.execute<{
-				id: string;
-				name: string;
-				floorPlanName: string | null;
-				spotCount: number;
-				currentVersion: string | null;
-				currentStatus: "draft" | "published" | null;
-			}>(
-				// todo: find a way to avoid raw SQL
-				sql`
-				SELECT
-					a.id,
-					a.name,
-					av.plan_image_name AS "floorPlanName",
-					COALESCE((
-						SELECT COUNT(*)::int FROM spots
-						WHERE layout_spec_version_id = av.id
-					), 0) AS "spotCount",
-					'v' || av.version AS "currentVersion",
-					av.status AS "currentStatus"
-				FROM areas a
-				LEFT JOIN LATERAL (
-					SELECT id, plan_image_name, version, status
-					FROM layout_spec_versions
-					WHERE area_id = a.id
-					ORDER BY
-						(status = 'published' AND effective_date <= ${targetDate}::date) DESC,
-						effective_date DESC,
-						version DESC
-					LIMIT 1
-				) av ON true
-				WHERE a.site_id = ${siteId}
-				ORDER BY a.created_at
-			`,
+			const siteAreas = await db
+				.select({ id: areas.id, name: areas.name })
+				.from(areas)
+				.where(eq(areas.siteId, siteId))
+				.orderBy(areas.createdAt);
+			const areaIds = siteAreas.map((a) => a.id);
+
+			const versions = areaIds.length
+				? await db
+						.select()
+						.from(layoutSpecVersions)
+						.where(inArray(layoutSpecVersions.areaId, areaIds))
+				: [];
+			const spotCounts = versions.length
+				? await db
+						.select({
+							versionId: spots.layoutSpecVersionId,
+							count: count(),
+						})
+						.from(spots)
+						.where(
+							inArray(
+								spots.layoutSpecVersionId,
+								versions.map((v) => v.id),
+							),
+						)
+						.groupBy(spots.layoutSpecVersionId)
+				: [];
+			const spotCountByVersionId = new Map(
+				spotCounts.map((r) => [r.versionId, r.count]),
 			);
+
+			const rows = siteAreas.map((area) => {
+				const listed = resolveListedVersion(
+					versions.filter((v) => v.areaId === area.id),
+					targetDate,
+				);
+				return {
+					id: area.id,
+					name: area.name,
+					floorPlanName: listed?.planImageName ?? null,
+					spotCount: listed ? (spotCountByVersionId.get(listed.id) ?? 0) : 0,
+					currentVersion: listed ? `v${listed.version}` : null,
+					currentStatus: listed?.status ?? null,
+				};
+			});
 
 			return c.json({ areas: rows });
 		},
