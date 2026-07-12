@@ -22,6 +22,10 @@ export function ShiftStatusSection({ variant, slot, status, siteId }: Props) {
 	const { t } = useTranslation(["home", "common"]);
 	const { shift, date } = slot;
 
+	// The previous shift is a header-only summary: no progress detail, no area list.
+	const showBody = variant !== "previous";
+	const large = variant === "current";
+
 	const badgeLabel =
 		variant === "current"
 			? t("home:currentShift")
@@ -32,147 +36,98 @@ export function ShiftStatusSection({ variant, slot, status, siteId }: Props) {
 		? `${shift.name} ${shift.startTime}〜${shift.endTime}`
 		: t("home:allDay");
 
-	const header = (
-		<div className="flex items-center gap-2.5 min-w-0">
-			<span
-				className={`flex-none text-[11px] font-bold px-2 py-0.5 rounded-pill ${badgeTone[variant]}`}
-			>
-				{badgeLabel}
-			</span>
-			<div className="min-w-0">
-				<div className="font-bold text-[15px] text-ink truncate">
-					{shiftName}
-				</div>
-				<div className="text-[11.5px] text-faint font-medium">
-					{formatDateLabel(date)}
-				</div>
-			</div>
-			<span className="flex-none text-[13px] font-bold text-faint">
-				{t("home:placedAreasShort", {
-					placed: status.placedAreaCount,
-					total: status.publishedCount,
-				})}
-			</span>
-		</div>
-	);
-
-	// Previous shift: collapsed by default, no links to unplaced areas.
-	if (variant === "previous") {
-		return (
-			<details className="mt-4 bg-surface border border-border rounded-lg shadow-card overflow-hidden">
-				<summary className="flex items-center justify-between gap-3 px-4.5 py-3.5 cursor-pointer list-none">
-					{header}
-					<span className="flex-none text-[13px] font-bold text-muted">
-						{t("home:placementRate", { pct: status.placementPct })}
-					</span>
-				</summary>
-				<div className="px-4.5 pb-4 pt-1">
-					<ProgressBar pct={status.placementPct} />
-					{status.unplacedAreas.length > 0 ? (
-						<ul className="mt-3 flex flex-col gap-1.5">
-							{status.unplacedAreas.map((area) => (
-								<li
-									key={area.id}
-									className="flex items-center gap-2.5 text-[13px]"
-								>
-									<span className="font-bold text-muted truncate">
-										{area.name}
-									</span>
-									<span
-										className={`flex-none text-[11px] font-bold px-2 py-0.5 rounded-pill ${
-											status.draftAreaIds.has(area.id)
-												? "text-warning bg-warning-soft"
-												: "text-faint bg-empty-bg"
-										}`}
-									>
-										{status.draftAreaIds.has(area.id)
-											? t("home:hasDraft")
-											: t("home:notStarted")}
-									</span>
-								</li>
-							))}
-						</ul>
-					) : (
-						<div className="mt-3 text-[13px] text-faint">
-							{t("home:allPlacedShift")}
-						</div>
-					)}
-				</div>
-			</details>
-		);
-	}
-
-	const large = variant === "current";
-
 	return (
-		<div className="mt-4 bg-surface border border-border rounded-lg shadow-card overflow-hidden">
+		<section className="mt-4 bg-surface border border-border rounded-lg shadow-card overflow-hidden">
 			<div
-				className={`flex items-center justify-between gap-3 px-4.5 border-b border-border ${
+				className={`flex items-center justify-between gap-3 px-4.5 ${
 					large ? "py-4" : "py-3.5"
-				}`}
+				} ${showBody ? "border-b border-border" : ""}`}
 			>
-				{header}
+				<div className="flex items-center gap-2.5 min-w-0">
+					<span
+						className={`flex-none text-[11px] font-bold px-2 py-0.5 rounded-pill ${badgeTone[variant]}`}
+					>
+						{badgeLabel}
+					</span>
+					<div className="min-w-0">
+						<div className="font-bold text-[15px] text-ink truncate">
+							{shiftName}
+						</div>
+						<div className="text-[11.5px] text-faint font-medium">
+							{formatDateLabel(date)}
+						</div>
+					</div>
+					<span className="flex-none text-[13px] font-bold text-faint">
+						{t("home:placedAreasShort", {
+							placed: status.placedAreaCount,
+							total: status.publishedCount,
+						})}
+					</span>
+				</div>
 				<span className="flex-none text-[13px] font-bold text-muted">
 					{t("home:placementRate", { pct: status.placementPct })}
 				</span>
 			</div>
-			<div className={large ? "p-4.5" : "px-4.5 py-3.5"}>
-				<ProgressBar
-					pct={status.placementPct}
-					full={status.unplacedAreaCount === 0 && status.publishedCount > 0}
-				/>
-				{large && (
-					<div className="mt-3.5 flex gap-6">
-						<Stat
-							label={t("home:placedPeople")}
-							value={String(status.assignedCount)}
-							unit={t("home:personUnit")}
-						/>
-						<Stat
-							label={t("home:openSpots")}
-							value={String(status.openSpots)}
-							unit={t("home:totalSpots", { count: status.totalSpots })}
-						/>
-					</div>
-				)}
-				{status.unplacedAreas.length > 0 ? (
-					<ul className="mt-3.5 flex flex-col gap-1.5">
-						{status.unplacedAreas.map((area) => (
-							<li key={area.id}>
-								<Link
-									to="/s/$siteId/assignment/$areaId"
-									params={{ siteId, areaId: area.id }}
-									search={{ date, shiftId: shift?.id }}
-									className="flex items-center gap-2.5 px-3 py-2 -mx-1 rounded-md hover:bg-hairline transition-colors duration-150"
-								>
-									<span className="font-bold text-[14px] text-ink min-w-0 truncate">
-										{area.name}
-									</span>
-									<span
-										className={`flex-none text-[11px] font-bold px-2 py-0.5 rounded-pill ${
-											status.draftAreaIds.has(area.id)
-												? "text-warning bg-warning-soft"
-												: "text-faint bg-empty-bg"
-										}`}
+
+			{showBody && (
+				<div className={large ? "p-4.5" : "px-4.5 py-3.5"}>
+					<ProgressBar
+						pct={status.placementPct}
+						full={status.unplacedAreaCount === 0 && status.publishedCount > 0}
+					/>
+					{large && (
+						<div className="mt-3.5 flex gap-6">
+							<Stat
+								label={t("home:placedPeople")}
+								value={String(status.assignedCount)}
+								unit={t("home:personUnit")}
+							/>
+							<Stat
+								label={t("home:openSpots")}
+								value={String(status.openSpots)}
+								unit={t("home:totalSpots", { count: status.totalSpots })}
+							/>
+						</div>
+					)}
+					{status.unplacedAreas.length === 0 ? (
+						<div className="mt-3 text-[13px] text-faint">
+							{t("home:allPlacedShift")}
+						</div>
+					) : (
+						<ul className="mt-3.5 flex flex-col gap-1.5">
+							{status.unplacedAreas.map((area) => (
+								<li key={area.id}>
+									<Link
+										to="/s/$siteId/assignment/$areaId"
+										params={{ siteId, areaId: area.id }}
+										search={{ date, shiftId: shift?.id }}
+										className="flex items-center gap-2.5 px-3 py-2 -mx-1 rounded-md hover:bg-hairline transition-colors duration-150"
 									>
-										{status.draftAreaIds.has(area.id)
-											? t("home:hasDraft")
-											: t("home:notStarted")}
-									</span>
-									<span className="ml-auto flex-none text-[13px] font-bold text-primary">
-										{t("home:place")}
-									</span>
-								</Link>
-							</li>
-						))}
-					</ul>
-				) : (
-					<div className="mt-3 text-[13px] text-faint">
-						{t("home:allPlacedShift")}
-					</div>
-				)}
-			</div>
-		</div>
+										<span className="font-bold text-[14px] text-ink min-w-0 truncate">
+											{area.name}
+										</span>
+										<span
+											className={`flex-none text-[11px] font-bold px-2 py-0.5 rounded-pill ${
+												status.draftAreaIds.has(area.id)
+													? "text-warning bg-warning-soft"
+													: "text-faint bg-empty-bg"
+											}`}
+										>
+											{status.draftAreaIds.has(area.id)
+												? t("home:hasDraft")
+												: t("home:notStarted")}
+										</span>
+										<span className="ml-auto flex-none text-[13px] font-bold text-primary">
+											{t("home:place")}
+										</span>
+									</Link>
+								</li>
+							))}
+						</ul>
+					)}
+				</div>
+			)}
+		</section>
 	);
 }
 
