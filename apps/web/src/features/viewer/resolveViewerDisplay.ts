@@ -1,5 +1,10 @@
 import type { ViewerConfig, WorkPattern } from "@haizu/shared";
-import { hmToMinutes, minutesOfDay, toDateStr } from "#/lib/datetime";
+import {
+	addDaysStr,
+	hmToMinutes,
+	minutesOfDay,
+	toDateStr,
+} from "#/lib/datetime";
 
 export type ViewerDisplay = { date: string; shiftId: string | null };
 
@@ -29,18 +34,36 @@ export function resolveViewerDisplay(
 	if (shifts.length === 0) return { date, shiftId: null };
 
 	const nowMin = minutesOfDay(now);
-	// Each shift's switch time = start time - leadMinutes (positive = earlier). Normalized over 24 hours.
 	const switches = shifts
-		.map((s) => ({
-			id: s.id,
-			at: mod(hmToMinutes(s.startTime) - config.leadMinutes, DAY),
-		}))
+		.map((s) => {
+			// Switch time = start - leadMinutes (positive = earlier), which can fall outside today.
+			// startDayOffset records which day the shift itself starts on, relative to the day its
+			// switch lands on: a lead that reaches back past midnight makes the shift start the next
+			// day (+1), a negative lead reaching past midnight makes it the previous day (-1).
+			const raw = hmToMinutes(s.startTime) - config.leadMinutes;
+			return {
+				id: s.id,
+				at: mod(raw, DAY),
+				startDayOffset: -Math.floor(raw / DAY),
+			};
+		})
 		.sort((a, b) => a.at - b.at);
 
 	// Take the largest switch time <= now. If none, wrap to the last shift (largest at) across the day boundary.
 	let active = switches[switches.length - 1];
+	let switchDayOffset = -1;
 	for (const s of switches) {
-		if (s.at <= nowMin) active = s;
+		if (s.at <= nowMin) {
+			active = s;
+			switchDayOffset = 0;
+		}
 	}
-	return { date, shiftId: active.id };
+
+	// Placements are keyed by the date the shift starts, so an overnight shift still running past
+	// midnight (e.g. 19:00-09:00 seen at 03:00) must resolve to yesterday's date, not today's.
+	const dayOffset = switchDayOffset + active.startDayOffset;
+	return {
+		date: dayOffset === 0 ? date : addDaysStr(now, dayOffset),
+		shiftId: active.id,
+	};
 }

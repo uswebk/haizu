@@ -15,7 +15,7 @@ import {
 	fetchVersionSpots,
 } from "#/lib/api/areas";
 import { assignmentKeys, fetchAssignments } from "#/lib/api/assignments";
-import { fetchEmployees } from "#/lib/api/employees";
+import { employeeKeys, fetchEmployees } from "#/lib/api/employees";
 import { fetchViewerConfigs, viewerConfigKeys } from "#/lib/api/viewer";
 import { fetchWorkPattern, workPatternKeys } from "#/lib/api/workPatterns";
 import { formatClock, formatDateLabel, toDateStr } from "#/lib/datetime";
@@ -26,6 +26,13 @@ const ZOOM_MAX = 6;
 const BASE_WIDTH = 760;
 // Margin around the board (PlacementViewCanvas's inner p-4 + a clipping-prevention margin)
 const BOARD_PADDING = 56;
+
+// The viewer runs on always-on monitors, so it has to pick up placements confirmed elsewhere
+// without a reload. Background refetch is required because TanStack Query pauses
+// refetchInterval while the window is unfocused, which a kiosk display usually is.
+const ASSIGNMENT_POLL_MS = 60_000;
+// Layout and master data change far less often than assignments
+const MASTER_POLL_MS = 300_000;
 
 type ViewerSearch = { area?: string };
 
@@ -53,10 +60,14 @@ function useCommonData() {
 	const { data: configs = [] } = useQuery({
 		queryKey: viewerConfigKeys.all,
 		queryFn: fetchViewerConfigs,
+		refetchInterval: MASTER_POLL_MS,
+		refetchIntervalInBackground: true,
 	});
 	const { data: workPattern } = useQuery({
 		queryKey: workPatternKeys.detail,
 		queryFn: fetchWorkPattern,
+		refetchInterval: MASTER_POLL_MS,
+		refetchIntervalInBackground: true,
 	});
 	const configByArea = useMemo(
 		() => new Map(configs.map((c) => [c.areaId, c])),
@@ -127,6 +138,8 @@ function ViewerAreaCard({
 				shiftId: (display as { shiftId: string | null }).shiftId,
 			}),
 		enabled: !!display,
+		refetchInterval: ASSIGNMENT_POLL_MS,
+		refetchIntervalInBackground: true,
 	});
 	const assigned =
 		assignments.find((a) => a.areaId === area.id && a.status === "confirmed")
@@ -226,6 +239,8 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 	const { data: area } = useQuery({
 		queryKey: areaKeys.detail(areaId),
 		queryFn: () => fetchArea(areaId),
+		refetchInterval: MASTER_POLL_MS,
+		refetchIntervalInBackground: true,
 	});
 	const { data: assignments = [] } = useQuery({
 		queryKey: date
@@ -233,10 +248,14 @@ function ViewerDetail({ areaId }: { areaId: string }) {
 			: ["viewer-detail-idle", areaId],
 		queryFn: () => fetchAssignments({ date: date as string, shiftId }),
 		enabled: !!date,
+		refetchInterval: ASSIGNMENT_POLL_MS,
+		refetchIntervalInBackground: true,
 	});
 	const { data: employees = [] } = useQuery({
-		queryKey: ["employees"],
+		queryKey: employeeKeys.all,
 		queryFn: fetchEmployees,
+		refetchInterval: MASTER_POLL_MS,
+		refetchIntervalInBackground: true,
 	});
 
 	const serverAssignment =
