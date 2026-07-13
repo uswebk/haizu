@@ -77,7 +77,7 @@ The web app (`apps/web`) reads two deploy-time defaults from its environment (Vi
 
 | Concern | Env var | Default | Notes |
 |---|---|---|---|
-| Language | `VITE_DEFAULT_LOCALE` | `en` | `en` or `ja`. The deploy-wide default. Users can switch language from the in-app switcher (sidebar user menu / account settings); their choice is remembered in a cookie and overrides this default. |
+| Language | `VITE_DEFAULT_LOCALE` | `en` | `en` or `ja`. The locale is resolved in this order: the cookie set by the in-app switcher (sidebar user menu / account settings) → the browser's `Accept-Language` → this default. So this value only applies when the browser asks for no supported language. |
 | Timezone | `VITE_DEFAULT_TIMEZONE` | *(runtime TZ)* | An IANA name such as `Asia/Tokyo`. Used to decide "today" and shift times. If unset, it falls back to the runtime timezone (the server's `TZ` on SSR, the browser's timezone on the client). |
 
 Set them in `apps/web/.env` (copied from `apps/web/.env.example`). There is no per-user timezone setting: the app assumes a single site/timezone per deployment. Running one instance across multiple timezones would need a site-level timezone setting (not implemented).

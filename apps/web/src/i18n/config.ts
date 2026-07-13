@@ -9,7 +9,8 @@ export type Locale = (typeof SUPPORTED_LOCALES)[number];
 export const LOCALE_COOKIE = "i18next";
 
 // The deploy default language is set via the VITE_DEFAULT_LOCALE env var (unset = "en").
-// Users can override it with the language switcher, and their choice is saved to a cookie.
+// It only applies when the browser asks for no supported language; a user's own choice from the
+// language switcher is saved to a cookie and wins over both.
 export const DEFAULT_LOCALE: Locale = toLocale(
 	import.meta.env.VITE_DEFAULT_LOCALE,
 	"en",
@@ -43,8 +44,9 @@ if (!i18n.isInitialized) {
 			supportedLngs: SUPPORTED_LOCALES as unknown as string[],
 			defaultNS: "common",
 			interpolation: { escapeValue: false },
-			// The default is the env var (fallbackLng). Once the user switches, the cookie takes priority.
-			// No browser-language auto-detection; the default is made deterministic via the env var.
+			// The locale is decided on the server (see i18n/server.ts: cookie -> Accept-Language -> env
+			// default) and rendered as <html lang>, so htmlTag is what the client reads when there's no
+			// cookie yet. Don't add "navigator" here: it would let the client disagree with the server.
 			detection: {
 				order: ["cookie", "htmlTag"],
 				caches: ["cookie"],
