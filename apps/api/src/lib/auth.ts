@@ -77,6 +77,9 @@ export const auth = betterAuth({
 	},
 	plugins: [
 		emailOTP({
+			// Matches the TTL of the in-house email-change OTP (lib/email-otp.ts).
+			expiresIn: 600,
+			allowedAttempts: 3,
 			async sendVerificationOTP({ email, otp, type }) {
 				await emailSender.send({
 					to: email,
