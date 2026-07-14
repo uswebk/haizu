@@ -26,8 +26,6 @@ On a factory or warehouse floor, someone decides every day which worker stands a
 - Pick a date and a shift, then **drag employees onto spots**
 - Show the confirmed placement in a **display-only viewer** for large screens
 
-<!-- TODO: screenshots of the placement editor and the viewer -->
-
 <div align="center"><img src="docs/images/haizu_demo.gif" width="800"></div>
 
 ## Features
@@ -54,6 +52,9 @@ pnpm dev                                # web: 3000, api: 3001
 ```
 
 Open http://localhost:3000 and create a company from the sign-up screen.
+
+> [!WARNING]
+> `pnpm db:seed` inserts demo data including a demo admin account (`admin@haizu.co.jp` / `password123`). It is for local development only — never run it against a production database. You can skip it and start from the sign-up screen instead.
 
 > [!NOTE]
 > Email delivery and file storage are pluggable adapters. By default nothing is sent: verification codes, invitation links, and password resets are printed to the API server console (prefixed `[email:console]`), and uploaded images are stored on local disk (`apps/api/uploads`).
