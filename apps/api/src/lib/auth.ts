@@ -1,4 +1,7 @@
-import { MIN_PASSWORD_LENGTH } from "@haizu/shared";
+import {
+	MIN_PASSWORD_LENGTH,
+	OTP_RESEND_COOLDOWN_SECONDS,
+} from "@haizu/shared";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP } from "better-auth/plugins";
@@ -75,8 +78,25 @@ export const auth = betterAuth({
 			},
 		},
 	},
+	// Better Auth only rate-limits in production by default. Enable it everywhere so the OTP
+	// resend limit is exercised in dev too. Counters are in-memory, so with multiple API
+	// instances the limit is per-instance; move to `storage: "database"` before scaling out.
+	rateLimit: {
+		enabled: true,
+		customRules: {
+			// Sending an OTP costs an email, so a client that ignores the UI countdown (reload,
+			// direct API call) must still be blocked from spamming the address.
+			"/email-otp/send-verification-otp": {
+				window: OTP_RESEND_COOLDOWN_SECONDS,
+				max: 1,
+			},
+		},
+	},
 	plugins: [
 		emailOTP({
+			// Matches the TTL of the in-house email-change OTP (lib/email-otp.ts).
+			expiresIn: 600,
+			allowedAttempts: 3,
 			async sendVerificationOTP({ email, otp, type }) {
 				await emailSender.send({
 					to: email,

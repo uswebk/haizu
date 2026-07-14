@@ -538,11 +538,23 @@
 		},
 		"verify": {
 			"title": "Verify your email",
-			"subtitle": "Enter the verification code we sent to {{email}}.",
+			"subtitle": "Enter the verification code we sent to:",
 			"otpLabel": "Verification code",
 			"verify": "Verify",
 			"verifying": "Verifying…",
-			"otpInvalid": "The verification code is incorrect"
+			"otpInvalid": "The verification code is incorrect",
+			"otpExpired": "The verification code has expired. Please resend it.",
+			"otpTooManyAttempts": "Too many attempts. Please resend the verification code.",
+			"noCodeReceived": "Didn't get the code?",
+			"resend": "Resend",
+			"resending": "Sending…",
+			"resendIn": "Resend ({{seconds}}s)",
+			"resent": "Verification code resent",
+			"resendFailed": "Failed to resend. Please try again in a moment.",
+			"resendRateLimited": "You're resending too quickly. Please try again in {{seconds}}s.",
+			"wrongEmailTitle": "Wrong email address?",
+			"wrongEmailDesc": "You can abandon this registration and sign up again with the correct address.",
+			"useAnotherEmail": "Sign up with a different email"
 		},
 		"invite": {
 			"title": "Accept invitation",

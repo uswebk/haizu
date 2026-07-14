@@ -538,11 +538,23 @@
 		},
 		"verify": {
 			"title": "メールアドレスの確認",
-			"subtitle": "{{email}} に送信した確認コードを入力してください。",
+			"subtitle": "以下のメールアドレスに送信した確認コードを入力してください。",
 			"otpLabel": "確認コード",
 			"verify": "確認する",
 			"verifying": "確認中…",
-			"otpInvalid": "確認コードが正しくありません"
+			"otpInvalid": "確認コードが正しくありません",
+			"otpExpired": "確認コードの有効期限が切れています。再送信してください。",
+			"otpTooManyAttempts": "試行回数の上限に達しました。確認コードを再送信してください。",
+			"noCodeReceived": "コードが届きませんか？",
+			"resend": "再送信",
+			"resending": "送信中…",
+			"resendIn": "再送信（{{seconds}}秒）",
+			"resent": "確認コードを再送信しました",
+			"resendFailed": "再送信に失敗しました。しばらくしてから再度お試しください。",
+			"resendRateLimited": "再送信の間隔が短すぎます。{{seconds}}秒後に再度お試しください。",
+			"wrongEmailTitle": "メールアドレスが違いますか？",
+			"wrongEmailDesc": "この登録を中断して、正しいメールアドレスで登録し直せます。",
+			"useAnotherEmail": "別のメールアドレスで登録し直す"
 		},
 		"invite": {
 			"title": "招待の受け入れ",

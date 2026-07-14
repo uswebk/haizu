@@ -10,6 +10,9 @@
     - Authenticate with a registered email and password
 - OTP (email verification)
     - Verifies identity via a one-time password emailed at sign-up
+    - Valid for 10 minutes, up to 3 attempts per code
+    - The verification screen can resend a code (60-second cooldown between sends). Resending issues a new code and resets the attempt count
+    - If the email address itself is wrong, the verification screen offers "sign up with a different email": it drops the current session and returns to sign-up (an unverified account cannot change its email address)
 - Invitation
     - An existing member (admin/site admin) invites a new member by specifying an email
     - Setting a password from the link in the invitation email enables login
@@ -42,6 +45,9 @@
     - 登録済みのメールアドレスとパスワードで認証する
 - OTP（メール認証）
     - サインアップ時にメールへ送信するワンタイムパスワードで本人確認を行う
+    - 有効期限は10分、1つのコードにつき試行回数は3回まで
+    - 確認画面から再送信できる（再送信は60秒のクールダウンあり）。再送信すると新しいコードが発行され、試行回数もリセットされる
+    - メールアドレス自体を間違えた場合は、確認画面の「別のメールアドレスで登録し直す」から現在のセッションを破棄してサインアップに戻る（未認証のアカウントはメールアドレスを変更できない）
 - 招待
     - 既存メンバー（管理者・拠点管理者）がメールアドレスを指定して新規メンバーを招待する
     - 招待メールに記載のリンクからパスワードを設定することでログイン可能になる
