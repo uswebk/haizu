@@ -1,3 +1,4 @@
+import { OTP_RESEND_COOLDOWN_SECONDS } from "@haizu/shared";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -5,9 +6,12 @@ import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { useSnackbar } from "#/contexts/snackbar-context";
 import { authClient } from "#/lib/auth-client";
+import {
+	clearOtpCooldown,
+	getOtpCooldownSeconds,
+	startOtpCooldown,
+} from "#/lib/otp-cooldown";
 import { fetchSession } from "#/lib/session";
-
-const RESEND_COOLDOWN_SECONDS = 60;
 
 export const Route = createFileRoute("/verify-otp")({
 	beforeLoad: async () => {
@@ -30,16 +34,15 @@ function VerifyOtpPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
 	const [resending, setResending] = useState(false);
-	// A code is sent right before landing here (at sign-up), so start on cooldown.
-	const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
+	// Starts at 0 rather than the stored value so the server-rendered markup matches the first
+	// client render; the effect below fills in the real remaining time on mount.
+	const [cooldown, setCooldown] = useState(0);
 
 	useEffect(() => {
-		if (cooldown <= 0) return;
-		const timer = setInterval(() => {
-			setCooldown((s) => (s <= 1 ? 0 : s - 1));
-		}, 1000);
+		setCooldown(getOtpCooldownSeconds());
+		const timer = setInterval(() => setCooldown(getOtpCooldownSeconds()), 1000);
 		return () => clearInterval(timer);
-	}, [cooldown]);
+	}, []);
 
 	const submit = async () => {
 		if (!email || otp.length === 0) return;
@@ -52,6 +55,8 @@ function VerifyOtpPage() {
 				error.code === "OTP_EXPIRED" || error.code === "TOO_MANY_ATTEMPTS";
 			if (stale) {
 				// The current code can no longer succeed, so let them resend immediately.
+				// The API may still rate-limit the resend; that path is handled in resend().
+				clearOtpCooldown();
 				setCooldown(0);
 				setError(
 					t(
@@ -72,23 +77,41 @@ function VerifyOtpPage() {
 		if (!email || cooldown > 0 || resending) return;
 		setResending(true);
 		setError(null);
-		const { error } = await authClient.emailOtp.sendVerificationOtp({
-			email,
-			type: "email-verification",
-		});
+		// The cooldown we show is only a guess (another tab or device may have sent a code), so when
+		// the rate limiter rejects us, take the wait time it reports instead of our own.
+		const rateLimit = { retryAfterSeconds: 0 };
+		const { error } = await authClient.emailOtp.sendVerificationOtp(
+			{ email, type: "email-verification" },
+			{
+				onError: ({ response }) => {
+					rateLimit.retryAfterSeconds =
+						Number(response.headers.get("X-Retry-After")) || 0;
+				},
+			},
+		);
 		setResending(false);
 		if (error) {
+			if (error.status === 429) {
+				const seconds =
+					rateLimit.retryAfterSeconds || OTP_RESEND_COOLDOWN_SECONDS;
+				startOtpCooldown(seconds);
+				setCooldown(seconds);
+				setError(t("verify.resendRateLimited", { seconds }));
+				return;
+			}
 			setError(t("verify.resendFailed"));
 			return;
 		}
 		setOtp("");
-		setCooldown(RESEND_COOLDOWN_SECONDS);
+		startOtpCooldown();
+		setCooldown(OTP_RESEND_COOLDOWN_SECONDS);
 		showSuccess(t("verify.resent"));
 	};
 
 	// The account exists but is unverified and its email can't be changed, so the only
 	// way out of a mistyped address is to drop this session and sign up again.
 	const useAnotherEmail = async () => {
+		clearOtpCooldown();
 		await authClient.signOut();
 		void navigate({ to: "/signup" });
 	};

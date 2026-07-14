@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { Input } from "#/components/ui/Input";
 import { signUp } from "#/lib/api/auth";
+import { startOtpCooldown } from "#/lib/otp-cooldown";
 
 export const Route = createFileRoute("/signup")({
 	component: SignupPage,
@@ -28,6 +29,8 @@ function SignupPage() {
 		setError(null);
 		try {
 			await signUp({ name, companyName, email, password });
+			// Sign-up sends the first code, so the verify screen opens already on cooldown.
+			startOtpCooldown();
 			void navigate({ to: "/verify-otp" });
 		} catch (e) {
 			setError(e instanceof Error ? e.message : t("signup.failed"));

@@ -551,6 +551,7 @@
 			"resendIn": "Resend ({{seconds}}s)",
 			"resent": "Verification code resent",
 			"resendFailed": "Failed to resend. Please try again in a moment.",
+			"resendRateLimited": "You're resending too quickly. Please try again in {{seconds}}s.",
 			"wrongEmailTitle": "Wrong email address?",
 			"wrongEmailDesc": "You can abandon this registration and sign up again with the correct address.",
 			"useAnotherEmail": "Sign up with a different email"

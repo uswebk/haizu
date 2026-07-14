@@ -551,6 +551,7 @@
 			"resendIn": "再送信（{{seconds}}秒）",
 			"resent": "確認コードを再送信しました",
 			"resendFailed": "再送信に失敗しました。しばらくしてから再度お試しください。",
+			"resendRateLimited": "再送信の間隔が短すぎます。{{seconds}}秒後に再度お試しください。",
 			"wrongEmailTitle": "メールアドレスが違いますか？",
 			"wrongEmailDesc": "この登録を中断して、正しいメールアドレスで登録し直せます。",
 			"useAnotherEmail": "別のメールアドレスで登録し直す"
