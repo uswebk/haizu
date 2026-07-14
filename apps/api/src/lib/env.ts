@@ -1,6 +1,6 @@
 // Centralizes environment-dependent config in one place. Values are injected from the runtime environment (12-factor).
 // APP_ENV: local / dev / stg / prod. Unset is treated as "prod" on the safe side (disables dev features).
-export const APP_ENV = process.env.APP_ENV ?? "local";
+export const APP_ENV = process.env.APP_ENV ?? "prod";
 
 // Gate for dev-only features. Fail-safe: enabled only for "local"; anything other than local is always disabled.
 export function resolveIsLocal(appEnv?: string): boolean {

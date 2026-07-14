@@ -23,6 +23,11 @@ const app = new Hono();
 app.use("*", cors({ origin: WEB_ORIGIN, credentials: true }));
 
 app.get("/health", (c) => c.json({ status: "ok" }));
+// nosniff so a stored file can never be reinterpreted as HTML/script on the API origin
+app.use("/uploads/*", async (c, next) => {
+	await next();
+	c.res.headers.set("X-Content-Type-Options", "nosniff");
+});
 app.use("/uploads/*", serveStatic({ root: "./" }));
 
 // Better Auth's standard handlers (login, logout, session, etc.)

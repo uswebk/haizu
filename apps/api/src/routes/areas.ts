@@ -49,6 +49,14 @@ const versionGuard = createMiddleware<AppEnv>(async (c, next) => {
 	await next();
 });
 
+// Whitelist of formats detected by image-size. Uploads are served as-is from /uploads,
+// so anything that can execute scripts on the API origin (HTML, SVG, ...) must be rejected.
+const ALLOWED_IMAGE_EXTENSIONS: Record<string, string> = {
+	png: ".png",
+	jpg: ".jpg",
+	webp: ".webp",
+};
+
 function todayDateStr() {
 	return new Date().toISOString().slice(0, 10);
 }
@@ -280,15 +288,24 @@ export const areasRoute = new Hono<AppEnv>()
 			}
 
 			const buffer = Buffer.from(await file.arrayBuffer());
-			const { url } = await storage.save(file.name, buffer);
 
-			let aspectRatio: number | null;
+			// Validate by content, not the client-supplied filename/MIME type
+			let dimensions: ReturnType<typeof imageSize>;
 			try {
-				const { width, height } = imageSize(buffer);
-				aspectRatio = width / height;
+				dimensions = imageSize(buffer);
 			} catch {
-				aspectRatio = null;
+				return c.json({ error: "Unsupported image format" }, 400);
 			}
+			const extension = dimensions.type
+				? ALLOWED_IMAGE_EXTENSIONS[dimensions.type]
+				: undefined;
+			if (!extension || !dimensions.width || !dimensions.height) {
+				return c.json({ error: "Unsupported image format" }, 400);
+			}
+
+			// Store under a server-chosen extension so the client filename never decides how the file is served
+			const { url } = await storage.save(`plan${extension}`, buffer);
+			const aspectRatio = dimensions.width / dimensions.height;
 
 			await db
 				.update(layoutSpecVersions)
