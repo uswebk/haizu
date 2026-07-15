@@ -3,10 +3,10 @@ import { and, count, eq, inArray } from "drizzle-orm";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { createMiddleware } from "hono/factory";
-import { imageSize } from "image-size";
 import { z } from "zod";
 import { db } from "../db/client";
 import { areas, layoutSpecVersions, spots } from "../db/schema";
+import { parseFloorPlanImage } from "../features/areas/floor-plan-image";
 import {
 	hasAssignmentsForVersion,
 	LOCKED_MESSAGE,
@@ -48,14 +48,6 @@ const versionGuard = createMiddleware<AppEnv>(async (c, next) => {
 	}
 	await next();
 });
-
-// Whitelist of formats detected by image-size. Uploads are served as-is from /uploads,
-// so anything that can execute scripts on the API origin (HTML, SVG, ...) must be rejected.
-const ALLOWED_IMAGE_EXTENSIONS: Record<string, string> = {
-	png: ".png",
-	jpg: ".jpg",
-	webp: ".webp",
-};
 
 function todayDateStr() {
 	return new Date().toISOString().slice(0, 10);
@@ -289,23 +281,18 @@ export const areasRoute = new Hono<AppEnv>()
 
 			const buffer = Buffer.from(await file.arrayBuffer());
 
-			// Validate by content, not the client-supplied filename/MIME type
-			let dimensions: ReturnType<typeof imageSize>;
-			try {
-				dimensions = imageSize(buffer);
-			} catch {
-				return c.json({ error: "Unsupported image format" }, 400);
-			}
-			const extension = dimensions.type
-				? ALLOWED_IMAGE_EXTENSIONS[dimensions.type]
-				: undefined;
-			if (!extension || !dimensions.width || !dimensions.height) {
+			const image = parseFloorPlanImage(buffer);
+			if (!image) {
 				return c.json({ error: "Unsupported image format" }, 400);
 			}
 
+			const previous = await db.query.layoutSpecVersions.findFirst({
+				where: eq(layoutSpecVersions.id, versionId),
+			});
+
 			// Store under a server-chosen extension so the client filename never decides how the file is served
-			const { url } = await storage.save(`plan${extension}`, buffer);
-			const aspectRatio = dimensions.width / dimensions.height;
+			const { url } = await storage.save(`plan${image.extension}`, buffer);
+			const aspectRatio = image.aspectRatio;
 
 			await db
 				.update(layoutSpecVersions)
@@ -319,6 +306,12 @@ export const areasRoute = new Hono<AppEnv>()
 					updatedAt: new Date(),
 				})
 				.where(eq(layoutSpecVersions.id, versionId));
+
+			// Remove the replaced file only after the DB points at the new one,
+			// so a failed update never leaves the version referencing a deleted file
+			if (previous?.planImageUrl && previous.planImageUrl !== url) {
+				await storage.remove(previous.planImageUrl);
+			}
 
 			return c.json({ url, name: file.name, aspectRatio });
 		},
