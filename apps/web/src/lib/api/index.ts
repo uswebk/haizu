@@ -1,5 +1,15 @@
 export const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
+export class ApiError extends Error {
+	constructor(
+		message: string,
+		readonly status: number,
+	) {
+		super(message);
+		this.name = "ApiError";
+	}
+}
+
 // Common handler for API responses. On error, throws preferring the server's { error } message.
 export async function handleResponse<T>(res: Response): Promise<T> {
 	if (!res.ok) {
@@ -11,7 +21,7 @@ export async function handleResponse<T>(res: Response): Promise<T> {
 			typeof body.error === "string"
 				? body.error
 				: `API error: ${res.status}`;
-		throw new Error(message);
+		throw new ApiError(message, res.status);
 	}
 	return res.json() as Promise<T>;
 }

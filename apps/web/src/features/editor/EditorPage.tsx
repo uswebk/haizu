@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "#/components/ui/Button";
 import { useSnackbar } from "#/contexts/snackbar-context";
-import { API_BASE } from "#/lib/api";
+import { API_BASE, ApiError } from "#/lib/api";
 import {
 	areaKeys,
 	deleteArea,
@@ -40,7 +40,7 @@ export function EditorPage({ siteId, areaId }: Props) {
 	const navigate = useNavigate();
 	const { t } = useTranslation(["editor", "common"]);
 	const queryClient = useQueryClient();
-	const { showSuccess } = useSnackbar();
+	const { showSuccess, showError } = useSnackbar();
 
 	const { data: areaData } = useQuery({
 		queryKey: areaKeys.detail(areaId),
@@ -163,6 +163,23 @@ export function EditorPage({ siteId, areaId }: Props) {
 		});
 	};
 
+	// bodyLimit rejects oversized uploads before the handler runs, so 413 arrives
+	// without a server-provided message and needs a client-side one
+	const showSaveError = (error: unknown) => {
+		if (error instanceof ApiError && error.status === 413) {
+			showError(t("editor:imageTooLarge"));
+			return;
+		}
+		if (
+			error instanceof ApiError &&
+			error.message === "Unsupported image format"
+		) {
+			showError(t("editor:unsupportedImageFormat"));
+			return;
+		}
+		showError(error instanceof Error ? error.message : t("editor:saveFailed"));
+	};
+
 	const saveMutation = useMutation({
 		mutationFn: async () => {
 			if (!resolvedVersion) return;
@@ -199,6 +216,7 @@ export function EditorPage({ siteId, areaId }: Props) {
 			setSaveDialogOpen(false);
 			showSuccess(t("editor:draftSaved"));
 		},
+		onError: showSaveError,
 	});
 
 	const publishMutation = useMutation({
@@ -246,6 +264,7 @@ export function EditorPage({ siteId, areaId }: Props) {
 			setPublishDialogOpen(false);
 			showSuccess(t("editor:specPublished"));
 		},
+		onError: showSaveError,
 	});
 
 	const unpublishMutation = useMutation({
@@ -486,7 +505,7 @@ export function EditorPage({ siteId, areaId }: Props) {
 			<input
 				ref={fileInputRef}
 				type="file"
-				accept="image/png,image/jpeg"
+				accept="image/png,image/jpeg,image/webp"
 				className="hidden"
 				onChange={handleFileSelected}
 			/>
