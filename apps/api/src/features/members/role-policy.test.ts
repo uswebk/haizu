@@ -5,7 +5,7 @@ import {
 } from "./role-policy";
 
 describe("evaluateOrgRoleAssignment", () => {
-	it("自身の権限を変更しようとすると拒否する", () => {
+	it("rejects changing your own role", () => {
 		expect(
 			evaluateOrgRoleAssignment({
 				actorOrgRole: "admin",
@@ -20,7 +20,7 @@ describe("evaluateOrgRoleAssignment", () => {
 		});
 	});
 
-	it("自身への no-op 更新(ロール据え置き)は許可する", () => {
+	it("allows a no-op update on yourself that keeps the same role", () => {
 		expect(
 			evaluateOrgRoleAssignment({
 				actorOrgRole: "admin",
@@ -31,7 +31,7 @@ describe("evaluateOrgRoleAssignment", () => {
 		).toEqual({ ok: true });
 	});
 
-	it("拠点管理者(member)は既存の管理者に手を出せない", () => {
+	it("forbids a site admin (member) from touching an existing admin", () => {
 		expect(
 			evaluateOrgRoleAssignment({
 				actorOrgRole: "member",
@@ -46,7 +46,7 @@ describe("evaluateOrgRoleAssignment", () => {
 		});
 	});
 
-	it("拠点管理者(member)は管理者へ昇格させられない(招待: target=null)", () => {
+	it("forbids a site admin (member) from promoting to admin on invite (target=null)", () => {
 		expect(
 			evaluateOrgRoleAssignment({
 				actorOrgRole: "member",
@@ -61,7 +61,7 @@ describe("evaluateOrgRoleAssignment", () => {
 		});
 	});
 
-	it("管理者は管理者を作成できる", () => {
+	it("allows an admin to create another admin", () => {
 		expect(
 			evaluateOrgRoleAssignment({
 				actorOrgRole: "admin",
@@ -72,7 +72,7 @@ describe("evaluateOrgRoleAssignment", () => {
 		).toEqual({ ok: true });
 	});
 
-	it("拠点管理者(member)が member を member のまま扱うのは許可する", () => {
+	it("allows a site admin (member) to keep a member as a member", () => {
 		expect(
 			evaluateOrgRoleAssignment({
 				actorOrgRole: "member",
@@ -85,13 +85,13 @@ describe("evaluateOrgRoleAssignment", () => {
 });
 
 describe("assertSitesManageable", () => {
-	it("対象拠点が管理可能拠点の部分集合なら許可する", () => {
+	it("allows target sites that are a subset of the manageable sites", () => {
 		expect(assertSitesManageable(["s1", "s2", "s3"], ["s1", "s3"])).toEqual({
 			ok: true,
 		});
 	});
 
-	it("管理外の拠点が混入していると拒否する", () => {
+	it("rejects a target list containing an unmanageable site", () => {
 		expect(assertSitesManageable(["s1", "s2"], ["s1", "s9"])).toEqual({
 			ok: false,
 			status: 403,
@@ -99,11 +99,11 @@ describe("assertSitesManageable", () => {
 		});
 	});
 
-	it("対象拠点が空なら許可する", () => {
+	it("allows an empty target site list", () => {
 		expect(assertSitesManageable(["s1"], [])).toEqual({ ok: true });
 	});
 
-	it("管理可能拠点が空で対象が非空なら拒否する", () => {
+	it("rejects a non-empty target list when no sites are manageable", () => {
 		expect(assertSitesManageable([], ["s1"])).toEqual({
 			ok: false,
 			status: 403,

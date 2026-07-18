@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import { evaluateSessionAccess } from "./session-access";
 
 describe("evaluateSessionAccess", () => {
-	it("無効化ユーザーは403で遮断する", () => {
+	it("blocks a deactivated user with 403", () => {
 		expect(
 			evaluateSessionAccess({ isActive: false, emailVerified: true }),
 		).toEqual({ ok: false, status: 403, message: "This account is disabled" });
 	});
 
-	it("メール未確認ユーザーは403で遮断する", () => {
+	it("blocks a user with an unverified email with 403", () => {
 		expect(
 			evaluateSessionAccess({ isActive: true, emailVerified: false }),
 		).toEqual({
@@ -18,13 +18,13 @@ describe("evaluateSessionAccess", () => {
 		});
 	});
 
-	it("有効かつ確認済みユーザーは通過する", () => {
+	it("lets an active, verified user through", () => {
 		expect(
 			evaluateSessionAccess({ isActive: true, emailVerified: true }),
 		).toEqual({ ok: true });
 	});
 
-	it("無効化を未確認より優先して判定する", () => {
+	it("reports deactivation ahead of an unverified email", () => {
 		// A deactivated account returns "inactive" regardless of verification state
 		expect(
 			evaluateSessionAccess({ isActive: false, emailVerified: false }),

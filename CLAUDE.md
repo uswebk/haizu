@@ -53,6 +53,11 @@ pnpm format    # biome format
 cd apps/web && pnpm test          # vitest run（全件）
 cd apps/web && pnpm vitest <file> # 単一ファイル
 
+# テスト（apps/api）※戦略・基盤の詳細は docs/testing.md
+cd apps/api && pnpm test:unit         # 純粋関数のみ（Docker不要・高速）
+cd apps/api && pnpm test:integration  # Testcontainers統合テスト（Docker必須）
+cd apps/api && pnpm test              # 両方
+
 # DB（apps/api）
 cd apps/api
 pnpm db:generate   # drizzle-kit generate

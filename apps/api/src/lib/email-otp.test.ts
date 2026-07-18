@@ -4,7 +4,7 @@ import { evaluateEmailOtp } from "./email-otp";
 const NOW = new Date("2026-07-11T00:00:00Z").getTime();
 
 describe("evaluateEmailOtp", () => {
-	it("期限切れは expired=true でエラーを返す", () => {
+	it("returns an error with expired=true once the deadline has passed", () => {
 		expect(
 			evaluateEmailOtp({
 				value: "123456:new@example.com",
@@ -19,7 +19,7 @@ describe("evaluateEmailOtp", () => {
 		});
 	});
 
-	it("OTP不一致は expired=false でエラーを返す", () => {
+	it("returns an error with expired=false when the OTP does not match", () => {
 		expect(
 			evaluateEmailOtp({
 				value: "123456:new@example.com",
@@ -34,7 +34,7 @@ describe("evaluateEmailOtp", () => {
 		});
 	});
 
-	it("一致すれば新メールアドレスを返す", () => {
+	it("returns the new email address on a match", () => {
 		expect(
 			evaluateEmailOtp({
 				value: "123456:new@example.com",
@@ -45,7 +45,7 @@ describe("evaluateEmailOtp", () => {
 		).toEqual({ ok: true, newEmail: "new@example.com" });
 	});
 
-	it("値に複数のコロンがあっても最初のコロンで分割する", () => {
+	it("splits on the first colon even when the value contains several", () => {
 		expect(
 			evaluateEmailOtp({
 				value: "123456:a:b@example.com",
